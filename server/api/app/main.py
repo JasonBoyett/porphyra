@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
+from app.errors import EmptyResponseError
 from app.seed.load import load_seed_data
 
 
@@ -13,6 +15,12 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @application.exception_handler(EmptyResponseError)
+    async def empty_response_handler(
+        _: Request, error: EmptyResponseError
+    ) -> Response:
+        return Response(status_code=error.status_code)
 
     @application.get("/health")
     def health() -> dict[str, str]:
