@@ -1,5 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" /><title>Porphyra</title></head>
-  <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
+  <body>
+    <div id="root"></div>
+    <script>
+      const showStartupError = (error) => {
+        const root = document.getElementById("root")
+        root.innerHTML = `<main style="font-family:system-ui;padding:2rem"><h1>Porphyra could not start</h1><pre style="white-space:pre-wrap">${String(error?.stack || error?.message || error)}</pre></main>`
+      }
+      window.addEventListener("error", (event) => showStartupError(event.error || event.message))
+      window.addEventListener("unhandledrejection", (event) => showStartupError(event.reason))
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
