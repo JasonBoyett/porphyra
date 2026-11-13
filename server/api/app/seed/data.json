@@ -1,32 +1,40 @@
 {
-  "viewer": {
+  "developmentUser": {
+    "authId": "development:dev@a244.tech",
     "email": "dev@a244.tech",
-    "roles": ["administrator", "volunteer", "member"]
+    "name": "A2:44 Tech"
   },
-  "organizations": [
+  "churches": [
     {
-      "id": "org_grace_harbor",
       "name": "Grace Harbor Church",
       "description": "A welcoming multi-campus church serving its city with joy.",
       "campuses": [
-        { "id": "campus_downtown", "name": "Downtown", "city": "Nashville" },
-        { "id": "campus_eastside", "name": "Eastside", "city": "Nashville" }
+        { "name": "Downtown", "city": "Nashville" },
+        { "name": "Eastside", "city": "Nashville" }
+      ],
+      "ministries": [
+        { "name": "Kids", "teams": ["Toddlers", "Fourth Grade"] },
+        { "name": "Music", "teams": ["Band", "Choir"] }
       ]
     },
     {
-      "id": "org_riverstone",
       "name": "Riverstone Community Church",
       "description": "A local church helping neighbors follow Jesus together.",
       "campuses": [
-        { "id": "campus_riverstone", "name": "Main Campus", "city": "Franklin" }
+        { "name": "Main Campus", "city": "Franklin" }
+      ],
+      "ministries": [
+        { "name": "Hospitality", "teams": ["Welcome Team", "Coffee Team"] }
       ]
     },
     {
-      "id": "org_new_mercies",
       "name": "New Mercies Fellowship",
       "description": "A growing church community rooted in worship, service, and hospitality.",
       "campuses": [
-        { "id": "campus_new_mercies", "name": "Gathering House", "city": "Murfreesboro" }
+        { "name": "Gathering House", "city": "Murfreesboro" }
+      ],
+      "ministries": [
+        { "name": "Worship", "teams": ["Worship Team", "Production"] }
       ]
     }
   ]

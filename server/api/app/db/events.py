@@ -17,4 +17,6 @@ def setup_base_campuses_before_flush(
 ) -> None:
     for record in cast(Iterable[object], db.new):
         if isinstance(record, Church):
-            db.add(Campus(church_id=record.id, name=record.name))
+            if record.campuses:
+                continue
+            db.add(Campus(church_id=record.id, name="Main Campus"))

@@ -13,7 +13,7 @@ def test_dashboard_includes_development_churches() -> None:
             "exp": 4_102_444_800,
             "iss": settings.auth_issuer,
             "name": "Development User",
-            "sub": "development-user",
+            "sub": "development:dev@a244.tech",
         },
         settings.auth_jwt_secret,
         algorithm="HS256",
@@ -25,4 +25,4 @@ def test_dashboard_includes_development_churches() -> None:
         )
     assert response.status_code == 200
     assert response.json()["viewer"]["email"] == "dev@a244.tech"
-    assert len(response.json()["organizations"]) == 3
+    assert len(response.json()["churches"]) == 3

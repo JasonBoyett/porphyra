@@ -19,14 +19,15 @@ app.on(["GET", "POST"], "/api/auth/*", context => auth.handler(context.req.raw))
 
 const issueDevelopmentAccessToken = async (email: string) => {
   const issuedAt = Math.floor(Date.now() / 1000)
+  const normalizedEmail = email.trim().toLowerCase()
   return sign({
     aud: authConfiguration.jwtAudience,
-    email,
+    email: normalizedEmail,
     exp: issuedAt + 60 * 60,
     iat: issuedAt,
     iss: "http://localhost:4000",
-    name: email,
-    sub: authConfiguration.developmentSubject
+    name: normalizedEmail,
+    sub: `development:${normalizedEmail}`
   }, authConfiguration.jwtSecret, "HS256")
 }
 

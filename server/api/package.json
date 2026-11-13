@@ -2,6 +2,8 @@
   "name": "@porphyra/api",
   "private": true,
   "scripts": {
+    "db:migrate": "uv run alembic upgrade head",
+    "db:reset": "rm -f porphyra.sqlite3 && uv run alembic upgrade head",
     "dev": "uv run fastapi dev app/main.py --port 8000",
     "typecheck": "uv run pyright",
     "test": "uv run pytest"

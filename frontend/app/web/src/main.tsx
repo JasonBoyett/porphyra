@@ -7,8 +7,10 @@ import "./styles.css"
 import { Button } from "./components/ui/button"
 
 type Campus = { id: string; name: string; city: string }
-type Organization = { id: string; name: string; description: string; campuses: Campus[] }
-type Dashboard = { viewer: { email: string; roles: string[] }; organizations: Organization[] }
+type Team = { id: string; name: string }
+type Ministry = { id: string; name: string; teams: Team[] }
+type Church = { id: string; name: string; description: string; campuses: Campus[]; ministries: Ministry[] }
+type Dashboard = { viewer: { id: string; email: string; name: string }; churches: Church[] }
 
 const queryClient = new QueryClient()
 const apiUrl = "http://localhost:8000"
@@ -37,7 +39,7 @@ const DashboardView = (props: { accessToken: string; onSignOut: () => void }) =>
     queryKey: ["dashboard", props.accessToken],
     queryFn: () => getDashboard(props.accessToken)
   })
-  const organizations = dashboard.data?.organizations ?? []
+  const churches = dashboard.data?.churches ?? []
 
   return (
     <main>
@@ -52,15 +54,16 @@ const DashboardView = (props: { accessToken: string; onSignOut: () => void }) =>
       </header>
       <div className="dashboard-shell" id="overview">
         <section className="dashboard-hero">
-          <div><p className="eyebrow">Good morning, A2:44 Tech</p><h1>Serve your churches with clarity.</h1><p>Choose a church below, or move between Planning, Volunteer, and Kiosk from the web workspace.</p></div>
-          <div className="role-list">{["Administrator", "Volunteer", "Member"].map(role => <span key={role}>{role}</span>)}</div>
+          <div><p className="eyebrow">Good morning, {dashboard.data?.viewer.name ?? "friend"}</p><h1>Serve your churches with clarity.</h1><p>Choose a church below, or move between Planning, Volunteer, and Kiosk from the web workspace.</p></div>
+          <div className="role-list"><span>{churches.length} churches</span><span>Authenticated</span></div>
         </section>
         {dashboard.isLoading && <p>Loading churches…</p>}
         {dashboard.isError && <p className="error">The API is not running yet. Start it with <code>bun run dev:api</code>.</p>}
         <section className="church-grid">
-          {organizations.map((organization) => <article className="church-card" key={organization.id}>
-            <div className="church-avatar">▦</div><div><p className="eyebrow">Church</p><h2>{organization.name}</h2><p>{organization.description}</p></div>
-            <div className="campus-list">{organization.campuses.map(campus => <span key={campus.id}><MapPin size={15}/>{campus.name} · {campus.city}</span>)}</div>
+          {churches.map((church) => <article className="church-card" key={church.id}>
+            <div className="church-avatar">▦</div><div><p className="eyebrow">Church</p><h2>{church.name}</h2><p>{church.description}</p></div>
+            <div className="campus-list">{church.campuses.map(campus => <span key={campus.id}><MapPin size={15}/>{campus.name} · {campus.city}</span>)}</div>
+            <div className="campus-list">{church.ministries.flatMap(ministry => ministry.teams.map(team => <span key={team.id}>{ministry.name} · {team.name}</span>))}</div>
           </article>)}
         </section>
         {concern === "Planning" && <ConcernPanel concern="planning" title="Planning" description="Prepare services, organize elements, and help every team arrive ready." />}

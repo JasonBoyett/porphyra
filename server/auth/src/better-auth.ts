@@ -5,7 +5,6 @@ import { Database } from "bun:sqlite"
 export const authConfiguration = {
   applicationName: "Porphyra",
   developmentUser: "dev@a244.tech",
-  developmentSubject: "development-user",
   databasePath: process.env.PORPHYRA_AUTH_DATABASE_PATH || "porphyra-auth.sqlite3",
   jwtAudience: "porphyra-api",
   jwtSecret: process.env.PORPHYRA_AUTH_JWT_SECRET || "porphyra-development-jwt-secret-2026"
