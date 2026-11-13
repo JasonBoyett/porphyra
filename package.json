@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:stream": "turbo dev --ui=stream",
     "generate:api": "bun scripts/generate-openapi-clients.ts",
     "check": "bun run --filter '*' typecheck",
     "typecheck": "bun run --filter @porphyra/auth typecheck && bun run --filter @porphyra/frontend typecheck && bun run --filter @porphyra/web typecheck"
