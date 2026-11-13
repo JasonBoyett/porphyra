@@ -1,0 +1,13 @@
+{
+  "name": "@porphyra/mobile-lib",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./mobile-dashboard.tsx"
+  },
+  "dependencies": {
+    "expo-status-bar": "~3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  }
+}

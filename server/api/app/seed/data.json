@@ -1,0 +1,33 @@
+{
+  "viewer": {
+    "email": "dev@a244.tech",
+    "roles": ["administrator", "volunteer", "member"]
+  },
+  "organizations": [
+    {
+      "id": "org_grace_harbor",
+      "name": "Grace Harbor Church",
+      "description": "A welcoming multi-campus church serving its city with joy.",
+      "campuses": [
+        { "id": "campus_downtown", "name": "Downtown", "city": "Nashville" },
+        { "id": "campus_eastside", "name": "Eastside", "city": "Nashville" }
+      ]
+    },
+    {
+      "id": "org_riverstone",
+      "name": "Riverstone Community Church",
+      "description": "A local church helping neighbors follow Jesus together.",
+      "campuses": [
+        { "id": "campus_riverstone", "name": "Main Campus", "city": "Franklin" }
+      ]
+    },
+    {
+      "id": "org_new_mercies",
+      "name": "New Mercies Fellowship",
+      "description": "A growing church community rooted in worship, service, and hospitality.",
+      "campuses": [
+        { "id": "campus_new_mercies", "name": "Gathering House", "city": "Murfreesboro" }
+      ]
+    }
+  ]
+}

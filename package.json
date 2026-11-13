@@ -1,0 +1,30 @@
+{
+  "name": "porphyra",
+  "private": true,
+  "packageManager": "bun@1.3.11",
+  "workspaces": [
+    "server/auth",
+    "frontend/lib",
+    "frontend/app/web",
+    "frontend/app/mobile/lib",
+    "frontend/app/mobile/planning",
+    "frontend/app/mobile/volunteer",
+    "frontend/app/mobile/kiosk"
+  ],
+  "scripts": {
+    "dev": "concurrently --names auth,api,web,planning,volunteer,kiosk --prefix-colors cyan,magenta,green,yellow,blue,red \"bun run dev:auth\" \"bun run dev:api\" \"bun run dev:web\" \"bun run dev:planning\" \"bun run dev:volunteer\" \"bun run dev:kiosk\"",
+    "dev:auth": "bun --cwd server/auth run dev",
+    "dev:api": "cd server/api && uv run fastapi dev app/main.py --port 8000",
+    "dev:web": "bun --cwd frontend/app/web run dev",
+    "dev:planning": "bun --cwd frontend/app/mobile/planning run dev",
+    "dev:volunteer": "bun --cwd frontend/app/mobile/volunteer run dev",
+    "dev:kiosk": "bun --cwd frontend/app/mobile/kiosk run dev",
+    "generate:api": "bun scripts/generate-openapi-clients.ts",
+    "check": "bun run --filter '*' typecheck",
+    "typecheck": "bun run --filter @porphyra/auth typecheck && bun run --filter @porphyra/frontend typecheck && bun run --filter @porphyra/web typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

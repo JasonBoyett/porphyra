@@ -1,0 +1,14 @@
+{
+  "name": "@porphyra/frontend",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": "./api/client.ts",
+    "./auth": "./auth/session.ts",
+    "./sync": "./sync/tag-manager.ts",
+    "./theme": "./theme/tokens.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

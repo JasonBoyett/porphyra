@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Porphyra Planning",
+    "slug": "porphyra-planning",
+    "scheme": "porphyra-planning",
+    "version": "0.1.0",
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

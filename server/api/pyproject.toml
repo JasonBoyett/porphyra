@@ -1,0 +1,22 @@
+[project]
+name = "porphyra-api"
+version = "0.1.0"
+description = "Porphyra church management API"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi[standard]>=0.115.0",
+  "sqlalchemy>=2.0.0",
+  "pydantic-settings>=2.6.0"
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0.0", "ruff>=0.8.0", "pyright>=1.1.390"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "SLF001"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

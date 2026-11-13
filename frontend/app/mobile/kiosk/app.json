@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Porphyra Kiosk",
+    "slug": "porphyra-kiosk",
+    "scheme": "porphyra-kiosk",
+    "version": "0.1.0",
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

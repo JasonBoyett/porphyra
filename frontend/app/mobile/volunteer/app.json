@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Porphyra Volunteer",
+    "slug": "porphyra-volunteer",
+    "scheme": "porphyra-volunteer",
+    "version": "0.1.0",
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
+
+:root {
+  --background: oklch(0.98 0.01 310);
+  --foreground: oklch(0.25 0.06 310);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.06 310);
+  --primary: oklch(0.46 0.16 310);
+  --primary-foreground: oklch(0.98 0.01 310);
+  --secondary: oklch(0.92 0.04 310);
+  --muted: oklch(0.94 0.02 310);
+  --muted-foreground: oklch(0.52 0.04 310);
+  --border: oklch(0.86 0.04 310);
+  --radius: 0.8rem;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: "DM Sans", sans-serif; }
+button, input { font: inherit; }
