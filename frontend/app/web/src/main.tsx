@@ -65,22 +65,38 @@ const DashboardView = () => {
   )
 }
 
-const Welcome = (props: { onContinue: () => void }) => (
+const Welcome = (props: { onAuthenticate: () => void }) => (
   <main className="welcome">
     <section className="welcome-copy">
       <p className="eyebrow">Church planning by Acts 2:44 Technology</p>
       <h1>Tools that help your church focus on ministry.</h1>
       <p className="lead">Porphyra brings service planning, volunteer coordination, team schedules, and campus operations together in one dependable platform.</p>
-      <div className="cta-row"><Button onClick={props.onContinue}><LogIn size={18}/> Sign in</Button><Button variant="secondary" onClick={props.onContinue}>Create a free account</Button></div>
+      <div className="cta-row"><Button onClick={props.onAuthenticate}><LogIn size={18}/> Sign in</Button><Button variant="secondary" onClick={props.onAuthenticate}>Create a free account</Button></div>
       <p className="small">Free and open source. Built for churches of every size.</p>
     </section>
     <section className="mission-card"><div className="mission-icon"><Heart /></div><h2>Made for the people who make Sunday happen.</h2><p>We reduce administrative burden so staff and volunteers can serve people with more presence, care, and confidence.</p><div className="mission-grid"><span><Music2/> Plan together</span><span><Users/> Serve together</span><span><ShieldCheck/> Steward wisely</span></div></section>
   </main>
 )
 
+const AuthScreen = (props: { onComplete: () => void }) => (
+  <main className="auth-screen">
+    <section className="auth-card">
+      <p className="eyebrow">Welcome to Porphyra</p>
+      <h1>Sign in to serve your church.</h1>
+      <p>Use the seeded development account to explore organization, campus, and team workspaces.</p>
+      <label>Email<input defaultValue="dev@a244.tech" type="email" /></label>
+      <label>Password<input defaultValue="password" type="password" /></label>
+      <Button onClick={props.onComplete}><LogIn size={18}/> Continue to Porphyra</Button>
+      <button className="text-button" onClick={props.onComplete}>Need an account? Create one</button>
+    </section>
+  </main>
+)
+
 const Application = () => {
-  const [authenticated, setAuthenticated] = useState(false)
-  return authenticated ? <DashboardView /> : <Welcome onContinue={() => setAuthenticated(true)} />
+  const [screen, setScreen] = useState<"welcome" | "auth" | "dashboard">("welcome")
+  if (screen === "dashboard") return <DashboardView />
+  if (screen === "auth") return <AuthScreen onComplete={() => setScreen("dashboard")} />
+  return <Welcome onAuthenticate={() => setScreen("auth")} />
 }
 
 createRoot(document.getElementById("root")!).render(<QueryClientProvider client={queryClient}><Application /></QueryClientProvider>)
