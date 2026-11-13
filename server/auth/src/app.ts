@@ -1,19 +1,21 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { sign } from "hono/jwt"
-import { authConfiguration } from "./better-auth"
+import { auth, authConfiguration } from "./better-auth"
 
 export const app = new Hono()
 
 app.use("*", cors({
-  allowHeaders: ["Content-Type"],
-  allowMethods: ["POST"],
+  allowHeaders: ["Authorization", "Content-Type"],
+  allowMethods: ["GET", "POST"],
   origin: "http://localhost:3000"
 }))
 
 app.get("/health", context => context.json({ status: "ok", service: "porphyra-auth" }))
 
 app.get("/.well-known/jwks.json", context => context.json({ keys: [] }))
+
+app.on(["GET", "POST"], "/api/auth/*", context => auth.handler(context.req.raw))
 
 const issueDevelopmentAccessToken = async (email: string) => {
   const issuedAt = Math.floor(Date.now() / 1000)
