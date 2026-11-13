@@ -15,6 +15,7 @@ import { Heart, LogIn, MapPin, Music2, ShieldCheck, Users } from "lucide-react"
 import "../../../lib/theme/globals.css"
 import "./styles.css"
 import { Button } from "./components/ui/button"
+import { DevelopmentThemeSwitcher, ThemeProvider } from "./theme"
 
 type Campus = { id: string; name: string; city: string }
 type Team = { id: string; name: string }
@@ -214,7 +215,12 @@ const Application = () => {
     },
   }
 
-  return <authContext.Provider value={auth}><RouterProvider router={router} /></authContext.Provider>
+  return (
+    <ThemeProvider>
+      <authContext.Provider value={auth}><RouterProvider router={router} /></authContext.Provider>
+      <DevelopmentThemeSwitcher />
+    </ThemeProvider>
+  )
 }
 
 createRoot(document.getElementById("root")!).render(
