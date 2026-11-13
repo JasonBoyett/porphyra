@@ -18,6 +18,9 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "SLF001"]
+# Contributors may use tabs or spaces. Python remains responsible for rejecting
+# syntactically ambiguous indentation.
+ignore = ["E101"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

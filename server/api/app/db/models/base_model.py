@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Self, cast
+from typing import Self
 from uuid import UUID, uuid7
 
 from fastapi import status
@@ -32,7 +32,7 @@ class DatabaseModel(SQLModel):
         record = db.get(cls, record_id)
         if record is None:
             raise EmptyResponseError(status.HTTP_404_NOT_FOUND)
-        return cast(Self, record)
+        return record
 
     def delete(self, db: Session) -> None:
         db.delete(self)
