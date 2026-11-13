@@ -8,6 +8,7 @@ dependencies = [
   "sqlalchemy>=2.0.0",
   "pydantic-settings>=2.6.0",
   "sqlmodel>=0.0.49",
+  "pyjwt>=2.10.1",
 ]
 
 [dependency-groups]
@@ -24,3 +25,11 @@ ignore = ["E101"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.pyright]
+include = ["app", "tests"]
+venvPath = "."
+venv = ".venv"
+# Bidirectional SQLModel relationships use type-only peer imports and quoted
+# relationship targets. Runtime model imports remain acyclic.
+reportImportCycles = "none"

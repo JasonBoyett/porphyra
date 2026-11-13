@@ -6,8 +6,9 @@ from uuid import UUID, uuid7
 
 from fastapi import status
 from sqlalchemy import DateTime, Uuid
-from sqlmodel import Field, Session, SQLModel
+from sqlmodel import Session, SQLModel
 
+from app.db.field import typed_field
 from app.db.utils import utc_now
 from app.errors import EmptyResponseError
 
@@ -15,13 +16,13 @@ from app.errors import EmptyResponseError
 class DatabaseModel(SQLModel):
     """Shared persisted-record behavior for SQLModel table models."""
 
-    id: UUID = Field(
+    id: UUID = typed_field(
         default_factory=uuid7,
         sa_type=Uuid(as_uuid=True),
         primary_key=True,
         nullable=False,
     )
-    created_at: datetime = Field(
+    created_at: datetime = typed_field(
         default_factory=utc_now,
         sa_type=DateTime(timezone=True),
         nullable=False,

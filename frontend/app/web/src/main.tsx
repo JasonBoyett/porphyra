@@ -12,9 +12,12 @@ type Dashboard = { viewer: { email: string; roles: string[] }; organizations: Or
 
 const queryClient = new QueryClient()
 const apiUrl = "http://localhost:8000"
+const authUrl = "http://localhost:4000"
 
-const getDashboard = async (): Promise<Dashboard> => {
-  const response = await fetch(`${apiUrl}/api/v1/dashboard`)
+const getDashboard = async (accessToken: string): Promise<Dashboard> => {
+  const response = await fetch(`${apiUrl}/api/v1/dashboard`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  })
   if (!response.ok) throw new Error("Unable to reach Porphyra API")
   return response.json() as Promise<Dashboard>
 }
@@ -28,9 +31,12 @@ const ConcernPanel = (props: { concern: string; title: string; description: stri
   </section>
 )
 
-const DashboardView = () => {
+const DashboardView = (props: { accessToken: string; onSignOut: () => void }) => {
   const [concern, setConcern] = useState("Overview")
-  const dashboard = useQuery({ queryKey: ["dashboard"], queryFn: getDashboard })
+  const dashboard = useQuery({
+    queryKey: ["dashboard", props.accessToken],
+    queryFn: () => getDashboard(props.accessToken)
+  })
   const organizations = dashboard.data?.organizations ?? []
 
   return (
@@ -42,7 +48,7 @@ const DashboardView = () => {
             <button className={concern === item ? "nav-active" : ""} key={item} onClick={() => setConcern(item)}>{item}</button>
           ))}
         </nav>
-        <div className="user-chip"><span className="avatar">D</span> dev@a244.tech</div>
+        <button className="user-chip" onClick={props.onSignOut}><span className="avatar">D</span> {dashboard.data?.viewer.email ?? "Loading…"}</button>
       </header>
       <div className="dashboard-shell" id="overview">
         <section className="dashboard-hero">
@@ -78,24 +84,57 @@ const Welcome = (props: { onAuthenticate: () => void }) => (
   </main>
 )
 
-const AuthScreen = (props: { onComplete: () => void }) => (
+const AuthScreen = (props: { onComplete: (accessToken: string) => void }) => {
+  const [email, setEmail] = useState("dev@a244.tech")
+  const [error, setError] = useState<string | null>(null)
+
+  const signIn = async () => {
+    setError(null)
+    const response = await fetch(`${authUrl}/api/v1/auth/sign-in`, {
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    })
+    if (!response.ok) {
+      setError("Unable to sign in. Please try again.")
+      return
+    }
+    const data = await response.json() as { accessToken: string }
+    props.onComplete(data.accessToken)
+  }
+
+  return (
   <main className="auth-screen">
     <section className="auth-card">
       <p className="eyebrow">Welcome to Porphyra</p>
       <h1>Sign in to serve your church.</h1>
       <p>Use the seeded development account to explore organization, campus, and team workspaces.</p>
-      <label>Email<input defaultValue="dev@a244.tech" type="email" /></label>
-      <label>Password<input defaultValue="password" type="password" /></label>
-      <Button onClick={props.onComplete}><LogIn size={18}/> Continue to Porphyra</Button>
-      <button className="text-button" onClick={props.onComplete}>Need an account? Create one</button>
+       <label>Email<input onChange={event => setEmail(event.target.value)} type="email" value={email} /></label>
+       <label>Password<input defaultValue="password" type="password" /></label>
+       {error && <p className="error">{error}</p>}
+       <Button onClick={signIn}><LogIn size={18}/> Continue to Porphyra</Button>
+       <button className="text-button" onClick={signIn}>Need an account? Create one</button>
     </section>
   </main>
 )
+}
 
 const Application = () => {
-  const [screen, setScreen] = useState<"welcome" | "auth" | "dashboard">("welcome")
-  if (screen === "dashboard") return <DashboardView />
-  if (screen === "auth") return <AuthScreen onComplete={() => setScreen("dashboard")} />
+  const [accessToken, setAccessToken] = useState(() => sessionStorage.getItem("porphyra-access-token"))
+  const [screen, setScreen] = useState<"welcome" | "auth">("welcome")
+
+  const completeAuthentication = (token: string) => {
+    sessionStorage.setItem("porphyra-access-token", token)
+    setAccessToken(token)
+  }
+  const signOut = () => {
+    sessionStorage.removeItem("porphyra-access-token")
+    setAccessToken(null)
+    setScreen("welcome")
+  }
+
+  if (accessToken) return <DashboardView accessToken={accessToken} onSignOut={signOut} />
+  if (screen === "auth") return <AuthScreen onComplete={completeAuthentication} />
   return <Welcome onAuthenticate={() => setScreen("auth")} />
 }
 
