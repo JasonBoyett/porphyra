@@ -57,3 +57,19 @@ The application normalizes this document to stable capability keys such as
    policy requires them; do not introduce polymorphic scope records early.
 5. Add authorization audit history before exposing role-policy editing in the
    production application.
+
+## Future Realtime Scaling
+
+Porphyra's current realtime invalidation registry is intentionally process-local
+and best effort. This matches the current single-process deployment and should
+not be expanded before deployment scale requires it.
+
+If Porphyra later runs multiple API workers, add a portable broker so generic
+tag notifications reach sockets connected to every worker. If realtime delivery
+ever needs durable guarantees, add a transactional outbox so committed changes
+can be retried after process or broker failures.
+
+These are future scaling steps, not current implementation requirements. Do not
+introduce a broker, outbox, offline synchronization, or Portico-specific
+infrastructure until an operational need establishes the delivery guarantees and
+deployment topology.

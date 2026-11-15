@@ -27,11 +27,7 @@ class _LiveSocket:
 
 
 class SocketRegistry:
-    """Process-local authenticated user-to-tab registry.
-
-    Delivery is deliberately best effort. A multi-worker deployment needs a broker,
-    and durable delivery would additionally require a transactional outbox.
-    """
+    """Best-effort, process-local authenticated user-to-tab registry."""
 
     def __init__(self) -> None:
         self._sockets: dict[UUID, dict[UUID, _LiveSocket]] = {}

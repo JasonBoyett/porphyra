@@ -45,9 +45,6 @@ the SQLAlchemy session before commit. One application-level session listener
 dispatches after commit, coalesces identical notifications, and discards queued
 work on rollback.
 
-The socket registry is process-local, non-durable, and best effort. It supports
-multiple tabs per user but does not provide cross-worker delivery. A
-multi-worker deployment requires a broker. Durable delivery would additionally
-require a transactional outbox. Neither is needed for the current
-single-process deployment, and this mechanism is not an offline or Portico data
-sync system.
+The socket registry is process-local and best effort, matching Porphyra's
+current deployment. It supports multiple tabs per user and is not an offline or
+Portico data sync system. Future scaling work is recorded in `plan.md`.
