@@ -1,9 +1,16 @@
+from uuid import UUID
+
 from app.api.v1.events.schemas import CampusEventResponse, EventResponse
 from app.db.models import CampusEvent, ChurchEvent
 
 
-def campus_event_response(event: CampusEvent) -> CampusEventResponse:
+def campus_event_response(
+	event: CampusEvent,
+	*,
+	sync_recipient_ids: list[UUID],
+) -> CampusEventResponse:
 	return CampusEventResponse(
+		sync_recipient_ids=sync_recipient_ids,
 		id=event.id,
 		church_id=event.church_id,
 		campus_id=event.campus_id,

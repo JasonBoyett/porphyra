@@ -5,6 +5,7 @@ from pydantic import Field
 
 from app.db.schemas import RoleTemplateData, TeamRoleData
 from app.schemas.base import ApiModel
+from app.sync.model import SyncableApiModel
 
 
 class CreateCampusEventRequest(ApiModel):
@@ -64,16 +65,16 @@ class EventResponse(ApiModel):
 	teams_needing_confirmation: list[UUID]
 
 
-class CampusEventResponse(EventResponse):
+class CampusEventResponse(EventResponse, SyncableApiModel):
 	campus_id: UUID
 
 
-class ScheduledMinistryResponse(ApiModel):
+class ScheduledMinistryResponse(SyncableApiModel):
 	id: UUID
 	ministry_id: UUID
 
 
-class ScheduledTeamResponse(ApiModel):
+class ScheduledTeamResponse(SyncableApiModel):
 	id: UUID
 	team_id: UUID
 	call_time: datetime | None
@@ -83,7 +84,7 @@ class ScheduledTeamResponse(ApiModel):
 	roles: TeamRoleData
 
 
-class VolunteerAssignmentResponse(ApiModel):
+class VolunteerAssignmentResponse(SyncableApiModel):
 	id: UUID
 	team_membership_id: UUID
 	role_name: str | None

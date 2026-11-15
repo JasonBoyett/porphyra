@@ -54,6 +54,7 @@ def test_create_campus_event_publishes_exact_church_audience_and_tags(
         )
 
     assert response.status_code == 201
+    assert "syncRecipientIds" not in response.json()
     assert notifications == [
         SyncNotification(
             recipients=expected_recipients,

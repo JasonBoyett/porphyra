@@ -80,14 +80,14 @@ def assign_volunteer(
     db.refresh(assignment)
     response = publish(
         VolunteerAssignmentResponse(
+            sync_recipient_ids=church_member_user_ids(
+                db, event_team.event_ministry.event.church_id
+            ),
             id=assignment.id,
             team_membership_id=assignment.team_membership_id,
             role_name=assignment.role_name,
             role_emoji=assignment.role_emoji,
             conflict_confirmed_at=assignment.conflict_confirmed_at,
-        ),
-        recipients=church_member_user_ids(
-            db, event_team.event_ministry.event.church_id
         ),
         tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
         session=db,
@@ -142,14 +142,14 @@ def update_volunteer_role(
     db.refresh(assignment)
     response = publish(
         VolunteerAssignmentResponse(
+            sync_recipient_ids=church_member_user_ids(
+                db, event_team.event_ministry.event.church_id
+            ),
             id=assignment.id,
             team_membership_id=assignment.team_membership_id,
             role_name=assignment.role_name,
             role_emoji=assignment.role_emoji,
             conflict_confirmed_at=assignment.conflict_confirmed_at,
-        ),
-        recipients=church_member_user_ids(
-            db, event_team.event_ministry.event.church_id
         ),
         tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
         session=db,

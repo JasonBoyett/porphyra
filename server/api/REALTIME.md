@@ -40,7 +40,13 @@ headers because that header carries the credential.
 
 ## Delivery guarantees
 
-Mutations resolve recipients from church membership and queue notifications on
+Synchronized response models satisfy the `Syncable` protocol. Their
+`publish_sync_to()` method owns the authorized recipient list, which is excluded
+from HTTP serialization. The `publish()` combinator accepts only such a response;
+it cannot receive a separate audience that might drift from the delivered read
+model's permissions.
+
+Mutations build that audience from church membership and queue notifications on
 the SQLAlchemy session before commit. One application-level session listener
 dispatches after commit, coalesces identical notifications, and discards queued
 work on rollback.

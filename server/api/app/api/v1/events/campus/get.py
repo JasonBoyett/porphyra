@@ -19,6 +19,7 @@ from app.db.models import (
 	TeamMembership,
 )
 from app.scheduling.conflicts import get_schedule_conflicts
+from app.sync.audience import church_member_user_ids
 
 router = APIRouter()
 
@@ -63,6 +64,7 @@ def _planning_response(
 	event: CampusEvent,
 ) -> CampusEventPlanningResponse:
 	return CampusEventPlanningResponse(
+		sync_recipient_ids=church_member_user_ids(db, event.church_id),
 		id=event.id,
 		church_id=event.church_id,
 		church_name=event.church.name,

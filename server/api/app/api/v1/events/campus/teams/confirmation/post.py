@@ -43,6 +43,9 @@ def confirm_schedule(
     db.refresh(event_team)
     response = publish(
         ScheduledTeamResponse(
+            sync_recipient_ids=church_member_user_ids(
+                db, event_team.event_ministry.event.church_id
+            ),
             id=event_team.id,
             team_id=event_team.team_id,
             call_time=event_team.call_time,
@@ -50,9 +53,6 @@ def confirm_schedule(
             confirmed_at=event_team.confirmed_at,
             is_fully_staffed=event_team.is_fully_staffed,
             roles=event_team.role_data,
-        ),
-        recipients=church_member_user_ids(
-            db, event_team.event_ministry.event.church_id
         ),
         tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
         session=db,

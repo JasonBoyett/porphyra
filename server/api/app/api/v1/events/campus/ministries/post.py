@@ -50,8 +50,11 @@ def schedule_ministry(
     db.flush()
     db.refresh(event_ministry)
     response = publish(
-        ScheduledMinistryResponse(id=event_ministry.id, ministry_id=ministry.id),
-        recipients=church_member_user_ids(db, event.church_id),
+        ScheduledMinistryResponse(
+            id=event_ministry.id,
+            ministry_id=ministry.id,
+            sync_recipient_ids=church_member_user_ids(db, event.church_id),
+        ),
         tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
         session=db,
     )

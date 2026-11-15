@@ -34,8 +34,10 @@ def create_campus_event(
     db.flush()
     db.refresh(event)
     response = publish(
-        campus_event_response(event),
-        recipients=church_member_user_ids(db, event.church_id),
+        campus_event_response(
+            event,
+            sync_recipient_ids=church_member_user_ids(db, event.church_id),
+        ),
         tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
         session=db,
     )
