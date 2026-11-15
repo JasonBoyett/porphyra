@@ -1,0 +1,62 @@
+/* Porphyra's purple-cloth identity, layered over the generated TweakCN theme. */
+:root {
+  --background: oklch(0.973 0.014 316);
+  --foreground: oklch(0.285 0.055 319);
+  --card: oklch(0.994 0.005 316);
+  --card-foreground: oklch(0.285 0.055 319);
+  --popover: oklch(0.994 0.005 316);
+  --popover-foreground: oklch(0.285 0.055 319);
+  --primary: oklch(0.46 0.15 320);
+  --primary-foreground: oklch(0.985 0.006 315);
+  --primary-ink: var(--primary);
+  --secondary: oklch(0.925 0.045 315);
+  --secondary-foreground: oklch(0.35 0.095 318);
+  --muted: oklch(0.94 0.022 315);
+  --muted-foreground: oklch(0.47 0.04 315);
+  --accent: oklch(0.875 0.065 337);
+  --accent-foreground: oklch(0.365 0.105 323);
+  --border: oklch(0.855 0.038 317);
+  --input: oklch(0.855 0.038 317);
+  --ring: oklch(0.57 0.17 320);
+  --sidebar: oklch(0.945 0.028 316);
+  --sidebar-foreground: oklch(0.285 0.055 319);
+  --sidebar-primary: oklch(0.46 0.15 320);
+  --sidebar-primary-foreground: oklch(0.985 0.006 315);
+  --sidebar-accent: oklch(0.9 0.045 316);
+  --sidebar-accent-foreground: oklch(0.35 0.095 318);
+  --sidebar-border: oklch(0.855 0.038 317);
+  --sidebar-ring: oklch(0.57 0.17 320);
+  --cloth-deep: oklch(0.34 0.12 323);
+  --cloth-mid: oklch(0.5 0.17 317);
+}
+
+.dark {
+  --background: oklch(0.185 0.025 315);
+  --foreground: oklch(0.958 0.015 316);
+  --card: oklch(0.235 0.035 315);
+  --card-foreground: oklch(0.958 0.015 316);
+  --popover: oklch(0.235 0.035 315);
+  --popover-foreground: oklch(0.958 0.015 316);
+  --primary: oklch(0.49 0.15 305);
+  --primary-foreground: oklch(0.97 0.008 310);
+  --primary-ink: oklch(0.79 0.105 307);
+  --secondary: oklch(0.315 0.065 305);
+  --secondary-foreground: oklch(0.94 0.025 318);
+  --muted: oklch(0.28 0.032 315);
+  --muted-foreground: oklch(0.745 0.028 315);
+  --accent: oklch(0.395 0.105 330);
+  --accent-foreground: oklch(0.955 0.025 320);
+  --border: oklch(0.385 0.05 318);
+  --input: oklch(0.41 0.05 318);
+  --ring: oklch(0.7 0.13 305);
+  --sidebar: oklch(0.21 0.03 315);
+  --sidebar-foreground: oklch(0.958 0.015 316);
+  --sidebar-primary: oklch(0.49 0.15 305);
+  --sidebar-primary-foreground: oklch(0.97 0.008 310);
+  --sidebar-accent: oklch(0.315 0.065 305);
+  --sidebar-accent-foreground: oklch(0.94 0.025 318);
+  --sidebar-border: oklch(0.385 0.05 318);
+  --sidebar-ring: oklch(0.7 0.13 305);
+  --cloth-deep: oklch(0.27 0.08 307);
+  --cloth-mid: oklch(0.43 0.145 304);
+}

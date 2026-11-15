@@ -48,3 +48,44 @@ The web application uses shadcn/ui as its styling and component primitive. The c
 - Update the web theme through the TweakCN CLI rather than manually recreating its generated theme values.
 - Keep the shared web theme in the canonical `globals.css` location so it provides the common styling base for the web application.
 - Mobile applications share semantic design tokens where appropriate but do not consume web CSS directly.
+
+## Web UI Architecture and Conventions
+
+### Styling and UI Primitives
+
+- Tailwind CSS is the default web styling system. Use utility classes for layout,
+  spacing, typography, colors, states, and responsive behavior whenever they
+  express the needed behavior clearly.
+- Use custom CSS only when Tailwind cannot express the needed behavior cleanly.
+  Custom CSS should extend Tailwind rather than replace it, and should not grow
+  into feature-wide styling systems.
+- shadcn/ui is the base component primitive for the web application. Add
+  primitives through the shadcn CLI.
+- Use an existing shadcn primitive when it fits. When it does not, compose the
+  required interface from shadcn primitives instead of building a hand-rolled
+  replacement for an available primitive.
+
+### Component and Page Boundaries
+
+- Web UI components live in `frontend/app/web/src/components`.
+- A component directory exports one primary component from `index.tsx`.
+- Component prop types live in `types.ts`. Focused helpers and meaningful
+  subcomponents may live alongside the primary component in that directory.
+- Prefer one component per file. Extract distinct subcomponents rather than
+  accumulating unrelated UI in one module.
+- Pages and route-level feature entry points provide scaffolding only: load and
+  marshal API data, coordinate route-level state, and pass typed props to UI
+  components. They must not become the place where product UI is built.
+
+### Readability
+
+- Optimize for human readability rather than minimum line count.
+- Use multiline JSX for nested or nontrivial markup. Do not compress UI trees,
+  CSS, or control flow into dense one-line blocks.
+- Use meaningful names for intermediate values and leave visual separation
+  between conceptual sections of code.
+- Format code consistently. Visual clarity matters more than brevity.
+
+## Frontend Delivery Order
+
+Build and validate new product workflows in the web application first. Implement the corresponding mobile experience only after the web workflow is established, so browser-based development and testing can validate the product behavior before platform-specific mobile adaptation.

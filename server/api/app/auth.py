@@ -6,18 +6,18 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
-from sqlmodel import Session, select
+from sqlmodel import select
 
+from app.api.v1.dependencies.database import DatabaseSession
 from app.config import settings
 from app.db.models.user import User
-from app.db.session import get_db
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-    db: Annotated[Session, Depends(get_db)],
+	db: DatabaseSession,
 ) -> User:
     if credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

@@ -1,0 +1,1 @@
+"""Church membership routes."""

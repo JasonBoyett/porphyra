@@ -6,23 +6,29 @@ from app.main import app
 
 
 def test_dashboard_includes_development_churches() -> None:
-    token = jwt.encode(
-        {
-            "aud": settings.auth_audience,
-            "email": "dev@a244.tech",
-            "exp": 4_102_444_800,
-            "iss": settings.auth_issuer,
-            "name": "Development User",
-            "sub": "development:dev@a244.tech",
-        },
-        settings.auth_jwt_secret,
-        algorithm="HS256",
-    )
-    with TestClient(app) as client:
-        response = client.get(
-            "/api/v1/dashboard",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-    assert response.status_code == 200
-    assert response.json()["viewer"]["email"] == "dev@a244.tech"
-    assert len(response.json()["churches"]) == 3
+	token = jwt.encode(
+		{
+			"aud": settings.auth_audience,
+			"email": "dev@a244.tech",
+			"exp": 4_102_444_800,
+			"iss": settings.auth_issuer,
+			"name": "Development User",
+			"sub": "development:dev@a244.tech",
+		},
+		settings.auth_jwt_secret,
+		algorithm="HS256",
+	)
+	with TestClient(app) as client:
+		response = client.get(
+			"/api/v1/dashboard",
+			headers={"Authorization": f"Bearer {token}"},
+		)
+	assert response.status_code == 200
+	assert response.json()["viewer"]["email"] == "dev@a244.tech"
+	assert response.json()["viewer"]["avatarUrl"].startswith(
+		"https://api.dicebear.com/10.x/clay/"
+	)
+	assert len(response.json()["churches"]) == 3
+	assert response.json()["churches"][0]["avatarUrl"].startswith(
+		"https://api.dicebear.com/10.x/stack/"
+	)

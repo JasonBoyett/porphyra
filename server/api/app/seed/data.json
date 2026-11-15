@@ -15,6 +15,77 @@
       "ministries": [
         { "name": "Kids", "teams": ["Toddlers", "Fourth Grade"] },
         { "name": "Music", "teams": ["Band", "Choir"] }
+      ],
+      "volunteers": [
+        "Amelia Brooks", "Benjamin Carter", "Chloe Davis", "Daniel Ellis",
+        "Elijah Foster", "Faith Grant", "Gabriel Hayes", "Hannah Ingram",
+        "Isaac Jenkins", "Julia Kim", "Katherine Lewis", "Liam Morgan",
+        "Maya Nelson", "Noah Ortiz", "Olivia Parker", "Peter Quinn",
+        "Rachel Simmons", "Samuel Turner", "Tessa Underwood", "Victor Walsh",
+        "Willow Xu", "Xavier Young", "Yasmin Zane", "Zachary Allen"
+      ],
+      "campusEvents": [
+        {
+          "title": "Sunday Worship Service",
+          "description": "A weekly gathering for worship, teaching, and community.",
+          "campus": "Downtown",
+          "startsAt": "2026-11-15T15:00:00+00:00",
+          "endsAt": "2026-11-15T16:15:00+00:00",
+          "ministries": [
+            {
+              "name": "Music",
+              "teams": [
+                {
+                  "name": "Band",
+                  "callTime": "2026-11-15T13:30:00+00:00",
+                  "notes": ["Meet in the green room for soundcheck."],
+                  "roles": {
+                    "Worship leader": { "emoji": "🎤", "count": 1 },
+                    "Keys": { "emoji": "🎹", "count": 1 },
+                    "Sound": { "emoji": "🎚️", "count": 1 }
+                  },
+                  "assignDevelopmentUser": true,
+                  "assignDevelopmentUserRole": "Worship leader"
+                },
+                {
+                  "name": "Choir",
+                  "callTime": "2026-11-15T14:00:00+00:00",
+                  "notes": ["Warm up in the choir room before soundcheck."],
+                  "roles": {
+                    "Choir director": { "emoji": "🎼", "count": 1 },
+                    "Soprano": { "emoji": "🎶", "count": 2 },
+                    "Alto": { "emoji": "🎶", "count": 2 }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Kids",
+              "teams": [
+                {
+                  "name": "Toddlers",
+                  "callTime": "2026-11-15T14:15:00+00:00",
+                  "notes": ["Prepare the toddler room before families arrive."],
+                  "roles": {
+                    "Room lead": { "emoji": "🧸", "count": 1 },
+                    "Caregiver": { "emoji": "🫶", "count": 2 }
+                  }
+                },
+                {
+                  "name": "Fourth Grade",
+                  "callTime": null,
+                  "notes": ["Review the lesson and prepare activity supplies."],
+                  "roles": {
+                    "Teacher": { "emoji": "📚", "count": 1 },
+                    "Assistant": { "emoji": "✏️", "count": 1 }
+                  },
+                  "assignDevelopmentUser": true,
+                  "assignDevelopmentUserRole": "Teacher"
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -25,6 +96,14 @@
       ],
       "ministries": [
         { "name": "Hospitality", "teams": ["Welcome Team", "Coffee Team"] }
+      ],
+      "volunteers": [
+        "Abigail Baker", "Caleb Bennett", "Diana Collins", "Ethan Douglas",
+        "Fiona Edwards", "Gavin Fisher", "Grace Gordon", "Henry Howard",
+        "Isabel Jackson", "Jonah Knight", "Keira Larson", "Lucas Mitchell",
+        "Madison Norris", "Nathan Owens", "Paige Price", "Quentin Roberts",
+        "Rebecca Stewart", "Silas Thompson", "Tiffany Usher", "Violet Vaughn",
+        "Wesley Walker", "Ximena West", "Yvette York", "Zoe Zimmerman"
       ]
     },
     {
@@ -35,6 +114,14 @@
       ],
       "ministries": [
         { "name": "Worship", "teams": ["Worship Team", "Production"] }
+      ],
+      "volunteers": [
+        "Aiden Adams", "Bianca Bell", "Connor Clark", "Delilah Cruz",
+        "Elias Diaz", "Freya Evans", "Gideon Flores", "Harper Green",
+        "Ian Hall", "Jasmine Hill", "Kai Holmes", "Layla Hunt",
+        "Miles Irwin", "Nina James", "Owen Johnson", "Piper Jones",
+        "Riley King", "Sadie Lopez", "Theo Martin", "Uma Mason",
+        "Valerie Moore", "Wyatt Myers", "Zara Newton", "Aaron Oliver"
       ]
     }
   ]

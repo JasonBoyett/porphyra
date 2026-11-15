@@ -4,7 +4,7 @@ import pytest
 from sqlmodel import Session, SQLModel
 
 from app.db.engine import create_database_engine
-from app.db.models import Church
+from app.db.models import Church, User
 from app.errors import EmptyResponseError
 
 
@@ -53,3 +53,20 @@ def test_database_model_delete_removes_and_commits_record() -> None:
     finally:
         SQLModel.metadata.drop_all(engine)
         engine.dispose()
+
+
+def test_profile_avatar_url_uses_stored_image_or_stable_dicebear_fallback() -> None:
+	user = User(name="Susie", email="susie@example.com", auth_id="auth-susie")
+	church = Church(name="Grace Harbor Church")
+
+	assert user.avatar_url == "https://api.dicebear.com/10.x/clay/svg?seed=auth-susie"
+	assert (
+		church.avatar_url
+		== "https://api.dicebear.com/10.x/stack/svg?seed=Grace%20Harbor%20Church"
+	)
+
+	user.profile_image_url = "https://images.example.com/susie.jpg"
+	church.profile_image_url = "https://images.example.com/grace-harbor.jpg"
+
+	assert user.avatar_url == user.profile_image_url
+	assert church.avatar_url == church.profile_image_url
