@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
 
 import { useSyncTags } from "../sync/sync-provider"
+import { apiQueryOperations } from "./operations"
 import { apiTags, type ApiTag } from "./tags"
 
 type Campus = { id: string; name: string; city: string }
@@ -232,26 +233,23 @@ const defineMutationOperation = <TInput, TData, const TTags extends readonly Api
 
 export const apiClient = {
 	dashboard: defineQueryOperation({
-		key: "GET /api/v1/dashboard",
+		...apiQueryOperations.dashboard,
 		request: getDashboard,
-		syncTags: apiTags.dashboard,
 	}),
 	campusEvents: defineQueryOperation({
-		key: "GET /api/v1/events/campus",
+		...apiQueryOperations.campusEvents,
 		request: getCampusEvents,
-		syncTags: apiTags.planning,
 	}),
 	campusEventPlanning: defineQueryOperation({
-		key: "GET /api/v1/events/campus/{eventId}",
+		...apiQueryOperations.campusEventPlanning,
 		request: getCampusEventPlanning,
-		syncTags: apiTags.planning,
 	}),
 	assignCampusEventVolunteer: defineMutationOperation({
 		request: assignCampusEventVolunteer,
-		syncTags: apiTags.planning,
+		syncTags: apiTags.campusEventPlanning,
 	}),
 	updateCampusEventVolunteerRole: defineMutationOperation({
 		request: updateCampusEventVolunteerRole,
-		syncTags: apiTags.planning,
+		syncTags: apiTags.campusEventPlanning,
 	}),
 }

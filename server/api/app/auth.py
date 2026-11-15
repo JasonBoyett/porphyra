@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -15,16 +15,10 @@ from app.db.models.user import User
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
-def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-	db: DatabaseSession,
-) -> User:
-    if credentials is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
+def decode_access_token(token: str) -> dict[str, Any]:
     try:
-        claims = jwt.decode(
-            credentials.credentials,
+        return jwt.decode(
+            token,
             settings.auth_jwt_secret,
             algorithms=["HS256"],
             audience=settings.auth_audience,
@@ -32,6 +26,16 @@ def get_current_user(
         )
     except InvalidTokenError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED) from error
+
+
+def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+    db: DatabaseSession,
+) -> User:
+    if credentials is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    claims = decode_access_token(credentials.credentials)
 
     subject = claims.get("sub")
     email = claims.get("email")

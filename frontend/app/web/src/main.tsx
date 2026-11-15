@@ -184,7 +184,9 @@ const Application = () => {
 	return (
 		<ThemeProvider>
 			<authContext.Provider value={auth}>
-				<RouterProvider router={router} />
+				<SyncProvider accessToken={accessToken} queryClient={queryClient}>
+					<RouterProvider router={router} />
+				</SyncProvider>
 			</authContext.Provider>
 			<DevelopmentThemeSwitcher />
 		</ThemeProvider>
@@ -193,8 +195,6 @@ const Application = () => {
 
 createRoot(document.getElementById("root")!).render(
 	<QueryClientProvider client={queryClient}>
-		<SyncProvider queryClient={queryClient}>
-			<Application />
-		</SyncProvider>
+		<Application />
 	</QueryClientProvider>,
 )
