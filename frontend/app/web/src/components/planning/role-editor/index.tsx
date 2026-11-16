@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/emoji-picker"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Localized, useLocalizedString } from "@/localization"
 import type { RoleEditorProps } from "./types"
 
 const initials = (name: string) =>
@@ -26,6 +27,10 @@ export const RoleEditor = (props: RoleEditorProps) => {
 	const [roleName, setRoleName] = useState(props.volunteer.roleName ?? "")
 	const [roleEmoji, setRoleEmoji] = useState(props.volunteer.roleEmoji ?? "")
 	const updateRole = apiClient.updateCampusEventVolunteerRole.useMutation()
+	const { text: roleAriaLabel } = useLocalizedString("planning.roleAriaLabel", {
+		name: props.volunteer.name,
+	})
+	const { text: rolePlaceholder } = useLocalizedString("planning.role")
 
 	const save = () => {
 		updateRole.mutate(
@@ -87,15 +92,15 @@ export const RoleEditor = (props: RoleEditorProps) => {
 							</PopoverContent>
 						</Popover>
 						<Input
-							aria-label={`${props.volunteer.name}'s role`}
+							aria-label={roleAriaLabel}
 							className="min-w-0 flex-1"
 							maxLength={100}
 							onChange={(event) => setRoleName(event.target.value)}
-							placeholder="Role"
+							placeholder={rolePlaceholder}
 							value={roleName}
 						/>
 						<Button disabled={updateRole.isPending} onClick={save} size="sm" type="button">
-							Save
+							<Localized str="planning.save" />
 						</Button>
 					</div>
 				)}

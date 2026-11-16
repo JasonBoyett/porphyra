@@ -16,7 +16,6 @@ from app.scheduling.conflicts import get_schedule_conflicts
 from app.scheduling.roles import assign_user_to_role
 from app.sync.audience import church_member_user_ids
 from app.sync.publish import publish
-from app.sync.tags import SyncTag
 
 router = APIRouter()
 
@@ -89,7 +88,7 @@ def assign_volunteer(
             role_emoji=assignment.role_emoji,
             conflict_confirmed_at=assignment.conflict_confirmed_at,
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()
@@ -151,7 +150,7 @@ def update_volunteer_role(
             role_emoji=assignment.role_emoji,
             conflict_confirmed_at=assignment.conflict_confirmed_at,
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()

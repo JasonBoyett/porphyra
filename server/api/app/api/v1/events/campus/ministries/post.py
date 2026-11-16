@@ -9,7 +9,6 @@ from app.auth import CurrentUser
 from app.db.models import CampusEvent, CampusEventMinistry, Ministry
 from app.sync.audience import church_member_user_ids
 from app.sync.publish import publish
-from app.sync.tags import SyncTag
 
 router = APIRouter()
 
@@ -55,7 +54,7 @@ def schedule_ministry(
             ministry_id=ministry.id,
             sync_recipient_ids=church_member_user_ids(db, event.church_id),
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()

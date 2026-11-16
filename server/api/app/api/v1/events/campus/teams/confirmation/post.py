@@ -4,13 +4,16 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.v1.dependencies.church_membership import get_church_membership_or_404
 from app.api.v1.dependencies.database import DatabaseSession
-from app.api.v1.events.schemas import ConfirmScheduleRequest, ScheduledTeamResponse
+from app.api.v1.events.schemas import (
+    ConfirmScheduleRequest,
+    ScheduledTeamResponse,
+    TeamRoleResponseData,
+)
 from app.auth import CurrentUser
 from app.db.models import CampusEventTeam, TeamMembership
 from app.db.utils import utc_now
 from app.sync.audience import church_member_user_ids
 from app.sync.publish import publish
-from app.sync.tags import SyncTag
 
 router = APIRouter()
 
@@ -52,9 +55,9 @@ def confirm_schedule(
             notes=event_team.notes,
             confirmed_at=event_team.confirmed_at,
             is_fully_staffed=event_team.is_fully_staffed,
-            roles=event_team.role_data,
+            roles=TeamRoleResponseData.from_role_data(event_team.role_data),
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()

@@ -5,7 +5,6 @@ from sqlmodel import Session
 
 from app.sync.publish import publish
 from app.sync.registry import SyncNotification, socket_registry
-from app.sync.tags import SyncTag
 
 
 @dataclass
@@ -29,14 +28,14 @@ def test_publish_returns_data_unchanged_and_deduplicates(monkeypatch) -> None:
 
     result = publish(
         data,
-        tags=[SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENTS],
+        tags=["campus-events", "campus-events"],
     )
 
     assert result is data
     assert notifications == [
         SyncNotification(
             recipients=tuple(sorted((first_user, second_user), key=str)),
-            tags=(SyncTag.CAMPUS_EVENTS,),
+            tags=("campus-events",),
         )
     ]
 
@@ -45,7 +44,7 @@ def test_publish_ignores_empty_recipients_or_tags(monkeypatch) -> None:
     notifications: list[SyncNotification] = []
     monkeypatch.setattr(socket_registry, "notify", notifications.append)
 
-    publish(SyncValue("no recipients", []), tags=[SyncTag.DASHBOARD])
+    publish(SyncValue("no recipients", []), tags=["dashboard"])
     publish(SyncValue("no tags", [uuid4()]), tags=[])
 
     assert notifications == []
@@ -60,13 +59,13 @@ def test_transaction_publish_dispatches_only_after_commit(monkeypatch) -> None:
         data = SyncValue("queued", [user_id])
         publish(
             data,
-            tags=[SyncTag.CAMPUS_EVENTS],
+            tags=["campus-events"],
             session=session,
         )
         assert notifications == []
         session.commit()
 
-    assert notifications == [SyncNotification((user_id,), (SyncTag.CAMPUS_EVENTS,))]
+    assert notifications == [SyncNotification((user_id,), ("campus-events",))]
 
 
 def test_transaction_publish_is_discarded_on_rollback(monkeypatch) -> None:
@@ -77,7 +76,7 @@ def test_transaction_publish_is_discarded_on_rollback(monkeypatch) -> None:
         session.begin()
         publish(
             SyncValue("queued", [uuid4()]),
-            tags=[SyncTag.DASHBOARD],
+            tags=["dashboard"],
             session=session,
         )
         session.rollback()
@@ -97,17 +96,17 @@ def test_commit_coalesces_identical_notifications_but_preserves_distinct_ones(
         for _ in range(2):
             publish(
                 SyncValue("same", [user_id]),
-                tags=[SyncTag.CAMPUS_EVENTS],
+                tags=["campus-events"],
                 session=session,
             )
         publish(
             SyncValue("distinct", [user_id]),
-            tags=[SyncTag.CAMPUS_EVENT_PLANNING],
+            tags=["campus-event-planning"],
             session=session,
         )
         session.commit()
 
     assert notifications == [
-        SyncNotification((user_id,), (SyncTag.CAMPUS_EVENTS,)),
-        SyncNotification((user_id,), (SyncTag.CAMPUS_EVENT_PLANNING,)),
+        SyncNotification((user_id,), ("campus-events",)),
+        SyncNotification((user_id,), ("campus-event-planning",)),
     ]

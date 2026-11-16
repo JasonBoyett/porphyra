@@ -10,6 +10,7 @@ from app.api.v1.events.schemas import (
 	CampusEventPlanningResponse,
 	CampusEventTeamScheduleResponse,
 	ScheduledVolunteerResponse,
+	TeamRoleResponseData,
 )
 from app.auth import CurrentUser
 from app.db.models import (
@@ -92,7 +93,7 @@ def _planning_response(
 							notes=event_team.notes,
 							confirmed_at=event_team.confirmed_at,
 							is_fully_staffed=event_team.is_fully_staffed,
-							roles=event_team.role_data,
+							roles=TeamRoleResponseData.from_role_data(event_team.role_data),
 						volunteers=[
 							_scheduled_volunteer(assignment)
 							for assignment in event_team.volunteers

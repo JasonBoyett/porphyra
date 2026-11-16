@@ -8,7 +8,6 @@ from starlette.websockets import WebSocketDisconnect
 from app.config import settings
 from app.main import app
 from app.sync.registry import SyncNotification, socket_registry
-from app.sync.tags import SyncTag
 
 
 def _token(subject: str, email: str) -> str:
@@ -78,7 +77,7 @@ def test_sync_socket_supports_multiple_tabs_and_isolates_recipients() -> None:
         ):
             assert first_tab.accepted_subprotocol == "porphyra.sync.v1"
             socket_registry.notify(
-                SyncNotification((first_user_id,), (SyncTag.DASHBOARD,))
+                SyncNotification((first_user_id,), ("dashboard",))
             )
             assert first_tab.receive_json() == {
                 "type": "changed",
@@ -89,7 +88,7 @@ def test_sync_socket_supports_multiple_tabs_and_isolates_recipients() -> None:
                 "tags": ["dashboard"],
             }
             socket_registry.notify(
-                SyncNotification((second_user_id,), (SyncTag.CAMPUS_EVENTS,))
+                SyncNotification((second_user_id,), ("campus-events",))
             )
             assert other_user_tab.receive_json() == {
                 "type": "changed",
@@ -109,6 +108,6 @@ def test_disconnected_tab_does_not_prevent_remaining_tab_delivery() -> None:
             ):
                 pass
             socket_registry.notify(
-                SyncNotification((user_id,), (SyncTag.CAMPUS_EVENT_PLANNING,))
+                SyncNotification((user_id,), ("campus-event-planning",))
             )
             assert remaining_tab.receive_json()["tags"] == ["campus-event-planning"]

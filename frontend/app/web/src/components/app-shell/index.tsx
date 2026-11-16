@@ -2,10 +2,12 @@ import { Link } from "@tanstack/react-router"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Localized, LocalizationScope, useLocalizedString } from "@/localization"
 import type { AppShellProps } from "./types"
 
-export const AppShell = ({ children, onSignOut, viewer }: AppShellProps) => {
+const AppShellContent = ({ children, onSignOut, viewer }: AppShellProps) => {
 	const viewerName = viewer.name ?? "User"
+	const { text: applicationAreas } = useLocalizedString("navigation.applicationAreas")
 
 	return (
 		<main>
@@ -17,34 +19,34 @@ export const AppShell = ({ children, onSignOut, viewer }: AppShellProps) => {
 					<img alt="" className="size-7 object-contain" src="/favicon.png" />
 					Porphyra
 				</Link>
-				<nav aria-label="Application areas" className="flex min-w-0 gap-1 overflow-x-auto">
+				<nav aria-label={applicationAreas} className="flex min-w-0 gap-1 overflow-x-auto">
 					<Link
 						activeProps={{ className: "bg-primary text-primary-foreground" }}
 						className="rounded-md px-3 py-2 text-sm font-bold text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
 						to="/app"
 					>
-						Overview
+						<Localized str="navigation.overview" />
 					</Link>
 					<Link
 						activeProps={{ className: "bg-primary text-primary-foreground" }}
 						className="rounded-md px-3 py-2 text-sm font-bold text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
 						to="/app/planning"
 					>
-						Planning
+						<Localized str="navigation.planning" />
 					</Link>
 					<Link
 						activeProps={{ className: "bg-primary text-primary-foreground" }}
 						className="rounded-md px-3 py-2 text-sm font-bold text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
 						to="/app/volunteers"
 					>
-						Volunteer
+						<Localized str="navigation.volunteer" />
 					</Link>
 					<Link
 						activeProps={{ className: "bg-primary text-primary-foreground" }}
 						className="rounded-md px-3 py-2 text-sm font-bold text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
 						to="/app/kiosk"
 					>
-						Kiosk
+						<Localized str="navigation.kiosk" />
 					</Link>
 				</nav>
 				<Button className="shrink-0 rounded-full" onClick={onSignOut} variant="secondary">
@@ -52,10 +54,18 @@ export const AppShell = ({ children, onSignOut, viewer }: AppShellProps) => {
 						<AvatarImage alt={`${viewerName} profile`} src={viewer.avatarUrl} />
 						<AvatarFallback>{viewerName.slice(0, 1)}</AvatarFallback>
 					</Avatar>
-					<span className="hidden sm:inline">Sign out</span>
+					<span className="hidden sm:inline">
+						<Localized str="common.signOut" />
+					</span>
 				</Button>
 			</header>
 			{children}
 		</main>
 	)
 }
+
+export const AppShell = (props: AppShellProps) => (
+	<LocalizationScope name="app-shell">
+		<AppShellContent {...props} />
+	</LocalizationScope>
+)

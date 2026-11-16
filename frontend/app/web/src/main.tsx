@@ -23,6 +23,13 @@ import { PlanningScheduleBoard } from "@/features/planning"
 import { VolunteerSchedule } from "@/features/volunteers"
 import { SyncProvider } from "@/sync/sync-provider"
 import { DevelopmentThemeSwitcher, ThemeProvider } from "@/theme"
+import { porphyraCatalog } from "@porphyra/frontend/localization"
+import {
+	DevelopmentLocaleSwitcher,
+	LocalizationScope,
+	TranslationProvider,
+	useLocalizedString,
+} from "@/localization"
 
 type AuthContextValue = {
 	accessToken: string | null
@@ -97,17 +104,17 @@ const AuthScreen = () => {
 	const { completeAuthentication } = useAuth()
 	const navigate = useNavigate()
 	const [email, setEmail] = useState("dev@a244.tech")
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(false)
 
 	const signIn = async () => {
-		setError(null)
+		setError(false)
 		const response = await fetch(`${authUrl}/api/v1/auth/sign-in`, {
 			body: JSON.stringify({ email }),
 			headers: { "Content-Type": "application/json" },
 			method: "POST",
 		})
 		if (!response.ok) {
-			setError("Unable to sign in. Please try again.")
+			setError(true)
 			return
 		}
 		const data = (await response.json()) as { accessToken: string }
@@ -118,6 +125,20 @@ const AuthScreen = () => {
 	return (
 		<Auth email={email} error={error} onEmailChange={setEmail} onSignIn={() => void signIn()} />
 	)
+}
+
+const KioskView = () => {
+	return (
+		<LocalizationScope name="kiosk">
+			<KioskContent />
+		</LocalizationScope>
+	)
+}
+
+const KioskContent = () => {
+	const { text: description } = useLocalizedString("kiosk.description")
+	const { text: title } = useLocalizedString("kiosk.title")
+	return <Kiosk description={description} title={title} />
 }
 
 const rootRoute = createRootRoute({ component: Outlet })
@@ -150,12 +171,7 @@ const volunteerRoute = createRoute({
 const kioskRoute = createRoute({
 	getParentRoute: () => appRoute,
 	path: "kiosk",
-	component: () => (
-		<Kiosk
-			description="Create welcoming, dependable on-site experiences for your campuses."
-			title="Kiosk"
-		/>
-	),
+	component: KioskView,
 })
 
 const routeTree = rootRoute.addChildren([
@@ -183,11 +199,14 @@ const Application = () => {
 
 	return (
 		<ThemeProvider>
-			<authContext.Provider value={auth}>
-				<SyncProvider accessToken={accessToken} queryClient={queryClient}>
-					<RouterProvider router={router} />
-				</SyncProvider>
-			</authContext.Provider>
+			<TranslationProvider catalog={porphyraCatalog}>
+				<authContext.Provider value={auth}>
+					<SyncProvider accessToken={accessToken} queryClient={queryClient}>
+						<RouterProvider router={router} />
+					</SyncProvider>
+				</authContext.Provider>
+				<DevelopmentLocaleSwitcher />
+			</TranslationProvider>
 			<DevelopmentThemeSwitcher />
 		</ThemeProvider>
 	)

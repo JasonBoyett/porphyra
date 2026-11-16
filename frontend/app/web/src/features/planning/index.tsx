@@ -4,6 +4,7 @@ import { apiClient } from "@/api/client"
 import { PlanningScheduleBoard as PlanningScheduleBoardView } from "@/components/planning/planning-schedule-board"
 import type { ScheduleFilter } from "@/components/planning/planning-schedule-board/types"
 import { SchedulingDialog } from "@/components/planning/scheduling-dialog"
+import { Localized, LocalizationScope } from "@/localization"
 
 export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 	const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
@@ -57,20 +58,32 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 	const teamToSchedule = teams.find(({ team }) => team.id === teamToScheduleId)
 
 	if (events.isLoading || planning.isLoading) {
-		return <main className="mx-auto max-w-310 px-6 py-12">Loading schedule…</main>
+		return (
+			<LocalizationScope name="planning.status">
+				<main className="mx-auto max-w-310 px-6 py-12">
+					<Localized str="planning.loadingSchedule" />
+				</main>
+			</LocalizationScope>
+		)
 	}
 
 	if (events.isError || planning.isError) {
 		return (
-			<main className="mx-auto max-w-310 px-6 py-12 text-destructive">
-				Unable to load this schedule. Please try again.
-			</main>
+			<LocalizationScope name="planning.status">
+				<main className="mx-auto max-w-310 px-6 py-12 text-destructive">
+					<Localized str="planning.unableToLoad" />
+				</main>
+			</LocalizationScope>
 		)
 	}
 
 	if (event === undefined) {
 		return (
-			<main className="mx-auto max-w-310 px-6 py-12">No events are available to plan yet.</main>
+			<LocalizationScope name="planning.status">
+				<main className="mx-auto max-w-310 px-6 py-12">
+					<Localized str="planning.noEvents" />
+				</main>
+			</LocalizationScope>
 		)
 	}
 

@@ -5,6 +5,7 @@
   "exports": {
     "./api": "./api/client.ts",
     "./auth": "./auth/session.ts",
+    "./localization": "./localization/catalog.ts",
     "./sync": "./sync/tag-manager.ts",
     "./theme": "./theme/tokens.ts"
   },

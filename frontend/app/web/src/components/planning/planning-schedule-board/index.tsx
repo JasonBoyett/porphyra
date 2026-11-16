@@ -3,6 +3,7 @@ import { CalendarDays, Clock3 } from "lucide-react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { TeamCard } from "@/components/planning/team-card"
+import { LocalizationScope } from "@/localization"
 import type { PlanningScheduleBoardProps, ScheduleFilter } from "./types"
 
 const filters: readonly { id: ScheduleFilter; label: string }[] = [
@@ -100,35 +101,37 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 		<p aria-live="polite" className="my-6 text-sm text-muted-foreground">
 			{props.visibleTeamCount} planned {props.visibleTeamCount === 1 ? "team" : "teams"}
 		</p>
-		<section aria-label="Planned teams" className="grid gap-9">
-			{props.teamsByMinistry.map((group) => (
-				<section
-					aria-labelledby={`${group.name.toLowerCase()}-heading`}
-					className="grid gap-3"
-					key={group.name}
-				>
-					<h2 className="m-0 font-serif text-3xl" id={`${group.name.toLowerCase()}-heading`}>
-						{group.name}
-					</h2>
-					<div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
-						{group.teams.map(({ team }) => (
-							<TeamCard
-								accessToken={props.accessToken}
-								event={props.event}
-								key={team.id}
-								onSchedule={() => props.onSchedule(team.id)}
-								team={team}
-							/>
-						))}
+		<LocalizationScope name="planning.team-rosters">
+			<section aria-label="Planned teams" className="grid gap-9">
+				{props.teamsByMinistry.map((group) => (
+					<section
+						aria-labelledby={`${group.name.toLowerCase()}-heading`}
+						className="grid gap-3"
+						key={group.name}
+					>
+						<h2 className="m-0 font-serif text-3xl" id={`${group.name.toLowerCase()}-heading`}>
+							{group.name}
+						</h2>
+						<div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+							{group.teams.map(({ team }) => (
+								<TeamCard
+									accessToken={props.accessToken}
+									event={props.event}
+									key={team.id}
+									onSchedule={() => props.onSchedule(team.id)}
+									team={team}
+								/>
+							))}
+						</div>
+					</section>
+				))}
+				{props.teamsByMinistry.length === 0 && (
+					<div className="rounded-xl border border-dashed p-8 text-center">
+						<h2>No teams match these filters</h2>
+						<p>Try a different ministry or schedule view.</p>
 					</div>
-				</section>
-			))}
-			{props.teamsByMinistry.length === 0 && (
-				<div className="rounded-xl border border-dashed p-8 text-center">
-					<h2>No teams match these filters</h2>
-					<p>Try a different ministry or schedule view.</p>
-				</div>
-			)}
-		</section>
+				)}
+			</section>
+		</LocalizationScope>
 	</main>
 )

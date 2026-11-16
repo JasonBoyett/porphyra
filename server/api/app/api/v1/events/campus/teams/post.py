@@ -7,6 +7,7 @@ from app.api.v1.dependencies.database import DatabaseSession
 from app.api.v1.events.schemas import (
     ScheduledTeamResponse,
     ScheduleTeamRequest,
+    TeamRoleResponseData,
     UpdateTeamRoleRequirementsRequest,
 )
 from app.auth import CurrentUser
@@ -14,7 +15,6 @@ from app.db.models import CampusEventMinistry, CampusEventTeam, Team
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 from app.sync.audience import church_member_user_ids
 from app.sync.publish import publish
-from app.sync.tags import SyncTag
 
 router = APIRouter()
 
@@ -59,9 +59,9 @@ def schedule_team(
             notes=event_team.notes,
             confirmed_at=event_team.confirmed_at,
             is_fully_staffed=event_team.is_fully_staffed,
-            roles=event_team.role_data,
+            roles=TeamRoleResponseData.from_role_data(event_team.role_data),
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()
@@ -117,9 +117,9 @@ def update_team_role_requirements(
             notes=event_team.notes,
             confirmed_at=event_team.confirmed_at,
             is_fully_staffed=event_team.is_fully_staffed,
-            roles=event_team.role_data,
+            roles=TeamRoleResponseData.from_role_data(event_team.role_data),
         ),
-        tags=(SyncTag.CAMPUS_EVENTS, SyncTag.CAMPUS_EVENT_PLANNING),
+        tags=("campus-events", "campus-event-planning"),
         session=db,
     )
     db.commit()

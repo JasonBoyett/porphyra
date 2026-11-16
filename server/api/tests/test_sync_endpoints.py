@@ -9,7 +9,6 @@ from app.db.session import SessionFactory
 from app.main import app
 from app.sync.audience import church_member_user_ids
 from app.sync.registry import SyncNotification, socket_registry
-from app.sync.tags import SyncTag
 
 
 def _headers() -> dict[str, str]:
@@ -58,6 +57,6 @@ def test_create_campus_event_publishes_exact_church_audience_and_tags(
     assert notifications == [
         SyncNotification(
             recipients=expected_recipients,
-            tags=(SyncTag.CAMPUS_EVENT_PLANNING, SyncTag.CAMPUS_EVENTS),
+            tags=("campus-event-planning", "campus-events"),
         )
     ]

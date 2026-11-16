@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Self
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, RootModel
 
 from app.db.schemas import RoleTemplateData, TeamRoleData
 from app.schemas.base import ApiModel
@@ -74,6 +75,22 @@ class ScheduledMinistryResponse(SyncableApiModel):
 	ministry_id: UUID
 
 
+class TeamRoleResponse(ApiModel):
+	emoji: str | None
+	count: int
+	scheduled_users: list[UUID]
+
+
+class TeamRoleResponseData(RootModel[dict[str, TeamRoleResponse]]):
+	"""Expose database role snapshots through the API's camel-case response model."""
+
+	@classmethod
+	def from_role_data(cls, roles: TeamRoleData) -> Self:
+		return cls.model_validate(
+			{name: role.model_dump() for name, role in roles.root.items()}
+		)
+
+
 class ScheduledTeamResponse(SyncableApiModel):
 	id: UUID
 	team_id: UUID
@@ -81,7 +98,7 @@ class ScheduledTeamResponse(SyncableApiModel):
 	notes: list[str]
 	confirmed_at: datetime | None
 	is_fully_staffed: bool
-	roles: TeamRoleData
+	roles: TeamRoleResponseData
 
 
 class VolunteerAssignmentResponse(SyncableApiModel):
@@ -112,7 +129,7 @@ class CampusEventTeamScheduleResponse(ApiModel):
 	notes: list[str]
 	confirmed_at: datetime | None
 	is_fully_staffed: bool
-	roles: TeamRoleData
+	roles: TeamRoleResponseData
 	volunteers: list[ScheduledVolunteerResponse]
 	eligible_volunteers: list[ScheduledVolunteerResponse]
 

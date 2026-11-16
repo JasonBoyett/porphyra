@@ -1,0 +1,97 @@
+export type PresentationOverride = Readonly<{
+	backgroundColor?: string
+	color?: string
+	fontSize?: string
+	fontStyle?: "italic" | "normal"
+	fontWeight?: number | string
+	textDecoration?: string
+}>
+
+export type ContextualOverride = Readonly<{
+	presentation?: PresentationOverride
+	text?: string
+}>
+
+export type LocaleCatalog = Readonly<Record<string, string>>
+
+export type TranslationCatalog = Readonly<{
+	contextual?: Readonly<Record<string, Readonly<Record<string, ContextualOverride>>>>
+	locales: Readonly<Record<string, LocaleCatalog>>
+	sourceLocale: string
+}>
+
+export type TranslationValues = Readonly<Record<string, string | number>>
+
+export const interpolate = (template: string, values?: TranslationValues): string =>
+	template.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
+		values?.[name] === undefined ? placeholder : String(values[name]),
+	)
+
+/**
+ * The application catalog is intentionally data-only. React applications inject it
+ * through their TranslationProvider rather than importing it from localized views.
+ */
+export const porphyraCatalog = {
+	sourceLocale: "en",
+	locales: {
+		en: {
+			"auth.email": "Email",
+			"auth.password": "Password",
+			"auth.signIn": "Sign in",
+			"auth.signInFailed": "Unable to sign in. Please try again.",
+			"auth.title": "Sign in to serve your church.",
+			"auth.welcome": "Welcome to Porphyra",
+			"auth.description": "Use the seeded development account to explore church, campus, ministry, and team workspaces.",
+			"auth.continue": "Continue to Porphyra",
+			"auth.createAccount": "Need an account? Create one",
+			"common.all": "All",
+			"common.close": "Close",
+			"common.hello": "hello",
+			"common.loading": "Loading…",
+			"common.signOut": "Sign out",
+			"dashboard.apiUnavailable": "The API is not running yet. Start it with",
+			"dashboard.church": "Church",
+			"dashboard.churches": "{count} churches",
+			"dashboard.description": "Choose a church below, or move between Planning, Volunteer, and Kiosk from the web workspace.",
+			"dashboard.friend": "friend",
+			"dashboard.greeting": "Good morning, {name}",
+			"dashboard.title": "Serve your churches with clarity.",
+			"dashboard.loadingChurches": "Loading churches…",
+			"kiosk.description": "Create welcoming, dependable on-site experiences for your campuses.",
+			"kiosk.title": "Kiosk",
+			"navigation.applicationAreas": "Application areas",
+			"navigation.kiosk": "Kiosk",
+			"navigation.overview": "Overview",
+			"navigation.planning": "Planning",
+			"navigation.volunteer": "Volunteer",
+			"planning.allMinistries": "All ministries",
+			"planning.loadingSchedule": "Loading schedule…",
+			"planning.noEvents": "No events are available to plan yet.",
+			"planning.noTeams": "No teams match these filters",
+			"planning.noTeamsDescription": "Try a different ministry or schedule view.",
+			"planning.servicePlanning": "Service planning",
+			"planning.role": "Role",
+			"planning.roleAriaLabel": "{name}'s role",
+			"planning.save": "Save",
+			"planning.unableToLoad": "Unable to load this schedule. Please try again.",
+			"volunteers.myServing": "My serving",
+			"volunteers.noAssignments": "Nothing scheduled here",
+			"volunteers.noAssignmentsDescription": "Try another campus or one of your ministries.",
+			"welcome.eyebrow": "Church planning by Acts 2:44 Technology",
+			"welcome.title": "Tools that help your church focus on ministry.",
+			"welcome.description": "Porphyra brings service planning, volunteer coordination, team schedules, and campus operations together in one dependable platform.",
+			"welcome.createAccount": "Create a free account",
+			"welcome.openSource": "Free and open source. Built for churches of every size.",
+			"welcome.madeFor": "Made for the people who make Sunday happen.",
+			"welcome.madeForDescription": "We reduce administrative burden so staff and volunteers can serve people with more presence, care, and confidence.",
+			"welcome.planTogether": "Plan together",
+			"welcome.serveTogether": "Serve together",
+			"welcome.stewardWisely": "Steward wisely",
+		},
+		// A deliberately sparse offline locale used by development and fixture tests.
+		// Missing values resolve to the declared source locale.
+		test: {},
+	},
+} as const satisfies TranslationCatalog
+
+export type PorphyraTranslationKey = keyof (typeof porphyraCatalog)["locales"]["en"]

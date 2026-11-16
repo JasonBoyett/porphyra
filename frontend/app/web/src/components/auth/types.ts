@@ -1,6 +1,6 @@
 export type AuthProps = {
 	email: string
-	error: string | null
+	error: boolean
 	onEmailChange: (email: string) => void
 	onSignIn: () => void
 }
