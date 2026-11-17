@@ -9,53 +9,119 @@
       "name": "Grace Harbor Church",
       "description": "A welcoming multi-campus church serving its city with joy.",
       "campuses": [
-        { "name": "Downtown", "city": "Nashville" },
-        { "name": "Eastside", "city": "Nashville" }
+        {
+          "name": "Downtown",
+          "city": "Nashville"
+        },
+        {
+          "name": "Eastside",
+          "city": "Nashville"
+        }
       ],
       "ministries": [
-        { "name": "Kids", "teams": ["Toddlers", "Fourth Grade"] },
-        { "name": "Music", "teams": ["Band", "Choir"] }
+        {
+          "name": "Kids",
+          "teams": [
+            "Toddlers",
+            "Fourth Grade"
+          ]
+        },
+        {
+          "name": "Music",
+          "teams": [
+            "Band",
+            "Choir"
+          ]
+        }
       ],
       "volunteers": [
-        "Amelia Brooks", "Benjamin Carter", "Chloe Davis", "Daniel Ellis",
-        "Elijah Foster", "Faith Grant", "Gabriel Hayes", "Hannah Ingram",
-        "Isaac Jenkins", "Julia Kim", "Katherine Lewis", "Liam Morgan",
-        "Maya Nelson", "Noah Ortiz", "Olivia Parker", "Peter Quinn",
-        "Rachel Simmons", "Samuel Turner", "Tessa Underwood", "Victor Walsh",
-        "Willow Xu", "Xavier Young", "Yasmin Zane", "Zachary Allen"
+        "Amelia Brooks",
+        "Benjamin Carter",
+        "Chloe Davis",
+        "Daniel Ellis",
+        "Elijah Foster",
+        "Faith Grant",
+        "Gabriel Hayes",
+        "Hannah Ingram",
+        "Isaac Jenkins",
+        "Julia Kim",
+        "Katherine Lewis",
+        "Liam Morgan",
+        "Maya Nelson",
+        "Noah Ortiz",
+        "Olivia Parker",
+        "Peter Quinn",
+        "Rachel Simmons",
+        "Samuel Turner",
+        "Tessa Underwood",
+        "Victor Walsh",
+        "Willow Xu",
+        "Xavier Young",
+        "Yasmin Zane",
+        "Zachary Allen"
       ],
       "campusEvents": [
         {
           "title": "Sunday Worship Service",
           "description": "A weekly gathering for worship, teaching, and community.",
           "campus": "Downtown",
-          "startsAt": "2026-11-15T15:00:00+00:00",
-          "endsAt": "2026-11-15T16:15:00+00:00",
+          "startsAt": "2026-11-23T07:30:59.915985+00:00",
+          "endsAt": "2026-11-23T08:45:59.915985+00:00",
           "ministries": [
             {
               "name": "Music",
               "teams": [
                 {
                   "name": "Band",
-                  "callTime": "2026-11-15T13:30:00+00:00",
-                  "notes": ["Meet in the green room for soundcheck."],
+                  "callTime": "2026-11-23T06:00:59.915985+00:00",
+                  "notes": [
+                    "Meet in the green room for soundcheck."
+                  ],
                   "roles": {
-                    "Worship leader": { "emoji": "🎤", "count": 1 },
-                    "Keys": { "emoji": "🎹", "count": 1 },
-                    "Sound": { "emoji": "🎚️", "count": 1 }
+                    "Worship leader": {
+                      "emoji": "🎤",
+                      "count": 1
+                    },
+                    "Keys": {
+                      "emoji": "🎹",
+                      "count": 1
+                    },
+                    "Sound": {
+                      "emoji": "🎚️",
+                      "count": 1
+                    }
                   },
-                  "assignDevelopmentUser": true,
-                  "assignDevelopmentUserRole": "Worship leader"
+                   "assignDevelopmentUser": true,
+                   "assignDevelopmentUserRole": "Worship leader",
+                   "volunteerRequests": [
+                     { "id": "keys-declined", "volunteer": "Chloe Davis", "role": "Keys", "status": "rejected" },
+                     { "id": "keys-replacement", "volunteer": "Gabriel Hayes", "role": "Keys", "status": "pending", "replaces": "keys-declined" },
+                     { "id": "sound-pending", "volunteer": "Katherine Lewis", "role": "Sound", "status": "pending" }
+                   ]
                 },
                 {
                   "name": "Choir",
-                  "callTime": "2026-11-15T14:00:00+00:00",
-                  "notes": ["Warm up in the choir room before soundcheck."],
-                  "roles": {
-                    "Choir director": { "emoji": "🎼", "count": 1 },
-                    "Soprano": { "emoji": "🎶", "count": 2 },
-                    "Alto": { "emoji": "🎶", "count": 2 }
-                  }
+                  "callTime": "2026-11-23T06:30:59.915985+00:00",
+                  "notes": [
+                    "Warm up in the choir room before soundcheck."
+                  ],
+                   "roles": {
+                    "Choir director": {
+                      "emoji": "🎼",
+                      "count": 1
+                    },
+                    "Soprano": {
+                      "emoji": "🎶",
+                      "count": 2
+                    },
+                     "Alto": {
+                       "emoji": "🎶",
+                       "count": 2
+                     }
+                   },
+                   "volunteerRequests": [
+                     { "id": "choir-rejected", "volunteer": "Daniel Ellis", "role": "Soprano", "status": "rejected" }
+                   ]
                 }
               ]
             },
@@ -64,20 +130,36 @@
               "teams": [
                 {
                   "name": "Toddlers",
-                  "callTime": "2026-11-15T14:15:00+00:00",
-                  "notes": ["Prepare the toddler room before families arrive."],
+                  "callTime": "2026-11-23T06:45:59.915985+00:00",
+                  "notes": [
+                    "Prepare the toddler room before families arrive."
+                  ],
                   "roles": {
-                    "Room lead": { "emoji": "🧸", "count": 1 },
-                    "Caregiver": { "emoji": "🫶", "count": 2 }
+                    "Room lead": {
+                      "emoji": "🧸",
+                      "count": 1
+                    },
+                    "Caregiver": {
+                      "emoji": "🫶",
+                      "count": 2
+                    }
                   }
                 },
                 {
                   "name": "Fourth Grade",
                   "callTime": null,
-                  "notes": ["Review the lesson and prepare activity supplies."],
+                  "notes": [
+                    "Review the lesson and prepare activity supplies."
+                  ],
                   "roles": {
-                    "Teacher": { "emoji": "📚", "count": 1 },
-                    "Assistant": { "emoji": "✏️", "count": 1 }
+                    "Teacher": {
+                      "emoji": "📚",
+                      "count": 1
+                    },
+                    "Assistant": {
+                      "emoji": "✏️",
+                      "count": 1
+                    }
                   },
                   "assignDevelopmentUser": true,
                   "assignDevelopmentUserRole": "Teacher"
@@ -92,36 +174,90 @@
       "name": "Riverstone Community Church",
       "description": "A local church helping neighbors follow Jesus together.",
       "campuses": [
-        { "name": "Main Campus", "city": "Franklin" }
+        {
+          "name": "Main Campus",
+          "city": "Franklin"
+        }
       ],
       "ministries": [
-        { "name": "Hospitality", "teams": ["Welcome Team", "Coffee Team"] }
+        {
+          "name": "Hospitality",
+          "teams": [
+            "Welcome Team",
+            "Coffee Team"
+          ]
+        }
       ],
       "volunteers": [
-        "Abigail Baker", "Caleb Bennett", "Diana Collins", "Ethan Douglas",
-        "Fiona Edwards", "Gavin Fisher", "Grace Gordon", "Henry Howard",
-        "Isabel Jackson", "Jonah Knight", "Keira Larson", "Lucas Mitchell",
-        "Madison Norris", "Nathan Owens", "Paige Price", "Quentin Roberts",
-        "Rebecca Stewart", "Silas Thompson", "Tiffany Usher", "Violet Vaughn",
-        "Wesley Walker", "Ximena West", "Yvette York", "Zoe Zimmerman"
+        "Abigail Baker",
+        "Caleb Bennett",
+        "Diana Collins",
+        "Ethan Douglas",
+        "Fiona Edwards",
+        "Gavin Fisher",
+        "Grace Gordon",
+        "Henry Howard",
+        "Isabel Jackson",
+        "Jonah Knight",
+        "Keira Larson",
+        "Lucas Mitchell",
+        "Madison Norris",
+        "Nathan Owens",
+        "Paige Price",
+        "Quentin Roberts",
+        "Rebecca Stewart",
+        "Silas Thompson",
+        "Tiffany Usher",
+        "Violet Vaughn",
+        "Wesley Walker",
+        "Ximena West",
+        "Yvette York",
+        "Zoe Zimmerman"
       ]
     },
     {
       "name": "New Mercies Fellowship",
       "description": "A growing church community rooted in worship, service, and hospitality.",
       "campuses": [
-        { "name": "Gathering House", "city": "Murfreesboro" }
+        {
+          "name": "Gathering House",
+          "city": "Murfreesboro"
+        }
       ],
       "ministries": [
-        { "name": "Worship", "teams": ["Worship Team", "Production"] }
+        {
+          "name": "Worship",
+          "teams": [
+            "Worship Team",
+            "Production"
+          ]
+        }
       ],
       "volunteers": [
-        "Aiden Adams", "Bianca Bell", "Connor Clark", "Delilah Cruz",
-        "Elias Diaz", "Freya Evans", "Gideon Flores", "Harper Green",
-        "Ian Hall", "Jasmine Hill", "Kai Holmes", "Layla Hunt",
-        "Miles Irwin", "Nina James", "Owen Johnson", "Piper Jones",
-        "Riley King", "Sadie Lopez", "Theo Martin", "Uma Mason",
-        "Valerie Moore", "Wyatt Myers", "Zara Newton", "Aaron Oliver"
+        "Aiden Adams",
+        "Bianca Bell",
+        "Connor Clark",
+        "Delilah Cruz",
+        "Elias Diaz",
+        "Freya Evans",
+        "Gideon Flores",
+        "Harper Green",
+        "Ian Hall",
+        "Jasmine Hill",
+        "Kai Holmes",
+        "Layla Hunt",
+        "Miles Irwin",
+        "Nina James",
+        "Owen Johnson",
+        "Piper Jones",
+        "Riley King",
+        "Sadie Lopez",
+        "Theo Martin",
+        "Uma Mason",
+        "Valerie Moore",
+        "Wyatt Myers",
+        "Zara Newton",
+        "Aaron Oliver"
       ]
     }
   ]

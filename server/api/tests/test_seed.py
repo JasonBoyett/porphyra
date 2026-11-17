@@ -7,6 +7,8 @@ from app.db.models import (
 	Church,
 	ChurchMembership,
 	User,
+	VolunteerRequest,
+	VolunteerRequestStatus,
 )
 from app.seed.load import seed_database
 
@@ -54,6 +56,25 @@ def test_seeded_sunday_service_assigns_development_user_idempotently() -> None:
 			) == event.starts_at
 			assert not planned_teams["Choir"].volunteers
 			assert not planned_teams["Toddlers"].volunteers
+			for team in planned_teams.values():
+				requests = db.exec(
+					select(VolunteerRequest).where(
+						VolunteerRequest.campus_event_team_id == team.id
+					)
+				).all()
+				replaced_request_ids = {
+					request.replacing_id
+					for request in requests
+					if request.replacing_id is not None
+				}
+				for role_name, role in team.role_data.root.items():
+					pending_count = sum(
+						request.status == VolunteerRequestStatus.PENDING
+						and request.role_name == role_name
+						and request.id not in replaced_request_ids
+						for request in requests
+					)
+					assert len(role.scheduled_users) + pending_count <= role.count
 	finally:
 		SQLModel.metadata.drop_all(engine)
 		engine.dispose()

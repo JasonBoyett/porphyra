@@ -11,6 +11,7 @@ export type SyncManagerOptions = {
 	accessToken: string | null
 	apiUrl: string
 	createSocket?: SocketFactory
+	onConnectionError?: (error: unknown) => void
 	reconnectDelayMs?: number
 	schedule?: (callback: () => void, delay: number) => TimerHandle
 	cancelSchedule?: (handle: TimerHandle) => void
@@ -36,6 +37,7 @@ export class SyncManager {
 	readonly #queryClient: QueryClient
 	readonly #apiUrl: string
 	readonly #createSocket: SocketFactory
+	readonly #onConnectionError: (error: unknown) => void
 	readonly #reconnectDelayMs: number
 	readonly #schedule: (callback: () => void, delay: number) => TimerHandle
 	readonly #cancelSchedule: (handle: TimerHandle) => void
@@ -43,15 +45,19 @@ export class SyncManager {
 	#socket: WebSocket | undefined
 	#reconnectTimer: TimerHandle | undefined
 	#disposed = false
+	#reportedConnectionError = false
 
 	public constructor(queryClient: QueryClient, options: SyncManagerOptions) {
 		this.#queryClient = queryClient
 		this.#apiUrl = options.apiUrl
 		this.#accessToken = options.accessToken
 		this.#createSocket = options.createSocket ?? ((url, protocols) => new WebSocket(url, protocols))
+		this.#onConnectionError =
+			options.onConnectionError ??
+			((error) => console.warn("Porphyra realtime sync could not connect.", error))
 		this.#reconnectDelayMs = options.reconnectDelayMs ?? 1_000
-		this.#schedule = options.schedule ?? setTimeout
-		this.#cancelSchedule = options.cancelSchedule ?? clearTimeout
+		this.#schedule = options.schedule ?? ((callback, delay) => setTimeout(callback, delay))
+		this.#cancelSchedule = options.cancelSchedule ?? ((handle) => clearTimeout(handle))
 	}
 
 	public addTags(tags: readonly ApiTag[]) {
@@ -74,6 +80,7 @@ export class SyncManager {
 	public updateAccessToken(accessToken: string | null) {
 		if (this.#accessToken === accessToken || this.#disposed) return
 		this.#accessToken = accessToken
+		this.#reportedConnectionError = false
 		this.#disconnect()
 		this.#connect()
 	}
@@ -96,10 +103,20 @@ export class SyncManager {
 			return
 		}
 
-		const socket = this.#createSocket(syncUrl(this.#apiUrl), [
-			SYNC_PROTOCOL,
-			`${TOKEN_PROTOCOL_PREFIX}${this.#accessToken}`,
-		])
+		let socket: WebSocket
+		try {
+			socket = this.#createSocket(syncUrl(this.#apiUrl), [
+				SYNC_PROTOCOL,
+				`${TOKEN_PROTOCOL_PREFIX}${this.#accessToken}`,
+			])
+		} catch (error) {
+			if (!this.#reportedConnectionError) {
+				this.#reportedConnectionError = true
+				this.#onConnectionError(error)
+			}
+			this.#scheduleReconnect()
+			return
+		}
 		this.#socket = socket
 		socket.addEventListener("open", () => {
 			if (this.#socket === socket) this.#invalidateTags([...this.#activeTags.keys()])
@@ -108,12 +125,24 @@ export class SyncManager {
 		socket.addEventListener("close", () => {
 			if (this.#socket !== socket) return
 			this.#socket = undefined
-			if (this.#disposed || this.#activeTags.size === 0 || this.#accessToken === null) return
-			this.#reconnectTimer = this.#schedule(() => {
-				this.#reconnectTimer = undefined
-				this.#connect()
-			}, this.#reconnectDelayMs)
+			this.#scheduleReconnect()
 		})
+	}
+
+	#scheduleReconnect() {
+		if (
+			this.#disposed ||
+			this.#reconnectTimer !== undefined ||
+			this.#activeTags.size === 0 ||
+			this.#accessToken === null
+		) {
+			return
+		}
+
+		this.#reconnectTimer = this.#schedule(() => {
+			this.#reconnectTimer = undefined
+			this.#connect()
+		}, this.#reconnectDelayMs)
 	}
 
 	#disconnect() {

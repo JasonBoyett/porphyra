@@ -130,6 +130,38 @@ describe("SyncManager", () => {
 		expect(invalidated(queryClient, "dashboard")).toBe(true)
 	})
 
+	test("keeps a synchronous socket construction failure from crashing the application", () => {
+		const queryClient = new QueryClient()
+		const scheduled: Array<() => void> = []
+		const connectionErrors: unknown[] = []
+		let attempts = 0
+		const connectionError = new DOMException("Invalid WebSocket protocol")
+		const manager = new SyncManager(queryClient, {
+			accessToken: "browser-rejected-token",
+			apiUrl: "http://localhost:8000",
+			createSocket: () => {
+				attempts += 1
+				throw connectionError
+			},
+			onConnectionError: (error) => connectionErrors.push(error),
+			schedule: (callback) => {
+				scheduled.push(callback)
+				return scheduled.length as unknown as ReturnType<typeof setTimeout>
+			},
+			cancelSchedule: () => undefined,
+		})
+
+		expect(() => manager.addTags([apiTag.dashboard])).not.toThrow()
+		expect(attempts).toBe(1)
+		expect(connectionErrors).toEqual([connectionError])
+		expect(scheduled).toHaveLength(1)
+
+		scheduled[0]()
+		expect(attempts).toBe(2)
+		expect(connectionErrors).toEqual([connectionError])
+		expect(scheduled).toHaveLength(2)
+	})
+
 	test("dispose closes the socket and prevents reconnect", () => {
 		const { manager, scheduled, sockets } = setup()
 		manager.addTags([apiTag.dashboard])

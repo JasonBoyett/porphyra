@@ -118,7 +118,9 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 									accessToken={props.accessToken}
 									event={props.event}
 									key={team.id}
-									onSchedule={() => props.onSchedule(team.id)}
+									onSchedule={(roleName, replacementRequestId) =>
+										props.onSchedule(team.id, roleName, replacementRequestId)
+									}
 									team={team}
 								/>
 							))}

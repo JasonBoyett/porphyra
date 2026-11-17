@@ -43,6 +43,8 @@ class UpdateTeamRoleRequirementsRequest(ApiModel):
 class AssignVolunteerRequest(ApiModel):
 	team_membership_id: UUID
 	confirm_conflict: bool = False
+	role_name: str | None = Field(default=None, max_length=100)
+	role_emoji: str | None = Field(default=None, max_length=16)
 
 
 class UpdateVolunteerRoleRequest(ApiModel):
@@ -79,16 +81,29 @@ class TeamRoleResponse(ApiModel):
 	emoji: str | None
 	count: int
 	scheduled_users: list[UUID]
+	accepted_count: int = 0
+	pending_count: int = 0
 
 
 class TeamRoleResponseData(RootModel[dict[str, TeamRoleResponse]]):
 	"""Expose database role snapshots through the API's camel-case response model."""
 
 	@classmethod
-	def from_role_data(cls, roles: TeamRoleData) -> Self:
-		return cls.model_validate(
-			{name: role.model_dump() for name, role in roles.root.items()}
-		)
+	def from_role_data(
+		cls,
+		roles: TeamRoleData,
+		*,
+		accepted_counts: dict[str, int] | None = None,
+		pending_counts: dict[str, int] | None = None,
+	) -> Self:
+		return cls.model_validate({
+			name: {
+				**role.model_dump(),
+				"accepted_count": (accepted_counts or {}).get(name, 0),
+				"pending_count": (pending_counts or {}).get(name, 0),
+			}
+			for name, role in roles.root.items()
+		})
 
 
 class ScheduledTeamResponse(SyncableApiModel):
@@ -107,6 +122,23 @@ class VolunteerAssignmentResponse(SyncableApiModel):
 	role_name: str | None
 	role_emoji: str | None
 	conflict_confirmed_at: datetime | None
+
+
+class VolunteerRequestResponse(ApiModel):
+	id: UUID
+	campus_event_team_id: UUID
+	team_membership_id: UUID
+	role_name: str | None
+	role_emoji: str | None
+	status: str
+	replacing_id: UUID | None
+
+
+class VolunteerRequestRosterResponse(VolunteerRequestResponse):
+	user_id: UUID
+	name: str
+	email: str
+	avatar_url: str
 
 
 class ScheduledVolunteerResponse(ApiModel):
@@ -131,6 +163,9 @@ class CampusEventTeamScheduleResponse(ApiModel):
 	is_fully_staffed: bool
 	roles: TeamRoleResponseData
 	volunteers: list[ScheduledVolunteerResponse]
+	volunteer_requests: list[VolunteerRequestRosterResponse] = Field(
+		default_factory=list
+	)
 	eligible_volunteers: list[ScheduledVolunteerResponse]
 
 

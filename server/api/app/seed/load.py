@@ -19,6 +19,8 @@ from app.db.models import (
 	Team,
 	TeamMembership,
 	User,
+	VolunteerRequest,
+	VolunteerRequestStatus,
 )
 from app.db.schemas import RoleTemplateData
 from app.scheduling.roles import RoleAssignment, build_team_role_data
@@ -235,6 +237,10 @@ def seed_database(db: Session) -> None:
 				)
 				db.add(event)
 				db.flush()
+			else:
+				event.description = event_data["description"]
+				event.starts_at = datetime.fromisoformat(event_data["startsAt"])
+				event.ends_at = datetime.fromisoformat(event_data["endsAt"])
 
 			for event_ministry_data in event_data["ministries"]:
 				ministry = db.exec(
@@ -321,6 +327,44 @@ def seed_database(db: Session) -> None:
 								role_name
 							].emoji
 
+					requests_by_seed_id: dict[str, VolunteerRequest] = {}
+					for request_data in event_team_data.get("volunteerRequests", []):
+						volunteer = db.exec(
+							select(User).where(User.name == request_data["volunteer"])
+						).one()
+						request_membership = db.exec(
+							select(TeamMembership).where(
+								TeamMembership.church_membership_id
+								== volunteer.memberships[0].id,
+								TeamMembership.team_id == team.id,
+							)
+						).one()
+						request = db.exec(
+							select(VolunteerRequest).where(
+								VolunteerRequest.campus_event_team_id == event_team.id,
+								VolunteerRequest.team_membership_id
+								== request_membership.id,
+							)
+						).one_or_none()
+						if request is None:
+							role_name = request_data["role"]
+							replaces = request_data.get("replaces")
+							request = VolunteerRequest(
+								campus_event_team_id=event_team.id,
+								team_membership_id=request_membership.id,
+								role_name=role_name,
+								role_emoji=role_requirements.root[role_name].emoji,
+								status=VolunteerRequestStatus(request_data["status"]),
+								replacing_id=(
+									requests_by_seed_id[replaces].id
+									if replaces is not None
+									else None
+								),
+							)
+							db.add(request)
+							db.flush()
+						requests_by_seed_id[request_data["id"]] = request
+
 					db.flush()
 					event_team.roles = build_team_role_data(
 						role_requirements,
@@ -332,5 +376,29 @@ def seed_database(db: Session) -> None:
 							for assignment in event_team.volunteers
 						],
 					).model_dump(mode="json")
+					seed_requests = db.exec(
+						select(VolunteerRequest).where(
+							VolunteerRequest.campus_event_team_id == event_team.id
+						)
+					).all()
+					replaced_request_ids = {
+						request.replacing_id
+						for request in seed_requests
+						if request.replacing_id is not None
+					}
+					for request in seed_requests:
+						role = (
+							event_team.role_data.root[request.role_name]
+							if request.role_name is not None
+							else None
+						)
+						if (
+							request.id not in replaced_request_ids
+							and request.status == VolunteerRequestStatus.PENDING
+							and role is not None
+							and len(role.scheduled_users) >= role.count
+						):
+							request.status = VolunteerRequestStatus.RESOLVED
+							db.add(request)
 
 	db.commit()

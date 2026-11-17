@@ -7,7 +7,9 @@ from sqlmodel import Session, SQLModel, select
 from app.api.v1.events.campus.get import get_campus_event_planning
 from app.api.v1.events.campus.teams.post import update_team_role_requirements
 from app.api.v1.events.campus.teams.volunteers.post import (
+	accept_volunteer_request,
 	assign_volunteer,
+	drop_volunteer,
 	update_volunteer_role,
 )
 from app.api.v1.events.schemas import (
@@ -79,7 +81,7 @@ def test_overlapping_assignment_requires_explicit_confirmation() -> None:
 				for candidate in choir_schedule.eligible_volunteers
 			)
 
-			assignment = assign_volunteer(
+			request = assign_volunteer(
 				choir.id,
 				AssignVolunteerRequest(
 					team_membership_id=choir_membership.id,
@@ -89,10 +91,15 @@ def test_overlapping_assignment_requires_explicit_confirmation() -> None:
 				user,
 			)
 
-			assert assignment.conflict_confirmed_at is not None
+			assert request.status == "pending"
+			assignment = accept_volunteer_request(
+				choir.id,
+				request.id,
+				db,
+				user,
+			)
 			persisted_assignment = db.get(CampusEventTeamVolunteer, assignment.id)
 			assert persisted_assignment is not None
-			assert persisted_assignment.conflict_confirmed_by_user_id == user.id
 	finally:
 		SQLModel.metadata.drop_all(engine)
 		engine.dispose()
@@ -147,6 +154,34 @@ def test_event_team_roles_track_the_user_filling_each_requirement() -> None:
 			assert band.role_data.root["Sound"].scheduled_users == [user.id]
 			assert band.role_data.root["Sound"].emoji == "🎚️"
 			assert band.is_fully_staffed is False
+	finally:
+		SQLModel.metadata.drop_all(engine)
+		engine.dispose()
+
+
+def test_dropping_a_volunteer_removes_them_from_the_role_roster() -> None:
+	engine = create_database_engine("sqlite://")
+	SQLModel.metadata.create_all(engine)
+	try:
+		with Session(engine) as db:
+			seed_database(db)
+			band = db.exec(
+				select(CampusEventTeam)
+				.join(Team)
+				.where(Team.name == "Band")
+			).one()
+			user = db.exec(select(User).where(User.email == "dev@a244.tech")).one()
+			assignment = db.exec(
+				select(CampusEventTeamVolunteer).where(
+					CampusEventTeamVolunteer.campus_event_team_id == band.id
+				)
+			).one()
+
+			drop_volunteer(band.id, assignment.id, db, user)
+
+			assert db.get(CampusEventTeamVolunteer, assignment.id) is None
+			db.refresh(band)
+			assert band.role_data.root["Worship leader"].scheduled_users == []
 	finally:
 		SQLModel.metadata.drop_all(engine)
 		engine.dispose()

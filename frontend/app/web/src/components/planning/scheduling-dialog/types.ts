@@ -6,5 +6,7 @@ export type SchedulingDialogProps = {
 	event: CampusEventPlanning
 	ministry: string | undefined
 	onClose: () => void
+	replacementRequestId?: string
+	roleName: string | null
 	team: PlanningTeam | undefined
 }
