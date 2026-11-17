@@ -361,6 +361,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AffectedVolunteerAction */
+        AffectedVolunteerAction: {
+            /**
+             * Assignmentid
+             * Format: uuid
+             */
+            assignmentId: string;
+            /** Action */
+            action: string;
+            /** Rolename */
+            roleName?: string | null;
+        };
         /** AssignVolunteerRequest */
         AssignVolunteerRequest: {
             /**
@@ -839,6 +851,10 @@ export interface components {
         /** UpdateTeamRoleRequirementsRequest */
         UpdateTeamRoleRequirementsRequest: {
             roles: components["schemas"]["RoleTemplateData"];
+            /** Calltime */
+            callTime?: string | null;
+            /** Affectedvolunteers */
+            affectedVolunteers?: components["schemas"]["AffectedVolunteerAction"][];
         };
         /** UpdateVolunteerRoleRequest */
         UpdateVolunteerRoleRequest: {

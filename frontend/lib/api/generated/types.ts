@@ -41,6 +41,8 @@ export type ApiOperationInput<TOperationId extends ApiOperationId> =
 		ApiOperationDataPart<ApiOperationQuery<TOperationId>> &
 		ApiOperationDataPart<ApiOperationRequest<TOperationId>>;
 
+export type AffectedVolunteerAction =
+	components["schemas"]["AffectedVolunteerAction"];
 export type AssignVolunteerRequest =
 	components["schemas"]["AssignVolunteerRequest"];
 export type CampusEventListItem = components["schemas"]["CampusEventListItem"];

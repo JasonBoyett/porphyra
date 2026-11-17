@@ -1,5 +1,7 @@
-import { AlertTriangle, Check, Clock3, Plus, UserPlus } from "lucide-react"
+import { AlertTriangle, Check, Clock3, Pencil, Plus, UserPlus } from "lucide-react"
+import { useState } from "react"
 
+import { EditTeamDialog } from "@/components/planning/edit-team-dialog"
 import { RosterVolunteer } from "@/components/planning/roster-volunteer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,6 +20,7 @@ const eventTime = (team: TeamCardProps["team"], event: TeamCardProps["event"]) =
 	team.callTime === null ? `Event start ${formatTime(event.startsAt)}` : formatTime(team.callTime)
 
 export const TeamCard = (props: TeamCardProps) => {
+	const [isEditing, setIsEditing] = useState(false)
 	const pendingRequests = (props.team.volunteerRequests ?? []).filter(
 		(request) => request.status === "pending",
 	)
@@ -70,10 +73,20 @@ export const TeamCard = (props: TeamCardProps) => {
 						{eventTime(props.team, props.event)}
 					</p>
 				</div>
-				<Badge className={status.className} variant="secondary">
-					{status.label === "Ready" && <Check aria-hidden="true" size={14} />}
-					{status.label}
-				</Badge>
+				<div className="flex items-center gap-2">
+					<Badge className={status.className} variant="secondary">
+						{status.label === "Ready" && <Check aria-hidden="true" size={14} />}
+						{status.label}
+					</Badge>
+					<Button
+						aria-label={`Edit ${props.team.name}`}
+						onClick={() => setIsEditing(true)}
+						size="icon"
+						variant="ghost"
+					>
+						<Pencil />
+					</Button>
+				</div>
 			</CardHeader>
 			<CardContent>
 				{props.team.notes.map((note) => (
@@ -193,6 +206,7 @@ export const TeamCard = (props: TeamCardProps) => {
 					)}
 				</div>
 			</CardContent>
+			{isEditing && <EditTeamDialog onOpenChange={setIsEditing} open team={props.team} />}
 		</Card>
 	)
 }

@@ -1047,6 +1047,37 @@
   },
   "components": {
     "schemas": {
+      "AffectedVolunteerAction": {
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignmentid"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assignmentId",
+          "action"
+        ],
+        "title": "AffectedVolunteerAction"
+      },
       "AssignVolunteerRequest": {
         "properties": {
           "teamMembershipId": {
@@ -2095,6 +2126,25 @@
         "properties": {
           "roles": {
             "$ref": "#/components/schemas/RoleTemplateData"
+          },
+          "callTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calltime"
+          },
+          "affectedVolunteers": {
+            "items": {
+              "$ref": "#/components/schemas/AffectedVolunteerAction"
+            },
+            "type": "array",
+            "title": "Affectedvolunteers"
           }
         },
         "type": "object",

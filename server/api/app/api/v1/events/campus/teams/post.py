@@ -11,7 +11,13 @@ from app.api.v1.events.schemas import (
     UpdateTeamRoleRequirementsRequest,
 )
 from app.auth import CurrentUser
-from app.db.models import CampusEventMinistry, CampusEventTeam, Team
+from app.db.models import (
+    CampusEventMinistry,
+    CampusEventTeam,
+    Team,
+    VolunteerRequest,
+    VolunteerRequestStatus,
+)
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 from app.sync.audience import church_member_user_ids
 from app.sync.openapi import sync_tags
@@ -88,24 +94,115 @@ def update_team_role_requirements(
         event_team.event_ministry.event.church_id, user=user, db=db
     )
 
-    for assignment in event_team.volunteers:
-        role = payload.roles.root.get(assignment.role_name or "")
-        if role is None:
-            assignment.role_name = None
-            assignment.role_emoji = None
-        else:
-            assignment.role_emoji = role.emoji
+    call_time = (
+        payload.call_time
+        if "call_time" in payload.model_fields_set
+        else event_team.call_time
+    )
+    call_time_changed = event_team.call_time != call_time
+    actions = {action.assignment_id: action for action in payload.affected_volunteers}
+    affected_assignments = [
+        assignment
+        for assignment in event_team.volunteers
+        if call_time_changed or assignment.role_name not in payload.roles.root
+    ]
+    missing_actions = [
+        assignment.id
+        for assignment in affected_assignments
+        if assignment.id not in actions
+    ]
+    if missing_actions:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Choose whether to drop or reassign every affected volunteer.",
+        )
 
-    event_team.roles = build_team_role_data(
+    for assignment in affected_assignments:
+        action = actions[assignment.id]
+        if action.action not in {"drop", "reassign"}:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)
+        if action.action == "reassign" and action.role_name not in payload.roles.root:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Reassigned volunteers must use a configured role.",
+            )
+
+    retained_assignments = [
+        assignment
+        for assignment in event_team.volunteers
+        if assignment not in affected_assignments
+    ]
+    for assignment in retained_assignments:
+        role = payload.roles.root[assignment.role_name or ""]
+        assignment.role_emoji = role.emoji
+
+    role_data = build_team_role_data(
         payload.roles,
         [
             RoleAssignment(
                 role_name=assignment.role_name,
                 user_id=assignment.team_membership.church_membership.user_id,
             )
-            for assignment in event_team.volunteers
+            for assignment in retained_assignments
         ],
-    ).model_dump(mode="json")
+    )
+    if any(
+        len(role.scheduled_users) > role.count for role in role_data.root.values()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "A role cannot require fewer volunteers than are currently assigned."
+            ),
+        )
+    reserved_roles = {
+        role_name: len(role.scheduled_users)
+        + sum(
+            request.status == VolunteerRequestStatus.PENDING
+            and request.role_name == role_name
+            for request in event_team.volunteer_requests
+        )
+        for role_name, role in role_data.root.items()
+    }
+    for assignment in affected_assignments:
+        action = actions[assignment.id]
+        if action.action != "reassign":
+            continue
+        role_name = action.role_name or ""
+        if reserved_roles[role_name] >= role_data.root[role_name].count:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="The selected role has no remaining openings.",
+            )
+        reserved_roles[role_name] += 1
+
+    event_team.roles = role_data.model_dump(mode="json")
+    event_team.call_time = call_time
+    if call_time_changed:
+        event_team.confirmed_at = None
+        event_team.confirmed_by_team_membership_id = None
+
+    for assignment in affected_assignments:
+        action = actions[assignment.id]
+        if action.action == "reassign":
+            role = payload.roles.root[action.role_name or ""]
+            request = VolunteerRequest(
+                campus_event_team_id=event_team.id,
+                team_membership_id=assignment.team_membership_id,
+                role_name=action.role_name,
+                role_emoji=role.emoji,
+            )
+            db.add(request)
+        db.delete(assignment)
+
+    for request in event_team.volunteer_requests:
+        if (
+            request.status == VolunteerRequestStatus.PENDING
+            and request.role_name not in payload.roles.root
+        ):
+            request.status = VolunteerRequestStatus.RESOLVED
+            db.add(request)
+
     db.add(event_team)
     db.flush()
     db.refresh(event_team)

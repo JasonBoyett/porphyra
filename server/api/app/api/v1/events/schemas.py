@@ -36,8 +36,16 @@ class ScheduleTeamRequest(ApiModel):
 	notes: list[str] = Field(default_factory=list)
 
 
+class AffectedVolunteerAction(ApiModel):
+	assignment_id: UUID
+	action: str
+	role_name: str | None = Field(default=None, max_length=100)
+
+
 class UpdateTeamRoleRequirementsRequest(ApiModel):
 	roles: RoleTemplateData
+	call_time: datetime | None = None
+	affected_volunteers: list[AffectedVolunteerAction] = Field(default_factory=list)
 
 
 class AssignVolunteerRequest(ApiModel):
