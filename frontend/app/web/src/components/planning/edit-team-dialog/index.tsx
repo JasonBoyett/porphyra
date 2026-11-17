@@ -88,8 +88,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 		}
 		setActions(
 			affectedVolunteers.map((volunteer) => ({
-				action:
-					callTimeChanged || roleNames.includes(volunteer.roleName ?? "") ? "reassign" : "drop",
+				action: "reassign",
 				assignmentId: volunteer.assignmentId,
 				roleName: reassignmentRoleName(volunteer.roleName),
 			})),
@@ -173,7 +172,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 												}
 												type="radio"
 											/>
-											Reassign for confirmation
+											Reassign
 										</label>
 										<label className="flex items-center gap-2">
 											<input
