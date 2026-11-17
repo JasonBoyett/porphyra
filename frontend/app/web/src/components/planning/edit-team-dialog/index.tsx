@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from "@/components/ui/emoji-picker"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { EditTeamDialogProps } from "./types"
 
-type RoleDraft = { count: number; emoji: string; name: string }
+type RoleDraft = { count: number; emoji: string; id: string; name: string }
 type VolunteerAction = { assignmentId: string; action: "drop" | "reassign"; roleName: string }
 
 const localDateTime = (value: string | null) => {
@@ -26,6 +28,11 @@ const localDateTime = (value: string | null) => {
 	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+const createRoleDraft = (role: Omit<RoleDraft, "id">): RoleDraft => ({
+	...role,
+	id: crypto.randomUUID(),
+})
+
 export const EditTeamDialog = (props: EditTeamDialogProps) => {
 	const updateTeam = apiClient.updateCampusEventTeamRoleRequirements.useMutation()
 	const [callTime, setCallTime] = useState("")
@@ -33,17 +40,20 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 	const [roles, setRoles] = useState<RoleDraft[]>([])
 	const [isConfirming, setIsConfirming] = useState(false)
 	const [actions, setActions] = useState<VolunteerAction[]>([])
+	const [emojiPickerRoleId, setEmojiPickerRoleId] = useState<string | null>(null)
 
 	useEffect(() => {
 		if (!props.open) return
 		setCallTime(localDateTime(props.team.callTime))
 		setCallTimeChanged(false)
 		setRoles(
-			Object.entries(props.team.roles).map(([name, role]) => ({
-				count: role.count,
-				emoji: role.emoji ?? "",
-				name,
-			})),
+			Object.entries(props.team.roles).map(([name, role]) =>
+				createRoleDraft({
+					count: role.count,
+					emoji: role.emoji ?? "",
+					name,
+				}),
+			),
 		)
 		setActions([])
 		setIsConfirming(false)
@@ -217,16 +227,32 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 						<div className="grid gap-3">
 							<Label>Service roles</Label>
 							{roles.map((role, index) => (
-								<div
-									className="grid grid-cols-[5rem_1fr_5rem_auto] gap-2"
-									key={`${role.name}-${index}`}
-								>
-									<Input
-										aria-label={`Emoji for role ${index + 1}`}
-										onChange={(event) => updateRole(index, { emoji: event.target.value })}
-										placeholder="✨"
-										value={role.emoji}
-									/>
+								<div className="grid grid-cols-[5rem_1fr_5rem_auto] gap-2" key={role.id}>
+									<Popover
+										onOpenChange={(open) => setEmojiPickerRoleId(open ? role.id : null)}
+										open={emojiPickerRoleId === role.id}
+									>
+										<PopoverTrigger asChild>
+											<Button
+												aria-label={`Choose emoji for ${role.name || `role ${index + 1}`}`}
+												type="button"
+												variant="outline"
+											>
+												{role.emoji || "✨"}
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent align="start" className="h-96 w-80 p-0">
+											<EmojiPicker
+												onEmojiSelect={({ emoji }) => {
+													updateRole(index, { emoji })
+													setEmojiPickerRoleId(null)
+												}}
+											>
+												<EmojiPickerSearch />
+												<EmojiPickerContent />
+											</EmojiPicker>
+										</PopoverContent>
+									</Popover>
 									<Input
 										aria-label={`Name for role ${index + 1}`}
 										onChange={(event) => updateRole(index, { name: event.target.value })}
@@ -256,18 +282,16 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 							<Button
 								className="w-fit"
 								onClick={() =>
-									setRoles((current) => [...current, { count: 1, emoji: "", name: "" }])
+									setRoles((current) => [
+										...current,
+										createRoleDraft({ count: 1, emoji: "", name: "" }),
+									])
 								}
 								type="button"
 								variant="outline"
 							>
 								<Plus /> Add role
 							</Button>
-							{!rolesAreValid && (
-								<p className="text-sm text-destructive">
-									Each role needs a unique name and at least one volunteer.
-								</p>
-							)}
 						</div>
 					</div>
 				)}
