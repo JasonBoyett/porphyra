@@ -18,7 +18,13 @@ import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from "@/components
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { EditTeamDialogProps } from "./types"
 
-type RoleDraft = { count: number; emoji: string; id: string; name: string }
+type RoleDraft = {
+	count: number
+	emoji: string
+	id: string
+	name: string
+	originalName: string | null
+}
 type VolunteerAction = { assignmentId: string; action: "drop" | "reassign"; roleName: string }
 
 const localDateTime = (value: string | null) => {
@@ -52,6 +58,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 					count: role.count,
 					emoji: role.emoji ?? "",
 					name,
+					originalName: name,
 				}),
 			),
 		)
@@ -67,6 +74,11 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 	const affectedVolunteers = props.team.volunteers.filter(
 		(volunteer) => callTimeChanged || !roleNames.includes(volunteer.roleName ?? ""),
 	)
+	const reassignmentRoleName = (currentRoleName: string | null) =>
+		roles.find((role) => role.originalName === currentRoleName)?.name ??
+		(currentRoleName !== null && roleNames.includes(currentRoleName)
+			? currentRoleName
+			: (roleNames[0] ?? ""))
 
 	const beginConfirmation = () => {
 		if (!rolesAreValid) return
@@ -79,9 +91,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 				action:
 					callTimeChanged || roleNames.includes(volunteer.roleName ?? "") ? "reassign" : "drop",
 				assignmentId: volunteer.assignmentId,
-				roleName: roleNames.includes(volunteer.roleName ?? "")
-					? (volunteer.roleName ?? "")
-					: (roleNames[0] ?? ""),
+				roleName: reassignmentRoleName(volunteer.roleName),
 			})),
 		)
 		setIsConfirming(true)
@@ -284,7 +294,12 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 								onClick={() =>
 									setRoles((current) => [
 										...current,
-										createRoleDraft({ count: 1, emoji: "", name: "" }),
+										createRoleDraft({
+											count: 1,
+											emoji: "",
+											name: "",
+											originalName: null,
+										}),
 									])
 								}
 								type="button"
