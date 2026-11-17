@@ -18,6 +18,15 @@ These are architectural preferences, not requirements to build abstractions prem
 
 **The priority is shipping Porphyra.** Portico should be considered only when resources and project maturity justify dedicated development.
 
+## Generated Application API Contracts
+
+The generated API client layer is the contract between the backend and Porphyra's web and mobile applications. Application code must use generated operation types, transport methods, and metadata rather than manually implementing endpoint URLs, request payloads, response types, or sync-tag mappings.
+
+- Change backend route declarations and schemas, then run the API generation script; never hand-edit generated artifacts.
+- Keep application-specific presentation and orchestration code outside the generated layer, but do not recreate its HTTP contract in an app.
+- When frontend and backend work is delegated in parallel, a frontend agent may receive an agreed endpoint shape that the backend agent has not yet implemented. It should use that agreed generated-client shape and may leave temporary type errors caused only by the missing generated artifacts.
+- A supervising agent must run generation after both sides are complete, resolve resulting integration errors, and run the relevant checks. Do not make a frontend agent replace the generated contract with temporary hand-written types or routes merely to silence those interim errors.
+
 ## Ephemeral Registry Review Rule
 
 A class named `*Registry` represents high-volume, process-local ephemeral state, such as WebSocket connections, subscriptions, presence, or cache invalidation registrations.
