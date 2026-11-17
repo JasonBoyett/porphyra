@@ -19,6 +19,7 @@ from app.db.models.role_template import (
 from app.db.models.team import Team
 from app.db.models.team_membership import TeamMembership
 from app.db.models.user import User
+from app.db.models.volunteer_request import VolunteerRequest, VolunteerRequestStatus
 
 __all__ = [
 	"Campus",
@@ -40,4 +41,6 @@ __all__ = [
 	"Team",
 	"TeamMembership",
 	"User",
+	"VolunteerRequest",
+	"VolunteerRequestStatus",
 ]

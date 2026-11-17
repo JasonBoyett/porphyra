@@ -10,7 +10,11 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 	const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
 	const [ministry, setMinistry] = useState("All ministries")
 	const [filter, setFilter] = useState<ScheduleFilter>("all")
-	const [teamToScheduleId, setTeamToScheduleId] = useState<string | null>(null)
+	const [roleToSchedule, setRoleToSchedule] = useState<{
+		replacementRequestId?: string
+		roleName: string
+		teamId: string
+	} | null>(null)
 	const events = apiClient.campusEvents.useSyncQuery({ accessToken: props.accessToken })
 
 	useEffect(() => {
@@ -55,7 +59,7 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 				.filter((group) => group.teams.length > 0) ?? [],
 		[event?.ministries, visibleTeams],
 	)
-	const teamToSchedule = teams.find(({ team }) => team.id === teamToScheduleId)
+	const teamToSchedule = teams.find(({ team }) => team.id === roleToSchedule?.teamId)
 
 	if (events.isLoading || planning.isLoading) {
 		return (
@@ -97,7 +101,9 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 				ministry={ministry}
 				onFilterChange={setFilter}
 				onMinistryChange={setMinistry}
-				onSchedule={setTeamToScheduleId}
+				onSchedule={(teamId, roleName, replacementRequestId) =>
+					setRoleToSchedule({ replacementRequestId, roleName, teamId })
+				}
 				onSelectedEventChange={setSelectedEventId}
 				selectedEventId={selectedEventId ?? ""}
 				teamsByMinistry={teamsByMinistry}
@@ -107,7 +113,9 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 				accessToken={props.accessToken}
 				event={event}
 				ministry={teamToSchedule?.ministry}
-				onClose={() => setTeamToScheduleId(null)}
+				onClose={() => setRoleToSchedule(null)}
+				roleName={roleToSchedule?.roleName ?? null}
+				replacementRequestId={roleToSchedule?.replacementRequestId}
 				team={teamToSchedule?.team}
 			/>
 		</>

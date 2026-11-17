@@ -7,14 +7,18 @@ from sqlmodel import Session, SQLModel
 
 import app.db.models
 from app.api.v1.router import router as v1_router
+from app.config import settings
 from app.db.engine import engine
 from app.errors import EmptyResponseError
 from app.seed.load import seed_database
+from app.seed.maintain import maintain_seed_dates
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
 	SQLModel.metadata.create_all(engine)
+	if settings.environment == "development":
+		maintain_seed_dates()
 	with Session(engine) as db:
 		seed_database(db)
 	yield

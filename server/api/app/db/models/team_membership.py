@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 	from app.db.models.church_event_team_volunteer import ChurchEventTeamVolunteer
 	from app.db.models.church_membership import ChurchMembership
 	from app.db.models.team import Team
+	from app.db.models.volunteer_request import VolunteerRequest
 
 
 class TeamMembership(DatabaseModel, table=True):
@@ -37,6 +38,10 @@ class TeamMembership(DatabaseModel, table=True):
 			back_populates="team_membership",
 			sa_relationship_kwargs={"cascade": "all, delete-orphan"},
 		)
+	)
+	volunteer_requests: list["VolunteerRequest"] = typed_relationship(
+		back_populates="team_membership",
+		sa_relationship_kwargs={"cascade": "all, delete-orphan"},
 	)
 	confirmed_campus_event_teams: list["CampusEventTeam"] = typed_relationship(
 		back_populates="confirmed_by_team_membership"

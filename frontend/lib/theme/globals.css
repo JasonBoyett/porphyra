@@ -19,6 +19,7 @@
   --accent-foreground: oklch(1.0000 0 0);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(0.9851 0 0);
+  --rejected: oklch(0.562 0.206 27);
   --input: oklch(0.9197 0.0040 286.3202);
   --ring: oklch(0.4685 0.1522 301.7014);
   --chart-1: oklch(0.4942 0.1693 276.2992);
@@ -107,6 +108,7 @@ button, input { font: inherit; }
   --color-border: var(--border);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive: var(--destructive);
+  --color-rejected: var(--rejected);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -147,6 +149,7 @@ button, input { font: inherit; }
   --accent-foreground: oklch(0.2136 0.0591 355.8832);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1.0000 0 0);
+  --rejected: oklch(0.71 0.17 27);
   --border: oklch(0.2951 0.0090 285.8368);
   --input: oklch(0.2951 0.0090 285.8368);
   --ring: oklch(0.7358 0.1394 299.7803);

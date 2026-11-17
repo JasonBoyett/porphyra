@@ -20,7 +20,7 @@ export type PlanningScheduleBoardProps = {
 	ministry: string
 	onFilterChange: (filter: ScheduleFilter) => void
 	onMinistryChange: (ministry: string) => void
-	onSchedule: (teamId: string) => void
+	onSchedule: (teamId: string, roleName: string, replacementRequestId?: string) => void
 	onSelectedEventChange: (eventId: string) => void
 	selectedEventId: string
 	teamsByMinistry: TeamGroup[]

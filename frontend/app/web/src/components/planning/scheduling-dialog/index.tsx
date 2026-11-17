@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
-import { apiClient, type ApiRequestError, type PlannedVolunteer, type TeamRole } from "@/api/client"
+import { apiClient, type PlannedVolunteer } from "@/api/client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -25,69 +28,52 @@ const eventTime = (
 ) =>
 	team.callTime === null ? `Event start ${formatTime(event.startsAt)}` : formatTime(team.callTime)
 
-type SelectedRole = {
-	emoji: string | null
-	name: string
-}
+const initials = (name: string) =>
+	name
+		.split(" ")
+		.map((part) => part[0])
+		.join("")
+		.slice(0, 2)
+		.toUpperCase()
 
 export const SchedulingDialog = (props: SchedulingDialogProps) => {
-	const [conflicts, setConflicts] = useState<string[]>([])
-	const [selectedCandidate, setSelectedCandidate] = useState<PlannedVolunteer | null>(null)
-	const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(null)
+	const [error, setError] = useState<string | null>(null)
+	const [sendingVolunteerId, setSendingVolunteerId] = useState<string | null>(null)
 	const assignment = apiClient.assignCampusEventVolunteer.useMutation()
-	const updateRole = apiClient.updateCampusEventVolunteerRole.useMutation()
 
 	useEffect(() => {
-		setConflicts([])
-		setSelectedCandidate(null)
-		setSelectedRole(null)
-	}, [props.team?.id])
+		setError(null)
+		setSendingVolunteerId(null)
+	}, [props.roleName, props.team?.id])
 
-	if (props.team === undefined) return null
+	if (props.team === undefined || props.roleName === null) return null
+
 	const team = props.team
-	const roleEntries = Object.entries(team.roles)
-	const isPending = assignment.isPending || updateRole.isPending
+	const roleName = props.roleName
+	const role = team.roles[roleName]
+	if (role === undefined) return null
 
-	const returnToVolunteerList = () => {
-		setConflicts([])
-		setSelectedCandidate(null)
-		setSelectedRole(null)
-	}
-
-	const assign = (confirmConflict = false, roleToAssign = selectedRole) => {
-		if (selectedCandidate === null || roleToAssign === null) return
-
+	const isFull = role.scheduledUsers.length >= role.count
+	const sendRequest = (volunteer: PlannedVolunteer) => {
+		setError(null)
+		setSendingVolunteerId(volunteer.teamMembershipId)
 		assignment.mutate(
 			{
 				accessToken: props.accessToken,
-				confirmConflict,
 				eventTeamId: team.id,
-				teamMembershipId: selectedCandidate.teamMembershipId,
+				replacementRequestId: props.replacementRequestId,
+				roleEmoji: role.emoji,
+				roleName,
+				teamMembershipId: volunteer.teamMembershipId,
 			},
 			{
-				onError: (error) => {
-					const requestError = error as ApiRequestError
-					const detail = requestError.detail as {
-						detail?: { conflicts?: Array<{ eventTitle: string; teamName: string }> }
-					} | null
-
-					setConflicts(
-						detail?.detail?.conflicts?.map(
-							(conflict) => `${conflict.eventTitle} · ${conflict.teamName}`,
-						) ?? [],
-					)
+				onError: () => {
+					setSendingVolunteerId(null)
+					setError("This role is no longer available. The schedule has been refreshed.")
 				},
-				onSuccess: (createdAssignment) => {
-					updateRole.mutate(
-						{
-							accessToken: props.accessToken,
-							assignmentId: createdAssignment.id,
-							eventTeamId: team.id,
-							roleEmoji: roleToAssign.emoji ?? "",
-							roleName: roleToAssign.name,
-						},
-						{ onSuccess: props.onClose },
-					)
+				onSuccess: () => {
+					toast.success(`Request sent to ${volunteer.name} for ${roleName}.`)
+					props.onClose()
 				},
 			},
 		)
@@ -98,96 +84,56 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 			<DialogContent className="porphyra-card max-w-md">
 				<DialogHeader>
 					<p className="porphyra-eyebrow">Schedule volunteer</p>
-					<DialogTitle className="font-serif text-3xl">{team.name}</DialogTitle>
+					<DialogTitle className="font-serif text-3xl">{props.team.name}</DialogTitle>
 					<DialogDescription>
-						{props.ministry} · {eventTime(team, props.event)}
+						{props.ministry} · {eventTime(props.team, props.event)}
 					</DialogDescription>
 				</DialogHeader>
 
-				{selectedCandidate === null ? (
-					<>
-						<p className="text-sm text-muted-foreground">
-							Choose a person, then assign them to an open role.
-						</p>
-						<div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-							{team.eligibleVolunteers.map((volunteer) => (
-								<Button
-									className="h-auto justify-start whitespace-normal border-border bg-card p-3 text-left text-foreground hover:border-primary hover:bg-card"
-									disabled={roleEntries.length === 0}
-									key={volunteer.teamMembershipId}
-									onClick={() => setSelectedCandidate(volunteer)}
-									variant="outline"
-								>
-									<img
-										alt=""
-										className="size-10 rounded-full bg-secondary object-cover"
-										src={volunteer.avatarUrl}
-									/>
-									<span className="grid min-w-0 gap-0.5">
-										<strong>{volunteer.name}</strong>
-										<span className="truncate text-xs font-normal text-muted-foreground">
-											{volunteer.email}
-										</span>
-									</span>
-								</Button>
-							))}
-						</div>
-						{roleEntries.length === 0 && (
-							<Alert>
-								<AlertTitle>No roles configured</AlertTitle>
-								<AlertDescription>
-									Set this team’s service roles before scheduling volunteers.
-								</AlertDescription>
-							</Alert>
-						)}
-					</>
+				<div className="flex flex-wrap items-center gap-2">
+					<Badge variant="secondary">
+						Role: {role.emoji ?? "✨"} {props.roleName} ({role.scheduledUsers.length}/{role.count})
+					</Badge>
+				</div>
+				<p className="text-sm text-muted-foreground">
+					Choose a volunteer for <strong className="text-foreground">{props.roleName}</strong>.
+				</p>
+
+				{error !== null && (
+					<Alert variant="destructive">
+						<AlertTitle>Unable to send request</AlertTitle>
+						<AlertDescription>{error}</AlertDescription>
+					</Alert>
+				)}
+
+				{isFull ? (
+					<Alert>
+						<AlertTitle>Role is filled</AlertTitle>
+						<AlertDescription>This role was filled while this window was open.</AlertDescription>
+					</Alert>
+				) : props.team.eligibleVolunteers.length > 0 ? (
+					<div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+						{props.team.eligibleVolunteers.map((volunteer) => (
+							<VolunteerChoice
+								isSending={sendingVolunteerId === volunteer.teamMembershipId}
+								key={volunteer.teamMembershipId}
+								onClick={() => sendRequest(volunteer)}
+								volunteer={volunteer}
+							/>
+						))}
+					</div>
 				) : (
-					<>
-						<p className="text-sm text-muted-foreground">
-							Assign <strong className="text-foreground">{selectedCandidate.name}</strong> to a
-							role.
-						</p>
-						<div className="grid gap-2">
-							{roleEntries.map(([roleName, role]) => {
-								const isFull = role.scheduledUsers.length >= role.count
-								return (
-									<RoleChoice
-										disabled={isFull || isPending}
-										key={roleName}
-										onClick={() => {
-											const roleToAssign = { emoji: role.emoji, name: roleName }
-											setSelectedRole(roleToAssign)
-											assign(false, roleToAssign)
-										}}
-										role={role}
-										roleName={roleName}
-									/>
-								)
-							})}
-						</div>
-						{conflicts.length > 0 && (
-							<Alert>
-								<AlertTitle>Schedule conflict</AlertTitle>
-								<AlertDescription className="gap-3">
-									<span>
-										{selectedCandidate.name} is already scheduled for: {conflicts.join(", ")}
-									</span>
-									<Button disabled={isPending} onClick={() => assign(true)} size="sm">
-										Schedule anyway
-									</Button>
-								</AlertDescription>
-							</Alert>
-						)}
-					</>
+					<Alert>
+						<AlertTitle>No available volunteers</AlertTitle>
+						<AlertDescription>
+							No available volunteers for {props.roleName} on this date. Adjust team membership or
+							availability to schedule someone.
+						</AlertDescription>
+					</Alert>
 				)}
 
 				<DialogFooter>
-					{selectedCandidate !== null && (
-						<Button disabled={isPending} onClick={returnToVolunteerList} variant="ghost">
-							Back
-						</Button>
-					)}
-					<Button disabled={isPending} onClick={props.onClose} variant="ghost">
+					<Button disabled={assignment.isPending} onClick={props.onClose} variant="ghost">
 						Exit
 					</Button>
 				</DialogFooter>
@@ -196,24 +142,27 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 	)
 }
 
-const RoleChoice = (props: {
-	disabled: boolean
+const VolunteerChoice = (props: {
+	isSending: boolean
 	onClick: () => void
-	role: TeamRole
-	roleName: string
+	volunteer: PlannedVolunteer
 }) => (
 	<Button
-		className="h-auto justify-between border-border bg-card p-3 text-left text-foreground hover:border-primary hover:bg-card"
-		disabled={props.disabled}
+		aria-label={`Send ${props.volunteer.name} a request`}
+		className="h-auto justify-start whitespace-normal border-border bg-card p-3 text-left text-foreground hover:border-primary hover:bg-card"
+		disabled={props.isSending}
 		onClick={props.onClick}
 		variant="outline"
 	>
-		<span className="flex items-center gap-3">
-			<span className="text-xl">{props.role.emoji ?? "✨"}</span>
-			<span className="font-semibold">{props.roleName}</span>
-		</span>
-		<span className="text-xs text-muted-foreground">
-			{props.role.scheduledUsers.length} / {props.role.count}
+		<Avatar size="lg">
+			<AvatarImage alt="" src={props.volunteer.avatarUrl} />
+			<AvatarFallback>{initials(props.volunteer.name)}</AvatarFallback>
+		</Avatar>
+		<span className="grid min-w-0 gap-0.5">
+			<strong>{props.isSending ? "Sending request…" : props.volunteer.name}</strong>
+			<span className="truncate text-xs font-normal text-muted-foreground">
+				{props.volunteer.email}
+			</span>
 		</span>
 	</Button>
 )

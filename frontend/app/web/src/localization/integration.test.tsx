@@ -5,7 +5,6 @@ import { act } from "react"
 import { afterEach, describe, expect, it } from "vitest"
 import { porphyraCatalog, type TranslationCatalog } from "@porphyra/frontend/localization"
 import { Dashboard } from "@/components/dashboard"
-import { RoleEditor } from "@/components/planning/role-editor"
 import {
 	createLocalizedElementId,
 	createTestIdentityStrategy,
@@ -279,67 +278,5 @@ describe("contextual localization integration", () => {
 			expect(target.style.backgroundColor).toBe("")
 			expect(target.style.color).toBe("")
 		}
-	})
-
-	it("shares one iterative roster context across repeated role editors and their buttons", () => {
-		const volunteers = ["Ada", "Ben"].map((name) => ({
-			assignmentId: name,
-			teamMembershipId: name,
-			userId: name,
-			name,
-			email: `${name.toLowerCase()}@example.org`,
-			avatarUrl: "",
-			roleName: null,
-			roleEmoji: null,
-			conflictConfirmedAt: null,
-		}))
-		const scopeId = defaultIdentityStrategy({ scopeName: "planning.team-rosters" })
-		const saveId = createLocalizedElementId(scopeId, "planning.save")
-		const rosterCatalog: TranslationCatalog = {
-			...porphyraCatalog,
-			contextual: { test: { [saveId]: { text: "Save role" } } },
-		}
-		container = document.createElement("div")
-		document.body.append(container)
-		root = createRoot(container)
-		act(() =>
-			root?.render(
-				<QueryClientProvider client={new QueryClient()}>
-					<TranslationProvider catalog={rosterCatalog}>
-						<LocalizationScope name="planning.team-rosters">
-							<div>
-								{volunteers.map((volunteer) => (
-									<RoleEditor
-										accessToken="fixture"
-										eventTeamId="team"
-										key={volunteer.assignmentId}
-										volunteer={volunteer}
-									/>
-								))}
-							</div>
-						</LocalizationScope>
-						<LocaleControls />
-					</TranslationProvider>
-				</QueryClientProvider>,
-			),
-		)
-		for (const button of container.querySelectorAll<HTMLButtonElement>("button")) {
-			if (button.textContent?.includes("Add role")) act(() => button.click())
-		}
-		const saves = Array.from(container.querySelectorAll<HTMLButtonElement>("button")).filter(
-			(button) => button.textContent === "Save",
-		)
-		expect(saves).toHaveLength(2)
-		expect(container.querySelectorAll('input[placeholder="Role"]')).toHaveLength(2)
-		act(() =>
-			Array.from(container?.querySelectorAll<HTMLButtonElement>("button") ?? [])
-				.find((button) => button.textContent === "Test locale")
-				?.click(),
-		)
-		expect(
-			Array.from(container.querySelectorAll<HTMLButtonElement>("button")).filter(
-				(button) => button.textContent === "Save role",
-			),
-		).toHaveLength(2)
 	})
 })

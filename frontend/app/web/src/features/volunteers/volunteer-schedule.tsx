@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react"
+import { apiClient } from "@/api/client"
+import { useAuth } from "@/auth"
 import { ScheduleFilters } from "@/components/volunteers/schedule-filters"
+import { RequestInbox } from "@/components/volunteers/request-inbox"
 import { VolunteerScheduleHeader } from "@/components/volunteers/schedule-header"
 import { UpcomingAssignments } from "@/components/volunteers/upcoming-assignments"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Campus, VolunteerAssignment } from "@/components/volunteers/types"
 
 const allCampuses = "all-campuses"
@@ -48,8 +52,14 @@ const schedule = {
 
 /** A self-contained volunteer schedule view ready to mount in the web App. */
 export const VolunteerSchedule = () => {
+	const auth = useAuth()
 	const [campusId, setCampusId] = useState(allCampuses)
 	const [ministry, setMinistry] = useState(allMinistries)
+	const accessToken = auth.session?.accessToken ?? ""
+	const requests = apiClient.myVolunteerRequests.useSyncQuery(
+		{ accessToken },
+		{ enabled: accessToken !== "" },
+	)
 
 	const assignments = useMemo(
 		() =>
@@ -64,15 +74,33 @@ export const VolunteerSchedule = () => {
 	return (
 		<main className="mx-auto max-w-260 px-6 py-12 pb-16 max-md:px-4 max-md:py-8">
 			<VolunteerScheduleHeader />
-			<ScheduleFilters
-				campuses={schedule.campuses}
-				campusId={campusId}
-				ministries={schedule.ministries}
-				ministry={ministry}
-				onCampusChange={setCampusId}
-				onMinistryChange={setMinistry}
-			/>
-			<UpcomingAssignments assignments={assignments} />
+			<Tabs className="mt-8" defaultValue="schedule">
+				<TabsList>
+					<TabsTrigger value="schedule">My schedule</TabsTrigger>
+					<TabsTrigger value="requests">
+						Requests
+						{(requests.data ?? []).length > 0 && (
+							<span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
+								{requests.data?.length}
+							</span>
+						)}
+					</TabsTrigger>
+				</TabsList>
+				<TabsContent value="schedule">
+					<ScheduleFilters
+						campuses={schedule.campuses}
+						campusId={campusId}
+						ministries={schedule.ministries}
+						ministry={ministry}
+						onCampusChange={setCampusId}
+						onMinistryChange={setMinistry}
+					/>
+					<UpcomingAssignments assignments={assignments} />
+				</TabsContent>
+				<TabsContent className="mt-6" value="requests">
+					<RequestInbox accessToken={accessToken} requests={requests.data ?? []} />
+				</TabsContent>
+			</Tabs>
 		</main>
 	)
 }

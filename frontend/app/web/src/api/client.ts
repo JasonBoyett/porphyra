@@ -34,9 +34,28 @@ export type PlannedVolunteer = {
 }
 
 export type TeamRole = {
+	acceptedCount?: number
 	count: number
 	emoji: string | null
+	pendingCount?: number
 	scheduledUsers: string[]
+}
+
+export type VolunteerRequestStatus =
+	"pending" | "accepted" | "rejected" | "rejected_resolved" | "resolved"
+
+export type VolunteerRequest = {
+	id: string
+	campusEventTeamId: string
+	teamMembershipId: string
+	roleName: string | null
+	roleEmoji: string | null
+	status: VolunteerRequestStatus
+	replacingId: string | null
+	userId: string
+	name: string
+	email: string
+	avatarUrl: string
 }
 
 export type VolunteerAssignment = {
@@ -72,6 +91,7 @@ export type CampusEventPlanning = {
 			isFullyStaffed: boolean
 			roles: Record<string, TeamRole>
 			volunteers: PlannedVolunteer[]
+			volunteerRequests?: VolunteerRequest[]
 			eligibleVolunteers: PlannedVolunteer[]
 		}>
 	}>
@@ -144,34 +164,46 @@ const getCampusEventPlanning = (
 		signal,
 	)
 
+const getMyVolunteerRequests = (input: { accessToken: string }, signal: AbortSignal) =>
+	apiRequest<VolunteerRequest[]>(
+		"/api/v1/events/campus/volunteer-requests",
+		input.accessToken,
+		signal,
+	)
+
 const assignCampusEventVolunteer = (input: {
 	accessToken: string
 	eventTeamId: string
+	replacementRequestId?: string
 	teamMembershipId: string
-	confirmConflict?: boolean
+	roleName: string
+	roleEmoji: string | null
 }): Promise<VolunteerAssignment> =>
 	apiRequest<VolunteerAssignment>(
-		`/api/v1/events/campus/${input.eventTeamId}/volunteers`,
+		input.replacementRequestId === undefined
+			? `/api/v1/events/campus/${input.eventTeamId}/volunteers`
+			: `/api/v1/events/campus/${input.eventTeamId}/volunteer-requests/${input.replacementRequestId}/replacement`,
 		input.accessToken,
 		undefined,
 		{
 			body: JSON.stringify({
-				confirmConflict: input.confirmConflict ?? false,
+				roleEmoji: input.roleEmoji,
+				roleName: input.roleName,
 				teamMembershipId: input.teamMembershipId,
 			}),
 			method: "POST",
 		},
 	)
 
-const updateCampusEventVolunteerRole = (input: {
+const changeCampusEventVolunteerRole = (input: {
 	accessToken: string
 	eventTeamId: string
-	assignmentId: string
+	volunteerId: string
 	roleName: string
-	roleEmoji: string
+	roleEmoji: string | null
 }) =>
 	apiRequest(
-		`/api/v1/events/campus/${input.eventTeamId}/volunteers/${input.assignmentId}`,
+		`/api/v1/events/campus/${input.eventTeamId}/volunteers/role/${input.volunteerId}`,
 		input.accessToken,
 		undefined,
 		{
@@ -179,8 +211,33 @@ const updateCampusEventVolunteerRole = (input: {
 				roleEmoji: input.roleEmoji,
 				roleName: input.roleName,
 			}),
-			method: "PATCH",
+			method: "POST",
 		},
+	)
+
+const dropCampusEventVolunteer = (input: {
+	accessToken: string
+	eventTeamId: string
+	volunteerId: string
+}) =>
+	apiRequest(
+		`/api/v1/events/campus/${input.eventTeamId}/volunteers/drop/${input.volunteerId}`,
+		input.accessToken,
+		undefined,
+		{ method: "POST" },
+	)
+
+const respondToVolunteerRequest = (input: {
+	accessToken: string
+	eventTeamId: string
+	requestId: string
+	response: "accept" | "decline"
+}) =>
+	apiRequest(
+		`/api/v1/events/campus/${input.eventTeamId}/volunteer-requests/${input.requestId}/${input.response}`,
+		input.accessToken,
+		undefined,
+		{ method: "POST" },
 	)
 
 const defineQueryOperation = <TInput, TData, const TTags extends readonly ApiTag[]>(operation: {
@@ -244,12 +301,31 @@ export const apiClient = {
 		...apiQueryOperations.campusEventPlanning,
 		request: getCampusEventPlanning,
 	}),
+	myVolunteerRequests: defineQueryOperation({
+		key: "GET /api/v1/events/campus/volunteer-requests",
+		request: getMyVolunteerRequests,
+		syncTags: apiTags.campusEventPlanning,
+	}),
 	assignCampusEventVolunteer: defineMutationOperation({
 		request: assignCampusEventVolunteer,
 		syncTags: apiTags.campusEventPlanning,
 	}),
-	updateCampusEventVolunteerRole: defineMutationOperation({
-		request: updateCampusEventVolunteerRole,
+	changeCampusEventVolunteerRole: defineMutationOperation({
+		request: changeCampusEventVolunteerRole,
+		syncTags: apiTags.campusEventPlanning,
+	}),
+	dropCampusEventVolunteer: defineMutationOperation({
+		request: dropCampusEventVolunteer,
+		syncTags: apiTags.campusEventPlanning,
+	}),
+	acceptVolunteerRequest: defineMutationOperation({
+		request: (input: { accessToken: string; eventTeamId: string; requestId: string }) =>
+			respondToVolunteerRequest({ ...input, response: "accept" }),
+		syncTags: apiTags.campusEventPlanning,
+	}),
+	declineVolunteerRequest: defineMutationOperation({
+		request: (input: { accessToken: string; eventTeamId: string; requestId: string }) =>
+			respondToVolunteerRequest({ ...input, response: "decline" }),
 		syncTags: apiTags.campusEventPlanning,
 	}),
 }
