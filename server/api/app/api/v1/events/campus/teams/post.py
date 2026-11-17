@@ -14,6 +14,7 @@ from app.auth import CurrentUser
 from app.db.models import CampusEventMinistry, CampusEventTeam, Team
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 from app.sync.audience import church_member_user_ids
+from app.sync.openapi import sync_tags
 from app.sync.publish import publish
 
 router = APIRouter()
@@ -23,7 +24,7 @@ router = APIRouter()
     "/ministries/{event_ministry_id}/teams",
     operation_id="scheduleCampusEventTeam",
     status_code=status.HTTP_201_CREATED,
-    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def schedule_team(
     event_ministry_id: UUID,
@@ -72,7 +73,7 @@ def schedule_team(
 @router.patch(
     "/{event_team_id}/roles",
     operation_id="updateCampusEventTeamRoleRequirements",
-    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def update_team_role_requirements(
     event_team_id: UUID,

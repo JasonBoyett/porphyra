@@ -56,8 +56,8 @@ export const VolunteerSchedule = () => {
 	const [campusId, setCampusId] = useState(allCampuses)
 	const [ministry, setMinistry] = useState(allMinistries)
 	const accessToken = auth.session?.accessToken ?? ""
-	const requests = apiClient.myVolunteerRequests.useSyncQuery(
-		{ accessToken },
+	const requests = apiClient.getMyVolunteerRequests.useSyncQuery(
+		{},
 		{ enabled: accessToken !== "" },
 	)
 

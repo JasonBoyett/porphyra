@@ -27,6 +27,19 @@ export type ApiOperationRequest<TOperationId extends ApiOperationId> =
 	}
 		? TData
 		: never;
+export type ApiOperationPath<TOperationId extends ApiOperationId> =
+	operations[TOperationId] extends { parameters: { path: infer TData } }
+		? TData
+		: never;
+export type ApiOperationQuery<TOperationId extends ApiOperationId> =
+	operations[TOperationId] extends { parameters: { query?: infer TData } }
+		? NonNullable<TData>
+		: never;
+type ApiOperationDataPart<TData> = [TData] extends [never] ? {} : TData;
+export type ApiOperationInput<TOperationId extends ApiOperationId> =
+	ApiOperationDataPart<ApiOperationPath<TOperationId>> &
+		ApiOperationDataPart<ApiOperationQuery<TOperationId>> &
+		ApiOperationDataPart<ApiOperationRequest<TOperationId>>;
 
 export type AssignVolunteerRequest =
 	components["schemas"]["AssignVolunteerRequest"];

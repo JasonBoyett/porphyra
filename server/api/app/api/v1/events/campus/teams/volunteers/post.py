@@ -23,6 +23,7 @@ from app.db.models import (
 from app.scheduling.conflicts import get_schedule_conflicts
 from app.scheduling.roles import assign_user_to_role
 from app.sync.audience import church_member_user_ids
+from app.sync.openapi import sync_tags
 from app.sync.publish import publish
 
 router = APIRouter()
@@ -213,7 +214,7 @@ def _create_request(
 	"/{event_team_id}/volunteers",
 	operation_id="assignCampusEventVolunteer",
 	status_code=status.HTTP_201_CREATED,
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def assign_volunteer(
 	event_team_id: UUID,
@@ -233,7 +234,7 @@ def assign_volunteer(
 	"/{event_team_id}/volunteer-requests/{request_id}/replacement",
 	operation_id="createVolunteerReplacement",
 	status_code=status.HTTP_201_CREATED,
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def create_replacement(
 	event_team_id: UUID,
@@ -273,7 +274,7 @@ def create_replacement(
 @router.post(
 	"/{event_team_id}/volunteer-requests/{request_id}/accept",
 	operation_id="acceptVolunteerRequest",
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def accept_volunteer_request(
 	event_team_id: UUID,
@@ -345,7 +346,7 @@ def accept_volunteer_request(
 @router.post(
 	"/{event_team_id}/volunteer-requests/{request_id}/decline",
 	operation_id="declineVolunteerRequest",
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def decline_volunteer_request(
 	event_team_id: UUID,
@@ -371,7 +372,7 @@ def decline_volunteer_request(
 @router.post(
 	"/{event_team_id}/volunteers/role/{volunteer_id}",
 	operation_id="changeCampusEventVolunteerRole",
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def update_volunteer_role(
 	event_team_id: UUID,

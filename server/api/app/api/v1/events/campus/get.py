@@ -25,6 +25,7 @@ from app.db.models import (
 )
 from app.scheduling.conflicts import get_schedule_conflicts
 from app.sync.audience import church_member_user_ids
+from app.sync.openapi import sync_tags
 
 router = APIRouter()
 
@@ -200,7 +201,7 @@ def _planning_response(
 @router.get(
 	"/",
 	operation_id="getCampusEvents",
-	openapi_extra={"x-sync-tags": ["campus-events"]},
+	openapi_extra=sync_tags("campus-events"),
 )
 def get_campus_events(
 	db: DatabaseSession,
@@ -252,7 +253,7 @@ def get_campus_event_planning(
 @router.get(
 	"/teams/{event_team_id}/volunteer-requests",
 	operation_id="getCampusEventTeamVolunteerRequests",
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def get_team_volunteer_requests(
 	event_team_id: UUID,
@@ -293,7 +294,7 @@ def get_team_volunteer_requests(
 @router.get(
 	"/volunteer-requests",
 	operation_id="getMyVolunteerRequests",
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def get_my_volunteer_requests(
 	db: DatabaseSession,
@@ -320,5 +321,5 @@ router.add_api_route(
 	methods=["GET"],
 	operation_id="getCampusEventPlanning",
 	response_model=CampusEventPlanningResponse,
-	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )

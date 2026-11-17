@@ -94,6 +94,27 @@ describe("SyncManager", () => {
 		expect(invalidated(queryClient, "dashboard")).toBe(false)
 	})
 
+	test("only invalidates the tab with an active matching concern", async () => {
+		const firstTab = setup()
+		const secondTab = setup()
+		await addQuery(firstTab.queryClient, "dashboard", [apiTag.dashboard])
+		await addQuery(secondTab.queryClient, "planning", [apiTag.campusEvents])
+		firstTab.manager.addTags([apiTag.dashboard])
+		secondTab.manager.addTags([apiTag.campusEvents])
+
+		firstTab.sockets[0].emit(
+			"message",
+			JSON.stringify({ type: "changed", tags: [apiTag.campusEvents] }),
+		)
+		secondTab.sockets[0].emit(
+			"message",
+			JSON.stringify({ type: "changed", tags: [apiTag.campusEvents] }),
+		)
+
+		expect(invalidated(firstTab.queryClient, "dashboard")).toBe(false)
+		expect(invalidated(secondTab.queryClient, "planning")).toBe(true)
+	})
+
 	test("ignores malformed, unknown, and non-JSON events", async () => {
 		const { manager, queryClient, sockets } = setup()
 		await addQuery(queryClient, "dashboard", [apiTag.dashboard])

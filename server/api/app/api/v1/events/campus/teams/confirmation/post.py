@@ -13,6 +13,7 @@ from app.auth import CurrentUser
 from app.db.models import CampusEventTeam, TeamMembership
 from app.db.utils import utc_now
 from app.sync.audience import church_member_user_ids
+from app.sync.openapi import sync_tags
 from app.sync.publish import publish
 
 router = APIRouter()
@@ -21,7 +22,7 @@ router = APIRouter()
 @router.post(
     "/{event_team_id}/confirmation",
     operation_id="confirmCampusEventTeam",
-    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def confirm_schedule(
     event_team_id: UUID,

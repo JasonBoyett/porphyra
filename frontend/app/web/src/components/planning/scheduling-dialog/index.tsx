@@ -40,6 +40,7 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 	const [error, setError] = useState<string | null>(null)
 	const [sendingVolunteerId, setSendingVolunteerId] = useState<string | null>(null)
 	const assignment = apiClient.assignCampusEventVolunteer.useMutation()
+	const replacement = apiClient.createVolunteerReplacement.useMutation()
 
 	useEffect(() => {
 		setError(null)
@@ -57,26 +58,25 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 	const sendRequest = (volunteer: PlannedVolunteer) => {
 		setError(null)
 		setSendingVolunteerId(volunteer.teamMembershipId)
-		assignment.mutate(
-			{
-				accessToken: props.accessToken,
-				eventTeamId: team.id,
-				replacementRequestId: props.replacementRequestId,
-				roleEmoji: role.emoji,
-				roleName,
-				teamMembershipId: volunteer.teamMembershipId,
+		const options = {
+			onError: () => {
+				setSendingVolunteerId(null)
+				setError("This role is no longer available. The schedule has been refreshed.")
 			},
-			{
-				onError: () => {
-					setSendingVolunteerId(null)
-					setError("This role is no longer available. The schedule has been refreshed.")
-				},
-				onSuccess: () => {
-					toast.success(`Request sent to ${volunteer.name} for ${roleName}.`)
-					props.onClose()
-				},
+			onSuccess: () => {
+				toast.success(`Request sent to ${volunteer.name} for ${roleName}.`)
+				props.onClose()
 			},
-		)
+		}
+		const request = {
+			confirmConflict: false,
+			event_team_id: team.id,
+			roleEmoji: role.emoji,
+			roleName,
+			teamMembershipId: volunteer.teamMembershipId,
+		}
+		if (props.replacementRequestId === undefined) assignment.mutate(request, options)
+		else replacement.mutate({ ...request, request_id: props.replacementRequestId }, options)
 	}
 
 	return (
@@ -133,7 +133,11 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 				)}
 
 				<DialogFooter>
-					<Button disabled={assignment.isPending} onClick={props.onClose} variant="ghost">
+					<Button
+						disabled={assignment.isPending || replacement.isPending}
+						onClick={props.onClose}
+						variant="ghost"
+					>
 						Exit
 					</Button>
 				</DialogFooter>

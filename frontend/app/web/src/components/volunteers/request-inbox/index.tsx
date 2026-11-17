@@ -18,7 +18,7 @@ export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
 		setRespondedRequestIds((ids) => [...ids, request.id])
 		const mutation = response === "accept" ? accept : decline
 		mutation.mutate(
-			{ accessToken, eventTeamId: request.campusEventTeamId, requestId: request.id },
+			{ event_team_id: request.campusEventTeamId, request_id: request.id },
 			{ onError: () => setRespondedRequestIds((ids) => ids.filter((id) => id !== request.id)) },
 		)
 	}

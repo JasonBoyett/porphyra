@@ -5,6 +5,7 @@ from app.api.v1.dashboard.schemas import DashboardResponse
 from app.api.v1.dependencies.database import DatabaseSession
 from app.auth import CurrentUser
 from app.db.models import ChurchMembership
+from app.sync.openapi import sync_tags
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ router = APIRouter()
 @router.get(
 	"/",
 	operation_id="getDashboard",
-	openapi_extra={"x-sync-tags": ["dashboard"]},
+	openapi_extra=sync_tags("dashboard"),
 )
 def get_dashboard(user: CurrentUser, db: DatabaseSession) -> DashboardResponse:
 	memberships = db.exec(

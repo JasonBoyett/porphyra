@@ -53,11 +53,10 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 			return
 		changeRole.mutate(
 			{
-				accessToken: props.accessToken ?? "",
-				eventTeamId: props.eventTeamId,
+				event_team_id: props.eventTeamId,
 				roleEmoji: role.emoji,
 				roleName,
-				volunteerId: props.volunteerId,
+				volunteer_id: props.volunteerId,
 			},
 			{
 				onError: () => toast.error(`Unable to update ${props.name}'s role.`),
@@ -70,9 +69,8 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 		if (props.eventTeamId === undefined || props.volunteerId === undefined) return
 		dropVolunteer.mutate(
 			{
-				accessToken: props.accessToken ?? "",
-				eventTeamId: props.eventTeamId,
-				volunteerId: props.volunteerId,
+				event_team_id: props.eventTeamId,
+				volunteer_id: props.volunteerId,
 			},
 			{
 				onError: () => toast.error(`Unable to remove ${props.name} from the roster.`),

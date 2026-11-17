@@ -15,7 +15,7 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 		roleName: string
 		teamId: string
 	} | null>(null)
-	const events = apiClient.campusEvents.useSyncQuery({ accessToken: props.accessToken })
+	const events = apiClient.getCampusEvents.useSyncQuery()
 
 	useEffect(() => {
 		if (selectedEventId === null && events.data?.[0] !== undefined) {
@@ -23,8 +23,8 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 		}
 	}, [events.data, selectedEventId])
 
-	const planning = apiClient.campusEventPlanning.useSyncQuery(
-		{ accessToken: props.accessToken, eventId: selectedEventId ?? "" },
+	const planning = apiClient.getCampusEventPlanning.useSyncQuery(
+		{ event_id: selectedEventId ?? "" },
 		{ enabled: selectedEventId !== null },
 	)
 	const event = planning.data

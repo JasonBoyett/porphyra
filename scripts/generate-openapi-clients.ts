@@ -91,9 +91,19 @@ const operationEntries = Object.entries(openApi.paths ?? {}).flatMap(
 				[
 					operation.operationId,
 					{
-						method,
-						pathParams: parameterNames("path"),
-						queryParams: parameterNames("query"),
+					method,
+					hasBody: operation.requestBody !== undefined,
+					pathParams: parameterNames("path"),
+					queryParams: parameterNames("query"),
+					requestContentType: operation.requestBody === undefined
+						? null
+						: Object.hasOwn(operation.requestBody, "content") &&
+							Object.hasOwn(
+								(operation.requestBody.content as Record<string, unknown>),
+								"application/json",
+							)
+							? "application/json"
+							: null,
 						route,
 						syncTags: syncTagsForOperation(operation, operation.operationId),
 					},
@@ -136,6 +146,19 @@ export type ApiOperationRequest<TOperationId extends ApiOperationId> =
 	}
 		? TData
 		: never
+export type ApiOperationPath<TOperationId extends ApiOperationId> =
+	operations[TOperationId] extends { parameters: { path: infer TData } }
+		? TData
+		: never
+export type ApiOperationQuery<TOperationId extends ApiOperationId> =
+	operations[TOperationId] extends { parameters: { query?: infer TData } }
+		? NonNullable<TData>
+		: never
+type ApiOperationDataPart<TData> = [TData] extends [never] ? {} : TData
+export type ApiOperationInput<TOperationId extends ApiOperationId> =
+	ApiOperationDataPart<ApiOperationPath<TOperationId>> &
+	ApiOperationDataPart<ApiOperationQuery<TOperationId>> &
+	ApiOperationDataPart<ApiOperationRequest<TOperationId>>
 
 ${schemaNames
 	.map(

@@ -15,7 +15,7 @@ const authStorageKey = "porphyra-auth-session"
 const legacyAccessTokenStorageKey = "porphyra-access-token"
 const authUrl = import.meta.env.VITE_AUTH_URL ?? "http://localhost:4000"
 
-const readStoredSession = (): AuthSession | null => {
+export const getStoredSession = (): AuthSession | null => {
 	const storedSession = sessionStorage.getItem(authStorageKey)
 
 	if (storedSession !== null) {
@@ -36,7 +36,7 @@ const readStoredSession = (): AuthSession | null => {
 }
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-	const [session, setSession] = useState<AuthSession | null>(readStoredSession)
+	const [session, setSession] = useState<AuthSession | null>(getStoredSession)
 
 	const signIn = useCallback(async ({ email }: SignInInput) => {
 		const response = await fetch(`${authUrl}/api/v1/auth/sign-in`, {

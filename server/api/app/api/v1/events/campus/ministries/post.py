@@ -8,6 +8,7 @@ from app.api.v1.events.schemas import ScheduledMinistryResponse, ScheduleMinistr
 from app.auth import CurrentUser
 from app.db.models import CampusEvent, CampusEventMinistry, Ministry
 from app.sync.audience import church_member_user_ids
+from app.sync.openapi import sync_tags
 from app.sync.publish import publish
 
 router = APIRouter()
@@ -17,7 +18,7 @@ router = APIRouter()
     "/{event_id}/ministries",
     operation_id="scheduleCampusEventMinistry",
     status_code=status.HTTP_201_CREATED,
-    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def schedule_ministry(
     event_id: UUID,
