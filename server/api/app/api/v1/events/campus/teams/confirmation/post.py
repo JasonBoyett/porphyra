@@ -18,7 +18,11 @@ from app.sync.publish import publish
 router = APIRouter()
 
 
-@router.post("/{event_team_id}/confirmation", operation_id="confirmCampusEventTeam")
+@router.post(
+    "/{event_team_id}/confirmation",
+    operation_id="confirmCampusEventTeam",
+    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+)
 def confirm_schedule(
     event_team_id: UUID,
     payload: ConfirmScheduleRequest,

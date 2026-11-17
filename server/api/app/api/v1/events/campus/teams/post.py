@@ -23,6 +23,7 @@ router = APIRouter()
     "/ministries/{event_ministry_id}/teams",
     operation_id="scheduleCampusEventTeam",
     status_code=status.HTTP_201_CREATED,
+    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def schedule_team(
     event_ministry_id: UUID,
@@ -71,6 +72,7 @@ def schedule_team(
 @router.patch(
     "/{event_team_id}/roles",
     operation_id="updateCampusEventTeamRoleRequirements",
+    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def update_team_role_requirements(
     event_team_id: UUID,

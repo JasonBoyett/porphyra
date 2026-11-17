@@ -17,6 +17,7 @@ router = APIRouter()
     "/{event_id}/ministries",
     operation_id="scheduleCampusEventMinistry",
     status_code=status.HTTP_201_CREATED,
+    openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def schedule_ministry(
     event_id: UUID,

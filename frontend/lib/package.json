@@ -1,15 +1,17 @@
 {
-  "name": "@porphyra/frontend",
-  "private": true,
-  "type": "module",
-  "exports": {
-    "./api": "./api/client.ts",
-    "./auth": "./auth/session.ts",
-    "./localization": "./localization/catalog.ts",
-    "./sync": "./sync/tag-manager.ts",
-    "./theme": "./theme/tokens.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  }
+	"name": "@porphyra/frontend",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./api": "./api/client.ts",
+		"./api/operations": "./api/generated/operations.ts",
+		"./api/types": "./api/generated/types.ts",
+		"./auth": "./auth/session.ts",
+		"./localization": "./localization/catalog.ts",
+		"./sync": "./sync/tag-manager.ts",
+		"./theme": "./theme/tokens.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	}
 }

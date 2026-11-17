@@ -1,101 +1,25 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+import type {
+	CampusEventListItem,
+	CampusEventPlanningResponse,
+	DashboardResponse,
+	ScheduledVolunteerResponse,
+	TeamRoleResponse,
+	VolunteerAssignmentResponse,
+	VolunteerRequestRosterResponse,
+} from "@porphyra/frontend/api/types"
+import { apiOperations } from "@porphyra/frontend/api/operations"
 
 import { useSyncTags } from "../sync/sync-provider"
-import { apiQueryOperations } from "./operations"
-import { apiTags, type ApiTag } from "./tags"
+import type { ApiTag } from "./tags"
 
-type Campus = { id: string; name: string; city: string }
-type Team = { id: string; name: string }
-type Ministry = { id: string; name: string; teams: Team[] }
-type Church = {
-	id: string
-	avatarUrl: string
-	name: string
-	description: string
-	campuses: Campus[]
-	ministries: Ministry[]
-}
-
-export type Dashboard = {
-	viewer: { id: string; avatarUrl: string; email: string; name: string }
-	churches: Church[]
-}
-
-export type PlannedVolunteer = {
-	assignmentId: string
-	teamMembershipId: string
-	userId: string
-	name: string
-	email: string
-	avatarUrl: string
-	roleName: string | null
-	roleEmoji: string | null
-	conflictConfirmedAt: string | null
-}
-
-export type TeamRole = {
-	acceptedCount?: number
-	count: number
-	emoji: string | null
-	pendingCount?: number
-	scheduledUsers: string[]
-}
-
-export type VolunteerRequestStatus =
-	"pending" | "accepted" | "rejected" | "rejected_resolved" | "resolved"
-
-export type VolunteerRequest = {
-	id: string
-	campusEventTeamId: string
-	teamMembershipId: string
-	roleName: string | null
-	roleEmoji: string | null
-	status: VolunteerRequestStatus
-	replacingId: string | null
-	userId: string
-	name: string
-	email: string
-	avatarUrl: string
-}
-
-export type VolunteerAssignment = {
-	id: string
-	teamMembershipId: string
-	roleName: string | null
-	roleEmoji: string | null
-	conflictConfirmedAt: string | null
-}
-
-export type CampusEventPlanning = {
-	id: string
-	churchId: string
-	churchName: string
-	campusId: string
-	campusName: string
-	title: string
-	startsAt: string
-	endsAt: string | null
-	isStaffed: boolean
-	isFullyStaffed: boolean
-	teamsNeedingConfirmation: string[]
-	ministries: Array<{
-		id: string
-		name: string
-		teams: Array<{
-			id: string
-			teamId: string
-			name: string
-			callTime: string | null
-			notes: string[]
-			confirmedAt: string | null
-			isFullyStaffed: boolean
-			roles: Record<string, TeamRole>
-			volunteers: PlannedVolunteer[]
-			volunteerRequests?: VolunteerRequest[]
-			eligibleVolunteers: PlannedVolunteer[]
-		}>
-	}>
-}
+export type Dashboard = DashboardResponse
+export type PlannedVolunteer = ScheduledVolunteerResponse
+export type TeamRole = TeamRoleResponse
+export type VolunteerRequestStatus = VolunteerRequestRosterResponse["status"]
+export type VolunteerRequest = VolunteerRequestRosterResponse
+export type VolunteerAssignment = VolunteerAssignmentResponse
+export type CampusEventPlanning = CampusEventPlanningResponse
 
 export type ApiRequestError = Error & {
 	status: number
@@ -148,11 +72,7 @@ const apiRequest = async <TData>(
 }
 
 const getCampusEvents = (input: { accessToken: string }, signal: AbortSignal) =>
-	apiRequest<Array<Pick<CampusEventPlanning, "id" | "title" | "startsAt">>>(
-		"/api/v1/events/campus/",
-		input.accessToken,
-		signal,
-	)
+	apiRequest<CampusEventListItem[]>("/api/v1/events/campus/", input.accessToken, signal)
 
 const getCampusEventPlanning = (
 	input: { accessToken: string; eventId: string },
@@ -290,42 +210,45 @@ const defineMutationOperation = <TInput, TData, const TTags extends readonly Api
 
 export const apiClient = {
 	dashboard: defineQueryOperation({
-		...apiQueryOperations.dashboard,
+		key: `GET ${apiOperations.getDashboard.route}`,
 		request: getDashboard,
+		syncTags: apiOperations.getDashboard.syncTags,
 	}),
 	campusEvents: defineQueryOperation({
-		...apiQueryOperations.campusEvents,
+		key: `GET ${apiOperations.getCampusEvents.route}`,
 		request: getCampusEvents,
+		syncTags: apiOperations.getCampusEvents.syncTags,
 	}),
 	campusEventPlanning: defineQueryOperation({
-		...apiQueryOperations.campusEventPlanning,
+		key: `GET ${apiOperations.getCampusEventPlanning.route}`,
 		request: getCampusEventPlanning,
+		syncTags: apiOperations.getCampusEventPlanning.syncTags,
 	}),
 	myVolunteerRequests: defineQueryOperation({
-		key: "GET /api/v1/events/campus/volunteer-requests",
+		key: `GET ${apiOperations.getMyVolunteerRequests.route}`,
 		request: getMyVolunteerRequests,
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.getMyVolunteerRequests.syncTags,
 	}),
 	assignCampusEventVolunteer: defineMutationOperation({
 		request: assignCampusEventVolunteer,
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.assignCampusEventVolunteer.syncTags,
 	}),
 	changeCampusEventVolunteerRole: defineMutationOperation({
 		request: changeCampusEventVolunteerRole,
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.changeCampusEventVolunteerRole.syncTags,
 	}),
 	dropCampusEventVolunteer: defineMutationOperation({
 		request: dropCampusEventVolunteer,
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.dropCampusEventVolunteer.syncTags,
 	}),
 	acceptVolunteerRequest: defineMutationOperation({
 		request: (input: { accessToken: string; eventTeamId: string; requestId: string }) =>
 			respondToVolunteerRequest({ ...input, response: "accept" }),
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.acceptVolunteerRequest.syncTags,
 	}),
 	declineVolunteerRequest: defineMutationOperation({
 		request: (input: { accessToken: string; eventTeamId: string; requestId: string }) =>
 			respondToVolunteerRequest({ ...input, response: "decline" }),
-		syncTags: apiTags.campusEventPlanning,
+		syncTags: apiOperations.declineVolunteerRequest.syncTags,
 	}),
 }

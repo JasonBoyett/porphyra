@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from sqlmodel import select
 
+from app.api.v1.dashboard.schemas import DashboardResponse
 from app.api.v1.dependencies.database import DatabaseSession
 from app.auth import CurrentUser
 from app.db.models import ChurchMembership
@@ -8,8 +9,12 @@ from app.db.models import ChurchMembership
 router = APIRouter()
 
 
-@router.get("/", operation_id="getDashboard")
-def get_dashboard(user: CurrentUser, db: DatabaseSession) -> dict[str, object]:
+@router.get(
+	"/",
+	operation_id="getDashboard",
+	openapi_extra={"x-sync-tags": ["dashboard"]},
+)
+def get_dashboard(user: CurrentUser, db: DatabaseSession) -> DashboardResponse:
 	memberships = db.exec(
 		select(ChurchMembership).where(ChurchMembership.user_id == user.id)
 	).all()
@@ -50,12 +55,12 @@ def get_dashboard(user: CurrentUser, db: DatabaseSession) -> dict[str, object]:
 		}
 		for membership in memberships
 	]
-	return {
+	return DashboardResponse.model_validate({
 		"viewer": {
-			"id": str(user.id),
+			"id": user.id,
 			"avatarUrl": user.avatar_url,
 			"email": user.email,
 			"name": user.name,
 		},
 		"churches": churches,
-	}
+	})

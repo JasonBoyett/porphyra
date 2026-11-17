@@ -1,0 +1,2469 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Porphyra API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/church-memberships/": {
+      "get": {
+        "summary": "Get Memberships",
+        "operationId": "getAllChurchMemberships",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChurchMembership"
+                  },
+                  "type": "array",
+                  "title": "Response Getallchurchmemberships"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/church-memberships/{church_id}": {
+      "get": {
+        "summary": "Get Church Membership",
+        "operationId": "getChurchMembership",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Church Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurchMembership"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/": {
+      "get": {
+        "summary": "Get Dashboard",
+        "operationId": "getDashboard",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/events/campus/": {
+      "get": {
+        "summary": "Get Campus Events",
+        "operationId": "getCampusEvents",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CampusEventListItem"
+                  },
+                  "type": "array",
+                  "title": "Response Getcampusevents"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "x-sync-tags": [
+          "campus-events"
+        ]
+      },
+      "post": {
+        "summary": "Create Campus Event",
+        "operationId": "createCampusEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCampusEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusEventResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/teams/{event_team_id}/volunteer-requests": {
+      "get": {
+        "summary": "Get Team Volunteer Requests",
+        "description": "Coordinator request list; resolved rejections are available as history.",
+        "operationId": "getCampusEventTeamVolunteerRequests",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "include_resolved",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Resolved"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VolunteerRequestRosterResponse"
+                  },
+                  "title": "Response Getcampuseventteamvolunteerrequests"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/volunteer-requests": {
+      "get": {
+        "summary": "Get My Volunteer Requests",
+        "description": "Request records for the signed-in volunteer's tab.",
+        "operationId": "getMyVolunteerRequests",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_resolved",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Resolved"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VolunteerRequestRosterResponse"
+                  },
+                  "title": "Response Getmyvolunteerrequests"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_id}": {
+      "get": {
+        "summary": "Get Campus Event Planning",
+        "operationId": "getCampusEventPlanning",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusEventPlanningResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/church/": {
+      "post": {
+        "summary": "Create Church Event",
+        "operationId": "createChurchEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChurchEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_id}/ministries": {
+      "post": {
+        "summary": "Schedule Ministry",
+        "operationId": "scheduleCampusEventMinistry",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleMinistryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledMinistryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/ministries/{event_ministry_id}/teams": {
+      "post": {
+        "summary": "Schedule Team",
+        "operationId": "scheduleCampusEventTeam",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_ministry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Ministry Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleTeamRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledTeamResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/roles": {
+      "patch": {
+        "summary": "Update Team Role Requirements",
+        "operationId": "updateCampusEventTeamRoleRequirements",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamRoleRequirementsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledTeamResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteers": {
+      "post": {
+        "summary": "Assign Volunteer",
+        "description": "Create a pending roster request; acceptance creates the assignment.",
+        "operationId": "assignCampusEventVolunteer",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerRequestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/replacement": {
+      "post": {
+        "summary": "Create Replacement",
+        "operationId": "createVolunteerReplacement",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVolunteerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerRequestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/accept": {
+      "post": {
+        "summary": "Accept Volunteer Request",
+        "operationId": "acceptVolunteerRequest",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/decline": {
+      "post": {
+        "summary": "Decline Volunteer Request",
+        "operationId": "declineVolunteerRequest",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerRequestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteers/role/{volunteer_id}": {
+      "post": {
+        "summary": "Update Volunteer Role",
+        "operationId": "changeCampusEventVolunteerRole",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "volunteer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Volunteer Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolunteerRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteers/drop/{volunteer_id}": {
+      "post": {
+        "summary": "Drop Volunteer",
+        "description": "Remove an accepted volunteer from the roster and role snapshot.",
+        "operationId": "dropCampusEventVolunteer",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "volunteer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Volunteer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/confirmation": {
+      "post": {
+        "summary": "Confirm Schedule",
+        "operationId": "confirmCampusEventTeam",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledTeamResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "campus-events",
+          "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/me/": {
+      "get": {
+        "summary": "Get Current User",
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssignVolunteerRequest": {
+        "properties": {
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          },
+          "confirmConflict": {
+            "type": "boolean",
+            "title": "Confirmconflict",
+            "default": false
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          }
+        },
+        "type": "object",
+        "required": [
+          "teamMembershipId"
+        ],
+        "title": "AssignVolunteerRequest"
+      },
+      "CampusEventListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "churchName": {
+            "type": "string",
+            "title": "Churchname"
+          },
+          "campusId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campusid"
+          },
+          "campusName": {
+            "type": "string",
+            "title": "Campusname"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          },
+          "isStaffed": {
+            "type": "boolean",
+            "title": "Isstaffed"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "churchName",
+          "campusId",
+          "campusName",
+          "title",
+          "startsAt",
+          "endsAt",
+          "isStaffed",
+          "isFullyStaffed"
+        ],
+        "title": "CampusEventListItem"
+      },
+      "CampusEventMinistryScheduleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/CampusEventTeamScheduleResponse"
+            },
+            "type": "array",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "teams"
+        ],
+        "title": "CampusEventMinistryScheduleResponse"
+      },
+      "CampusEventPlanningResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          },
+          "isStaffed": {
+            "type": "boolean",
+            "title": "Isstaffed"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          },
+          "teamsNeedingConfirmation": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamsneedingconfirmation"
+          },
+          "campusId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campusid"
+          },
+          "churchName": {
+            "type": "string",
+            "title": "Churchname"
+          },
+          "campusName": {
+            "type": "string",
+            "title": "Campusname"
+          },
+          "ministries": {
+            "items": {
+              "$ref": "#/components/schemas/CampusEventMinistryScheduleResponse"
+            },
+            "type": "array",
+            "title": "Ministries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "title",
+          "description",
+          "startsAt",
+          "endsAt",
+          "isStaffed",
+          "isFullyStaffed",
+          "teamsNeedingConfirmation",
+          "campusId",
+          "churchName",
+          "campusName",
+          "ministries"
+        ],
+        "title": "CampusEventPlanningResponse"
+      },
+      "CampusEventResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          },
+          "isStaffed": {
+            "type": "boolean",
+            "title": "Isstaffed"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          },
+          "teamsNeedingConfirmation": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamsneedingconfirmation"
+          },
+          "campusId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campusid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "title",
+          "description",
+          "startsAt",
+          "endsAt",
+          "isStaffed",
+          "isFullyStaffed",
+          "teamsNeedingConfirmation",
+          "campusId"
+        ],
+        "title": "CampusEventResponse"
+      },
+      "CampusEventTeamScheduleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teamid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "callTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calltime"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "confirmedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmedat"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          },
+          "roles": {
+            "$ref": "#/components/schemas/TeamRoleResponseData"
+          },
+          "volunteers": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduledVolunteerResponse"
+            },
+            "type": "array",
+            "title": "Volunteers"
+          },
+          "volunteerRequests": {
+            "items": {
+              "$ref": "#/components/schemas/VolunteerRequestRosterResponse"
+            },
+            "type": "array",
+            "title": "Volunteerrequests"
+          },
+          "eligibleVolunteers": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduledVolunteerResponse"
+            },
+            "type": "array",
+            "title": "Eligiblevolunteers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "teamId",
+          "name",
+          "callTime",
+          "notes",
+          "confirmedAt",
+          "isFullyStaffed",
+          "roles",
+          "volunteers",
+          "eligibleVolunteers"
+        ],
+        "title": "CampusEventTeamScheduleResponse"
+      },
+      "ChurchMembership": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "church_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Church Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "church_id"
+        ],
+        "title": "ChurchMembership"
+      },
+      "ConfirmScheduleRequest": {
+        "properties": {
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "teamMembershipId"
+        ],
+        "title": "ConfirmScheduleRequest"
+      },
+      "CreateCampusEventRequest": {
+        "properties": {
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "campusId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campusid"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "churchId",
+          "campusId",
+          "title",
+          "startsAt"
+        ],
+        "title": "CreateCampusEventRequest"
+      },
+      "CreateChurchEventRequest": {
+        "properties": {
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "churchId",
+          "title",
+          "startsAt"
+        ],
+        "title": "CreateChurchEventRequest"
+      },
+      "DashboardCampusResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "city"
+        ],
+        "title": "DashboardCampusResponse"
+      },
+      "DashboardChurchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "title": "Avatarurl"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "campuses": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardCampusResponse"
+            },
+            "type": "array",
+            "title": "Campuses"
+          },
+          "ministries": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardMinistryResponse"
+            },
+            "type": "array",
+            "title": "Ministries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "avatarUrl",
+          "name",
+          "description",
+          "campuses",
+          "ministries"
+        ],
+        "title": "DashboardChurchResponse"
+      },
+      "DashboardMinistryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardTeamResponse"
+            },
+            "type": "array",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "teams"
+        ],
+        "title": "DashboardMinistryResponse"
+      },
+      "DashboardResponse": {
+        "properties": {
+          "viewer": {
+            "$ref": "#/components/schemas/DashboardViewerResponse"
+          },
+          "churches": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardChurchResponse"
+            },
+            "type": "array",
+            "title": "Churches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "viewer",
+          "churches"
+        ],
+        "title": "DashboardResponse"
+      },
+      "DashboardTeamResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "DashboardTeamResponse"
+      },
+      "DashboardViewerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "title": "Avatarurl"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "avatarUrl",
+          "email",
+          "name"
+        ],
+        "title": "DashboardViewerResponse"
+      },
+      "EventResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "endsAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endsat"
+          },
+          "isStaffed": {
+            "type": "boolean",
+            "title": "Isstaffed"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          },
+          "teamsNeedingConfirmation": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamsneedingconfirmation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "title",
+          "description",
+          "startsAt",
+          "endsAt",
+          "isStaffed",
+          "isFullyStaffed",
+          "teamsNeedingConfirmation"
+        ],
+        "title": "EventResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RoleTemplateData": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/_RoleInfoForTemplate"
+        },
+        "type": "object",
+        "title": "RoleTemplateData",
+        "description": "Reusable requirements keyed by their human-readable role name."
+      },
+      "ScheduleMinistryRequest": {
+        "properties": {
+          "ministryId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ministryid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ministryId"
+        ],
+        "title": "ScheduleMinistryRequest"
+      },
+      "ScheduleTeamRequest": {
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teamid"
+          },
+          "callTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calltime"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "teamId"
+        ],
+        "title": "ScheduleTeamRequest"
+      },
+      "ScheduledMinistryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "ministryId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ministryid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ministryId"
+        ],
+        "title": "ScheduledMinistryResponse"
+      },
+      "ScheduledTeamResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teamid"
+          },
+          "callTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calltime"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "confirmedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmedat"
+          },
+          "isFullyStaffed": {
+            "type": "boolean",
+            "title": "Isfullystaffed"
+          },
+          "roles": {
+            "$ref": "#/components/schemas/TeamRoleResponseData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "teamId",
+          "callTime",
+          "notes",
+          "confirmedAt",
+          "isFullyStaffed",
+          "roles"
+        ],
+        "title": "ScheduledTeamResponse"
+      },
+      "ScheduledVolunteerResponse": {
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assignmentid"
+          },
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Userid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "title": "Avatarurl"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          },
+          "conflictConfirmedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflictconfirmedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assignmentId",
+          "teamMembershipId",
+          "userId",
+          "name",
+          "email",
+          "avatarUrl",
+          "roleName",
+          "roleEmoji",
+          "conflictConfirmedAt"
+        ],
+        "title": "ScheduledVolunteerResponse"
+      },
+      "TeamRoleResponse": {
+        "properties": {
+          "emoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emoji"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "scheduledUsers": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Scheduledusers"
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "title": "Acceptedcount",
+            "default": 0
+          },
+          "pendingCount": {
+            "type": "integer",
+            "title": "Pendingcount",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "emoji",
+          "count",
+          "scheduledUsers"
+        ],
+        "title": "TeamRoleResponse"
+      },
+      "TeamRoleResponseData": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/TeamRoleResponse"
+        },
+        "type": "object",
+        "title": "TeamRoleResponseData",
+        "description": "Expose database role snapshots through the API's camel-case response model."
+      },
+      "UpdateTeamRoleRequirementsRequest": {
+        "properties": {
+          "roles": {
+            "$ref": "#/components/schemas/RoleTemplateData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roles"
+        ],
+        "title": "UpdateTeamRoleRequirementsRequest"
+      },
+      "UpdateVolunteerRoleRequest": {
+        "properties": {
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          }
+        },
+        "type": "object",
+        "title": "UpdateVolunteerRoleRequest"
+      },
+      "User": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "auth_id": {
+            "type": "string",
+            "title": "Auth Id"
+          },
+          "profile_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "auth_id"
+        ],
+        "title": "User"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VolunteerAssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          },
+          "conflictConfirmedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflictconfirmedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "teamMembershipId",
+          "roleName",
+          "roleEmoji",
+          "conflictConfirmedAt"
+        ],
+        "title": "VolunteerAssignmentResponse"
+      },
+      "VolunteerRequestResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campusEventTeamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campuseventteamid"
+          },
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "replacingId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacingid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campusEventTeamId",
+          "teamMembershipId",
+          "roleName",
+          "roleEmoji",
+          "status",
+          "replacingId"
+        ],
+        "title": "VolunteerRequestResponse"
+      },
+      "VolunteerRequestRosterResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campusEventTeamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campuseventteamid"
+          },
+          "teamMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teammembershipid"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "replacingId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacingid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Userid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "title": "Avatarurl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campusEventTeamId",
+          "teamMembershipId",
+          "roleName",
+          "roleEmoji",
+          "status",
+          "replacingId",
+          "userId",
+          "name",
+          "email",
+          "avatarUrl"
+        ],
+        "title": "VolunteerRequestRosterResponse"
+      },
+      "_RoleInfoForTemplate": {
+        "properties": {
+          "emoji": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emoji"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "_RoleInfoForTemplate",
+        "description": "A role requirement that can be copied into an event team."
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

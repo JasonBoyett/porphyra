@@ -13,7 +13,12 @@ from app.sync.publish import publish
 router = APIRouter()
 
 
-@router.post("/", operation_id="createCampusEvent", status_code=status.HTTP_201_CREATED)
+@router.post(
+	"/",
+	operation_id="createCampusEvent",
+	status_code=status.HTTP_201_CREATED,
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+)
 def create_campus_event(
     payload: CreateCampusEventRequest,
     db: DatabaseSession,

@@ -213,6 +213,7 @@ def _create_request(
 	"/{event_team_id}/volunteers",
 	operation_id="assignCampusEventVolunteer",
 	status_code=status.HTTP_201_CREATED,
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def assign_volunteer(
 	event_team_id: UUID,
@@ -230,7 +231,9 @@ def assign_volunteer(
 
 @router.post(
 	"/{event_team_id}/volunteer-requests/{request_id}/replacement",
+	operation_id="createVolunteerReplacement",
 	status_code=status.HTTP_201_CREATED,
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def create_replacement(
 	event_team_id: UUID,
@@ -267,7 +270,11 @@ def create_replacement(
 	return _request_response(successor)
 
 
-@router.post("/{event_team_id}/volunteer-requests/{request_id}/accept")
+@router.post(
+	"/{event_team_id}/volunteer-requests/{request_id}/accept",
+	operation_id="acceptVolunteerRequest",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+)
 def accept_volunteer_request(
 	event_team_id: UUID,
 	request_id: UUID,
@@ -335,7 +342,11 @@ def accept_volunteer_request(
 	return response
 
 
-@router.post("/{event_team_id}/volunteer-requests/{request_id}/decline")
+@router.post(
+	"/{event_team_id}/volunteer-requests/{request_id}/decline",
+	operation_id="declineVolunteerRequest",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+)
 def decline_volunteer_request(
 	event_team_id: UUID,
 	request_id: UUID,
@@ -360,6 +371,7 @@ def decline_volunteer_request(
 @router.post(
 	"/{event_team_id}/volunteers/role/{volunteer_id}",
 	operation_id="changeCampusEventVolunteerRole",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def update_volunteer_role(
 	event_team_id: UUID,
@@ -418,6 +430,7 @@ def update_volunteer_role(
 @router.post(
 	"/{event_team_id}/volunteers/drop/{volunteer_id}",
 	operation_id="dropCampusEventVolunteer",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def drop_volunteer(
 	event_team_id: UUID,

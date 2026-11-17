@@ -197,7 +197,11 @@ def _planning_response(
 	)
 
 
-@router.get("/", operation_id="getCampusEvents")
+@router.get(
+	"/",
+	operation_id="getCampusEvents",
+	openapi_extra={"x-sync-tags": ["campus-events"]},
+)
 def get_campus_events(
 	db: DatabaseSession,
 	user: CurrentUser,
@@ -248,6 +252,7 @@ def get_campus_event_planning(
 @router.get(
 	"/teams/{event_team_id}/volunteer-requests",
 	operation_id="getCampusEventTeamVolunteerRequests",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
 def get_team_volunteer_requests(
 	event_team_id: UUID,
@@ -285,7 +290,11 @@ def get_team_volunteer_requests(
 	return [_request_roster_item(request) for request in requests]
 
 
-@router.get("/volunteer-requests", operation_id="getMyVolunteerRequests")
+@router.get(
+	"/volunteer-requests",
+	operation_id="getMyVolunteerRequests",
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
+)
 def get_my_volunteer_requests(
 	db: DatabaseSession,
 	user: CurrentUser,
@@ -311,4 +320,5 @@ router.add_api_route(
 	methods=["GET"],
 	operation_id="getCampusEventPlanning",
 	response_model=CampusEventPlanningResponse,
+	openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
