@@ -370,7 +370,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 						onClick={() => (isConfirming ? save(actions) : beginConfirmation())}
 						type="button"
 					>
-						{isConfirming ? "Apply changes" : "Review changes"}
+						{isConfirming ? "Apply changes" : "Save changes"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
