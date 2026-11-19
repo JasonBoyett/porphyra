@@ -27,11 +27,16 @@ type RoleDraft = {
 }
 type VolunteerAction = { assignmentId: string; action: "drop" | "reassign"; roleName: string }
 
-const localDateTime = (value: string | null) => {
+const localDatePart = (date: Date) => {
+	const pad = (part: number) => String(part).padStart(2, "0")
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+const localTimePart = (value: string | null) => {
 	if (value === null) return ""
 	const date = new Date(value)
 	const pad = (part: number) => String(part).padStart(2, "0")
-	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+	return `${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 const createRoleDraft = (role: Omit<RoleDraft, "id">): RoleDraft => ({
@@ -42,6 +47,8 @@ const createRoleDraft = (role: Omit<RoleDraft, "id">): RoleDraft => ({
 export const EditTeamDialog = (props: EditTeamDialogProps) => {
 	const updateTeam = apiClient.updateCampusEventTeamRoleRequirements.useMutation()
 	const [callTime, setCallTime] = useState("")
+	const [callDate, setCallDate] = useState("")
+	const [usesDifferentCallDate, setUsesDifferentCallDate] = useState(false)
 	const [callTimeChanged, setCallTimeChanged] = useState(false)
 	const [roles, setRoles] = useState<RoleDraft[]>([])
 	const [isConfirming, setIsConfirming] = useState(false)
@@ -50,7 +57,12 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 
 	useEffect(() => {
 		if (!props.open) return
-		setCallTime(localDateTime(props.team.callTime))
+		const serviceDate = localDatePart(new Date(props.event.startsAt))
+		const teamCallDate =
+			props.team.callTime === null ? serviceDate : localDatePart(new Date(props.team.callTime))
+		setCallDate(teamCallDate)
+		setCallTime(localTimePart(props.team.callTime))
+		setUsesDifferentCallDate(teamCallDate !== serviceDate)
 		setCallTimeChanged(false)
 		setRoles(
 			Object.entries(props.team.roles).map(([name, role]) =>
@@ -64,7 +76,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 		)
 		setActions([])
 		setIsConfirming(false)
-	}, [props.open, props.team])
+	}, [props.event.startsAt, props.open, props.team])
 
 	const roleNames = useMemo(() => roles.map((role) => role.name.trim()).filter(Boolean), [roles])
 	const rolesAreValid =
@@ -107,7 +119,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 				callTime: callTimeChanged
 					? callTime === ""
 						? null
-						: new Date(callTime).toISOString()
+						: new Date(`${callDate}T${callTime}`).toISOString()
 					: props.team.callTime,
 				event_team_id: props.team.id,
 				roles: Object.fromEntries(
@@ -226,9 +238,37 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 									setCallTime(event.target.value)
 									setCallTimeChanged(true)
 								}}
-								type="datetime-local"
+								type="time"
 								value={callTime}
 							/>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									checked={usesDifferentCallDate}
+									onChange={(event) => {
+										const usesDifferentDate = event.target.checked
+										setUsesDifferentCallDate(usesDifferentDate)
+										if (!usesDifferentDate)
+											setCallDate(localDatePart(new Date(props.event.startsAt)))
+										setCallTimeChanged(true)
+									}}
+									type="checkbox"
+								/>
+								Use a different day
+							</label>
+							{usesDifferentCallDate && (
+								<div className="grid gap-2">
+									<Label htmlFor="team-call-date">Call date</Label>
+									<Input
+										id="team-call-date"
+										onChange={(event) => {
+											setCallDate(event.target.value)
+											setCallTimeChanged(true)
+										}}
+										type="date"
+										value={callDate}
+									/>
+								</div>
+							)}
 							<p className="text-xs text-muted-foreground">
 								Changing this asks every scheduled volunteer to confirm again.
 							</p>

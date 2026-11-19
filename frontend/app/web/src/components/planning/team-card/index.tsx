@@ -206,7 +206,9 @@ export const TeamCard = (props: TeamCardProps) => {
 					)}
 				</div>
 			</CardContent>
-			{isEditing && <EditTeamDialog onOpenChange={setIsEditing} open team={props.team} />}
+			{isEditing && (
+				<EditTeamDialog event={props.event} onOpenChange={setIsEditing} open team={props.team} />
+			)}
 		</Card>
 	)
 }
