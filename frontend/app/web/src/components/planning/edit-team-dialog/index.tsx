@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from "@/components/ui/emoji-picker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Localized } from "@/localization"
 import type { EditTeamDialogProps } from "./types"
 
 type RoleDraft = {
@@ -370,7 +371,11 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 						onClick={() => (isConfirming ? save(actions) : beginConfirmation())}
 						type="button"
 					>
-						{isConfirming ? "Apply changes" : "Save changes"}
+						{isConfirming ? (
+							<Localized str="planning.applyChanges" />
+						) : (
+							<Localized str="planning.saveChanges" />
+						)}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

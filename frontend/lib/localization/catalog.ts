@@ -73,6 +73,8 @@ export const porphyraCatalog = {
 			"planning.role": "Role",
 			"planning.roleAriaLabel": "{name}'s role",
 			"planning.save": "Save",
+			"planning.saveChanges": "Save changes",
+			"planning.applyChanges": "Apply changes",
 			"planning.unableToLoad": "Unable to load this schedule. Please try again.",
 			"volunteers.myServing": "My serving",
 			"volunteers.noAssignments": "Nothing scheduled here",
