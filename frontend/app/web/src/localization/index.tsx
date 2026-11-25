@@ -30,6 +30,7 @@ type TranslationContextValue = {
 	activeLocale: string
 	catalog: TranslationCatalog
 	createScopeIdentity: IdentityStrategy
+	isLocalizationInspectionEnabled: boolean
 	resolve: (
 		key: string,
 		contextualId: string,
@@ -37,6 +38,7 @@ type TranslationContextValue = {
 		pluralize?: boolean,
 	) => ResolvedTranslation
 	resolveShared: (key: string, values?: TranslationValues, pluralize?: boolean) => string
+	setLocalizationInspectionEnabled: (enabled: boolean) => void
 	setLocale: (locale: string) => void
 	sourceLocale: string
 	supportedLocales: readonly string[]
@@ -53,6 +55,13 @@ export type ResolvedTranslation = {
 
 const translationContext = createContext<TranslationContextValue | null>(null)
 const localizationScopeContext = createContext<ScopeContextValue | null>(null)
+
+const localizationInspectionStyle: CSSProperties = {
+	backgroundColor: "#ffeb00",
+	color: "#000",
+	outline: "2px solid #f00",
+	outlineOffset: "2px",
+}
 
 export const createLocalizedElementId = (scopeId: string, key: string) => `${scopeId}:${key}`
 
@@ -117,15 +126,20 @@ export const resolveSharedTranslation = (
 export type TranslationProviderProps = PropsWithChildren<{
 	catalog: TranslationCatalog
 	identityStrategy?: IdentityStrategy
+	initialLocalizationInspectionEnabled?: boolean
 }>
 
 export const TranslationProvider = ({
 	catalog,
 	children,
 	identityStrategy = defaultIdentityStrategy,
+	initialLocalizationInspectionEnabled = false,
 }: TranslationProviderProps) => {
 	const [activeLocale, setLocale] = useState(() =>
 		selectLocale(catalog, typeof navigator === "undefined" ? [] : navigator.languages),
+	)
+	const [isLocalizationInspectionEnabled, setLocalizationInspectionEnabled] = useState(
+		initialLocalizationInspectionEnabled,
 	)
 	const supportedLocales = useMemo(() => Object.keys(catalog.locales), [catalog])
 	const value = useMemo<TranslationContextValue>(
@@ -133,15 +147,17 @@ export const TranslationProvider = ({
 			activeLocale,
 			catalog,
 			createScopeIdentity: identityStrategy,
+			isLocalizationInspectionEnabled,
 			resolve: (key, contextualId, values, pluralize) =>
 				resolveTranslation(catalog, activeLocale, key, contextualId, values, pluralize),
 			resolveShared: (key, values, pluralize) =>
 				resolveSharedTranslation(catalog, activeLocale, key, values, pluralize),
+			setLocalizationInspectionEnabled,
 			setLocale,
 			sourceLocale: catalog.sourceLocale,
 			supportedLocales,
 		}),
-		[activeLocale, catalog, identityStrategy, supportedLocales],
+		[activeLocale, catalog, identityStrategy, isLocalizationInspectionEnabled, supportedLocales],
 	)
 	return <translationContext.Provider value={value}>{children}</translationContext.Provider>
 }
@@ -186,7 +202,11 @@ export const useLocalizedString = (
 	const scope = useContext(localizationScopeContext)
 	if (scope === null) throw new Error(`Localized "${key}" requires an enclosing LocalizationScope.`)
 	const contextualId = createLocalizedElementId(scope.scopeId, key)
-	return { contextualId, ...translation.resolve(key, contextualId, values, pluralize) }
+	return {
+		contextualId,
+		isLocalizationInspectionEnabled: translation.isLocalizationInspectionEnabled,
+		...translation.resolve(key, contextualId, values, pluralize),
+	}
 }
 
 /**
@@ -222,7 +242,12 @@ export type LocalizedProps<K extends PorphyraTranslationKey> = {
 
 export const Localized = <K extends PorphyraTranslationKey>(props: LocalizedProps<K>) => {
 	const { asChild = false, children, pluralize = false, str, values } = props
-	const { contextualId, presentation, text } = useLocalizedString(str, values, pluralize)
+	const { contextualId, isLocalizationInspectionEnabled, presentation, text } = useLocalizedString(
+		str,
+		values,
+		pluralize,
+	)
+	const inspectionStyle = isLocalizationInspectionEnabled ? localizationInspectionStyle : undefined
 	if (asChild) {
 		if (!isValidElement(children)) {
 			throw new Error(
@@ -236,14 +261,17 @@ export const Localized = <K extends PorphyraTranslationKey>(props: LocalizedProp
 		}>
 		return cloneElement(child, {
 			"data-localization-id": contextualId,
-			style: { ...child.props.style, ...presentation },
+			style: { ...child.props.style, ...presentation, ...inspectionStyle },
 			children: text,
 		})
 	}
 
-	if (presentation === undefined) return text
+	if (presentation === undefined && inspectionStyle === undefined) return text
 	return (
-		<span data-localization-id={contextualId} style={presentation as CSSProperties | undefined}>
+		<span
+			data-localization-id={contextualId}
+			style={{ ...presentation, ...inspectionStyle } as CSSProperties}
+		>
 			{text}
 		</span>
 	)
@@ -255,7 +283,14 @@ export const SimpleLocalized = <K extends PorphyraTranslationKey>({
 }: Pick<LocalizedProps<K>, "str" | "values">) => useSimpleLocalizedString(str, values)
 
 export const DevelopmentLocaleSwitcher = () => {
-	const { activeLocale, setLocale, supportedLocales } = useTranslation()
+	const {
+		activeLocale,
+		isLocalizationInspectionEnabled,
+		setLocale,
+		setLocalizationInspectionEnabled,
+		supportedLocales,
+	} = useTranslation()
+	const inspectStringsLabel = useSimpleLocalizedString("common.inspectStrings")
 	const localeLabel = useSimpleLocalizedString("common.locale")
 	if (!import.meta.env.DEV || supportedLocales.length < 2) return null
 	return (
@@ -277,6 +312,14 @@ export const DevelopmentLocaleSwitcher = () => {
 					{locale}
 				</button>
 			))}
+			<button
+				aria-pressed={isLocalizationInspectionEnabled}
+				className={`rounded-full px-2 py-1 font-bold ${isLocalizationInspectionEnabled ? "bg-destructive text-destructive-foreground" : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"}`}
+				onClick={() => setLocalizationInspectionEnabled(!isLocalizationInspectionEnabled)}
+				type="button"
+			>
+				{inspectStringsLabel}
+			</button>
 		</div>
 	)
 }

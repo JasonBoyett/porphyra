@@ -71,6 +71,7 @@ export const porphyraCatalog = {
 			"common.all": "All",
 			"common.close": "Close",
 			"common.hello": "hello",
+			"common.inspectStrings": "Inspect strings",
 			"common.loading": "Loading…",
 			"common.locale": "Locale",
 			"common.signOut": "Sign out",

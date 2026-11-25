@@ -82,6 +82,21 @@ describe("localization resolution", () => {
 			resolveTranslation(catalog, "en", "common.volunteerCount", target, { count: 2 }),
 		).toEqual({ text: "2 volunteer" })
 	})
+
+	it("marks localized elements when localization inspection is enabled", () => {
+		const markup = renderToStaticMarkup(
+			<TranslationProvider catalog={catalog} initialLocalizationInspectionEnabled>
+				<LocalizationScope name="inspection-target">
+					<Localized asChild str="common.hello">
+						<button type="button" />
+					</Localized>
+				</LocalizationScope>
+			</TranslationProvider>,
+		)
+		expect(markup).toContain('data-localization-id="inspection-target:common.hello"')
+		expect(markup).toContain("background-color:#ffeb00")
+		expect(markup).toContain("outline:2px solid #f00")
+	})
 })
 
 describe("named localization scopes", () => {
