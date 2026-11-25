@@ -130,6 +130,8 @@ export const porphyraCatalog = {
 				"Unable to load this schedule. Please try again.",
 			"planning.volunteerDeclined": "{name} declined",
 			"planning.volunteerCancelled": "{name} cancelled their assignment",
+			"planning.volunteerAccepted": "Accepted",
+			"planning.volunteerPending": "Pending",
 			"volunteers.myServing": "My serving",
 			"volunteers.myMinistries": "My ministries",
 			"volunteers.noRequestsWaiting": "You have no requests waiting for a response.",

@@ -27,6 +27,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Localized, LocalizationScope } from "@/localization"
 import type { RosterVolunteerProps } from "./types"
 
 const initials = (name: string) =>
@@ -93,17 +94,27 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 				<small className="block truncate text-xs">{props.email}</small>
 				<div className="mt-1 flex items-center gap-1 text-xs">
 					<span>{props.roleEmoji ?? "✨"}</span>
-					<span>{props.roleName ?? "Volunteer"}</span>
-					<Badge
-						className={
-							props.status === "pending"
-								? "bg-accent/20 text-accent-foreground hover:bg-accent/20"
-								: "bg-primary/10 text-primary hover:bg-primary/10"
-						}
-						variant="secondary"
-					>
-						{props.status === "pending" ? "Pending" : "Accepted"}
-					</Badge>
+					<LocalizationScope name="planning.roster-volunteer-status">
+						<span>
+							{props.roleName ?? <Localized str="navigation.volunteer" />}
+						</span>
+						<Badge
+							className={
+								props.status === "pending"
+									? "bg-accent/20 text-accent-foreground hover:bg-accent/20"
+									: "bg-primary/10 text-primary hover:bg-primary/10"
+							}
+							variant="secondary"
+						>
+							<Localized
+								str={
+									props.status === "pending"
+										? "planning.volunteerPending"
+										: "planning.volunteerAccepted"
+								}
+							/>
+						</Badge>
+					</LocalizationScope>
 				</div>
 			</div>
 			{canManageAssignment && (
