@@ -256,13 +256,16 @@ export const SimpleLocalized = <K extends PorphyraTranslationKey>({
 
 export const DevelopmentLocaleSwitcher = () => {
 	const { activeLocale, setLocale, supportedLocales } = useTranslation()
+	const localeLabel = useSimpleLocalizedString("common.locale")
 	if (!import.meta.env.DEV || supportedLocales.length < 2) return null
 	return (
 		<div
 			aria-label="Development locale switcher"
 			className="fixed bottom-4 right-4 z-20 flex items-center gap-1 rounded-full border border-[color:var(--porphyra-surface-border)] bg-card/92 p-1 text-xs shadow-md backdrop-blur-md"
 		>
-			<span className="px-2 text-muted-foreground">Locale: {activeLocale}</span>
+			<span className="px-2 text-muted-foreground">
+				{localeLabel}: {activeLocale}
+			</span>
 			{supportedLocales.map((locale) => (
 				<button
 					aria-pressed={activeLocale === locale}

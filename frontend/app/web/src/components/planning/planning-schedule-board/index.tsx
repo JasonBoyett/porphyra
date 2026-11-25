@@ -3,15 +3,16 @@ import { CalendarDays, Clock3 } from "lucide-react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { TeamCard } from "@/components/planning/team-card"
-import { LocalizationScope } from "@/localization"
+import { Localized, LocalizationScope } from "@/localization"
+import type { PorphyraTranslationKey } from "@porphyra/frontend/localization"
 import type { PlanningScheduleBoardProps, ScheduleFilter } from "./types"
 
-const filters: readonly { id: ScheduleFilter; label: string }[] = [
-	{ id: "all", label: "All" },
-	{ id: "attention", label: "Needs attention" },
-	{ id: "confirmed", label: "Confirmed" },
-	{ id: "my-teams", label: "My teams" },
-]
+const filters = [
+	{ id: "all", label: "common.all" },
+	{ id: "attention", label: "planning.needsAttention" },
+	{ id: "confirmed", label: "planning.confirmed" },
+	{ id: "my-teams", label: "planning.myTeams" },
+] as const satisfies readonly { id: ScheduleFilter; label: PorphyraTranslationKey }[]
 
 const formatDate = (value: string) =>
 	new Intl.DateTimeFormat(undefined, {
@@ -41,7 +42,11 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 				</p>
 			</div>
 			<label className="grid min-w-[min(100%,20rem)] gap-2 text-sm font-bold">
-				<span>Event</span>
+				<LocalizationScope name="planning.event-selector-label">
+					<Localized asChild str="planning.event">
+						<span />
+					</Localized>
+				</LocalizationScope>
 				<select
 					aria-label="Event"
 					className="h-11 w-full rounded-md border border-input bg-card px-3 text-[.95rem] font-semibold outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -62,20 +67,32 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 			className="porphyra-panel flex items-end justify-between gap-6 max-md:flex-col max-md:items-stretch max-md:gap-4"
 		>
 			<label className="grid min-w-[min(100%,20rem)] gap-2 text-sm font-bold">
-				<span>Ministry</span>
+				<LocalizationScope name="planning.ministry-selector-label">
+					<Localized asChild str="planning.ministry">
+						<span />
+					</Localized>
+				</LocalizationScope>
 				<select
 					className="h-11 w-full rounded-md border border-input bg-card px-3 text-[.95rem] font-semibold outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
 					onChange={(choice) => props.onMinistryChange(choice.target.value)}
 					value={props.ministry}
 				>
-					<option>All ministries</option>
+					<option>
+						<LocalizationScope name="planning.all-ministries-option">
+							<Localized str="planning.allMinistries" />
+						</LocalizationScope>
+					</option>
 					{props.event.ministries.map((eventMinistry) => (
 						<option key={eventMinistry.id}>{eventMinistry.name}</option>
 					))}
 				</select>
 			</label>
 			<div className="grid gap-2">
-				<span className="text-sm font-bold">Show</span>
+				<LocalizationScope name="planning.filter-label">
+					<Localized asChild str="planning.show">
+						<span className="text-sm font-bold" />
+					</Localized>
+				</LocalizationScope>
 				<ToggleGroup
 					aria-label="Team status"
 					className="flex w-fit flex-wrap gap-2"
@@ -91,7 +108,9 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 							key={item.id}
 							value={item.id}
 						>
-							{item.label}
+							<LocalizationScope name={`planning.filter-${item.id}`}>
+								<Localized str={item.label} />
+							</LocalizationScope>
 						</ToggleGroupItem>
 					))}
 				</ToggleGroup>

@@ -142,7 +142,9 @@ export const TeamCard = (props: TeamCardProps) => {
 				<Separator />
 				<div className="pt-2">
 					<div className="flex justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-						<span>Roster</span>
+						<Localized asChild str="planning.roster">
+							<span />
+						</Localized>
 						<Localized
 							asChild
 							pluralize
