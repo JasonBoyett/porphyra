@@ -7,12 +7,19 @@ export type PresentationOverride = Readonly<{
 	textDecoration?: string;
 }>;
 
-export type ContextualOverride = Readonly<{
-	presentation?: PresentationOverride;
-	text?: string;
+export type PluralizedTranslation = Readonly<{
+	plural: string;
+	singular: string;
 }>;
 
-export type LocaleCatalog = Readonly<Record<string, string>>;
+export type Translation = string | PluralizedTranslation;
+
+export type ContextualOverride = Readonly<{
+	presentation?: PresentationOverride;
+	text?: Translation;
+}>;
+
+export type LocaleCatalog = Readonly<Record<string, Translation>>;
 
 export type TranslationCatalog = Readonly<{
 	contextual?: Readonly<
@@ -31,6 +38,17 @@ export const interpolate = (
 	template.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
 		values?.[name] === undefined ? placeholder : String(values[name]),
 	);
+
+export const resolvePluralizedTranslation = (
+	translation: Translation,
+	{
+		pluralize = false,
+		values,
+	}: Readonly<{ pluralize?: boolean; values?: TranslationValues }> = {},
+): string => {
+	if (typeof translation === "string") return translation;
+	return pluralize && values?.count !== 1 ? translation.plural : translation.singular;
+};
 
 /**
  * The application catalog is intentionally data-only. React applications inject it
@@ -84,8 +102,10 @@ export const porphyraCatalog = {
 			"planning.save": "Save",
 			"planning.saveChanges": "Save changes",
 			"planning.serviceRoles": "Service roles",
-			"planning.volunteerCount": "{count} volunteer",
-			"planning.volunteerCountPlural": "{count} volunteers",
+			"planning.volunteerCount": {
+				singular: "{count} volunteer",
+				plural: "{count} volunteers",
+			},
 			"planning.applyChanges": "Apply changes",
 			"planning.unableToLoad":
 				"Unable to load this schedule. Please try again.",

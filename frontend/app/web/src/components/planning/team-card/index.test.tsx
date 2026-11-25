@@ -55,15 +55,15 @@ describe("planning team roles", () => {
 			ministries: [{ id: "ministry", name: "Music", teams: [team] }],
 		}
 
-			expect(
-				renderToStaticMarkup(
-					<TranslationProvider catalog={porphyraCatalog}>
-						<LocalizationScope name="planning.team-rosters">
-							<TeamCard accessToken="fixture" event={event} onSchedule={() => {}} team={team} />
-						</LocalizationScope>
-					</TranslationProvider>,
-				),
-		).toContain("2 / 3")
+		const markup = renderToStaticMarkup(
+			<TranslationProvider catalog={porphyraCatalog}>
+				<LocalizationScope name="planning.team-rosters">
+					<TeamCard accessToken="fixture" event={event} onSchedule={() => {}} team={team} />
+				</LocalizationScope>
+			</TranslationProvider>,
+		)
+		expect(markup).toContain("2 / 3")
+		expect(markup).toContain("0 volunteers")
 	})
 
 	it("uses an open role as the scheduling control", () => {

@@ -145,11 +145,8 @@ export const TeamCard = (props: TeamCardProps) => {
 						<span>Roster</span>
 						<Localized
 							asChild
-							str={
-								volunteerCount === 1
-									? "planning.volunteerCount"
-									: "planning.volunteerCountPlural"
-							}
+							pluralize
+							str="planning.volunteerCount"
 							values={{ count: volunteerCount }}
 						>
 							<span />

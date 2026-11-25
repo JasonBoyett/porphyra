@@ -3,6 +3,7 @@ import {
 	type ContextualOverride,
 	type PorphyraTranslationKey,
 	type PresentationOverride,
+	resolvePluralizedTranslation,
 	type TranslationCatalog,
 	type TranslationValues,
 } from "@porphyra/frontend/localization"
@@ -25,8 +26,13 @@ type TranslationContextValue = {
 	activeLocale: string
 	catalog: TranslationCatalog
 	createScopeIdentity: IdentityStrategy
-	resolve: (key: string, contextualId: string, values?: TranslationValues) => ResolvedTranslation
-	resolveShared: (key: string, values?: TranslationValues) => string
+	resolve: (
+		key: string,
+		contextualId: string,
+		values?: TranslationValues,
+		pluralize?: boolean,
+	) => ResolvedTranslation
+	resolveShared: (key: string, values?: TranslationValues, pluralize?: boolean) => string
 	setLocale: (locale: string) => void
 	sourceLocale: string
 	supportedLocales: readonly string[]
@@ -79,12 +85,16 @@ export const resolveTranslation = (
 	key: string,
 	contextualId: string,
 	values?: TranslationValues,
+	pluralize = false,
 ): ResolvedTranslation => {
 	const contextual: ContextualOverride | undefined = catalog.contextual?.[locale]?.[contextualId]
 	const source = catalog.locales[catalog.sourceLocale]?.[key]
 	if (source === undefined) throw new Error(`Unknown localization key "${key}".`)
-	const text = contextual?.text ?? catalog.locales[locale]?.[key] ?? source
-	return { presentation: contextual?.presentation, text: interpolate(text, values) }
+	const translation = contextual?.text ?? catalog.locales[locale]?.[key] ?? source
+	return {
+		presentation: contextual?.presentation,
+		text: interpolate(resolvePluralizedTranslation(translation, { pluralize, values }), values),
+	}
 }
 
 export const resolveSharedTranslation = (
@@ -92,10 +102,12 @@ export const resolveSharedTranslation = (
 	locale: string,
 	key: string,
 	values?: TranslationValues,
+	pluralize = false,
 ): string => {
 	const source = catalog.locales[catalog.sourceLocale]?.[key]
 	if (source === undefined) throw new Error(`Unknown localization key "${key}".`)
-	return interpolate(catalog.locales[locale]?.[key] ?? source, values)
+	const translation = catalog.locales[locale]?.[key] ?? source
+	return interpolate(resolvePluralizedTranslation(translation, { pluralize, values }), values)
 }
 
 export type TranslationProviderProps = PropsWithChildren<{
@@ -117,9 +129,10 @@ export const TranslationProvider = ({
 			activeLocale,
 			catalog,
 			createScopeIdentity: identityStrategy,
-			resolve: (key, contextualId, values) =>
-				resolveTranslation(catalog, activeLocale, key, contextualId, values),
-			resolveShared: (key, values) => resolveSharedTranslation(catalog, activeLocale, key, values),
+			resolve: (key, contextualId, values, pluralize) =>
+				resolveTranslation(catalog, activeLocale, key, contextualId, values, pluralize),
+			resolveShared: (key, values, pluralize) =>
+				resolveSharedTranslation(catalog, activeLocale, key, values, pluralize),
 			setLocale,
 			sourceLocale: catalog.sourceLocale,
 			supportedLocales,
@@ -160,12 +173,16 @@ export const useLocalizationScopeId = (): string => {
 	return scope.scopeId
 }
 
-export const useLocalizedString = (key: PorphyraTranslationKey, values?: TranslationValues) => {
+export const useLocalizedString = (
+	key: PorphyraTranslationKey,
+	values?: TranslationValues,
+	pluralize = false,
+) => {
 	const translation = useTranslation()
 	const scope = useContext(localizationScopeContext)
 	if (scope === null) throw new Error(`Localized "${key}" requires an enclosing LocalizationScope.`)
 	const contextualId = createLocalizedElementId(scope.scopeId, key)
-	return { contextualId, ...translation.resolve(key, contextualId, values) }
+	return { contextualId, ...translation.resolve(key, contextualId, values, pluralize) }
 }
 
 /**
@@ -175,9 +192,11 @@ export const useLocalizedString = (key: PorphyraTranslationKey, values?: Transla
 export const useSimpleLocalizedString = (
 	key: PorphyraTranslationKey,
 	values?: TranslationValues,
-): string => useTranslation().resolveShared(key, values)
+	pluralize = false,
+): string => useTranslation().resolveShared(key, values, pluralize)
 
 export type LocalizedProps = {
+	pluralize?: boolean
 	str: PorphyraTranslationKey
 	values?: TranslationValues
 	/**
@@ -189,8 +208,14 @@ export type LocalizedProps = {
 	children?: ReactElement
 }
 
-export const Localized = ({ asChild = false, children, str, values }: LocalizedProps) => {
-	const { contextualId, presentation, text } = useLocalizedString(str, values)
+export const Localized = ({
+	asChild = false,
+	children,
+	pluralize = false,
+	str,
+	values,
+}: LocalizedProps) => {
+	const { contextualId, presentation, text } = useLocalizedString(str, values, pluralize)
 	if (asChild) {
 		if (!isValidElement(children)) {
 			throw new Error(

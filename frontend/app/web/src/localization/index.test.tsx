@@ -19,7 +19,14 @@ import {
 const catalog: TranslationCatalog = {
 	sourceLocale: "en",
 	locales: {
-		en: { "common.hello": "hello", "dashboard.church": "Church" },
+		en: {
+			"common.hello": "hello",
+			"common.volunteerCount": {
+				singular: "{count} volunteer",
+				plural: "{count} volunteers",
+			},
+			"dashboard.church": "Church",
+		},
 		test: { "common.hello": "shared" },
 	},
 	contextual: {
@@ -46,6 +53,19 @@ describe("localization resolution", () => {
 		expect(
 			resolveTranslation(catalog, "test", "dashboard.church", "dashboard:dashboard.church"),
 		).toEqual({ text: "Church" })
+	})
+
+	it("selects a plural form only when pluralization is requested", () => {
+		const target = "test:target:common.volunteerCount"
+		expect(
+			resolveTranslation(catalog, "en", "common.volunteerCount", target, { count: 1 }, true),
+		).toEqual({ text: "1 volunteer" })
+		expect(
+			resolveTranslation(catalog, "en", "common.volunteerCount", target, { count: 2 }, true),
+		).toEqual({ text: "2 volunteers" })
+		expect(
+			resolveTranslation(catalog, "en", "common.volunteerCount", target, { count: 2 }),
+		).toEqual({ text: "2 volunteer" })
 	})
 })
 
