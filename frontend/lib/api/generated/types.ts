@@ -53,6 +53,8 @@ export type CampusEventPlanningResponse =
 export type CampusEventResponse = components["schemas"]["CampusEventResponse"];
 export type CampusEventTeamScheduleResponse =
 	components["schemas"]["CampusEventTeamScheduleResponse"];
+export type CampusLocationResponse =
+	components["schemas"]["CampusLocationResponse"];
 export type ChurchMembership = components["schemas"]["ChurchMembership"];
 export type ConfirmScheduleRequest =
 	components["schemas"]["ConfirmScheduleRequest"];
@@ -73,6 +75,10 @@ export type DashboardViewerResponse =
 	components["schemas"]["DashboardViewerResponse"];
 export type EventResponse = components["schemas"]["EventResponse"];
 export type HTTPValidationError = components["schemas"]["HTTPValidationError"];
+export type MyVolunteerAssignmentResponse =
+	components["schemas"]["MyVolunteerAssignmentResponse"];
+export type MyVolunteerAssignmentsResponse =
+	components["schemas"]["MyVolunteerAssignmentsResponse"];
 export type RoleTemplateData = components["schemas"]["RoleTemplateData"];
 export type ScheduleMinistryRequest =
 	components["schemas"]["ScheduleMinistryRequest"];
@@ -100,3 +106,17 @@ export type VolunteerRequestRosterResponse =
 	components["schemas"]["VolunteerRequestRosterResponse"];
 export type _RoleInfoForTemplate =
 	components["schemas"]["_RoleInfoForTemplate"];
+
+export type ApiSyncResourceActionMethods<TTag extends string> =
+	TTag extends "volunteer-requests"
+		? {
+				accept: () => Promise<ApiOperationResponse<"acceptVolunteerRequest">>;
+				decline: () => Promise<ApiOperationResponse<"declineVolunteerRequest">>;
+			}
+		: TTag extends "volunteer-assignments"
+			? {
+					cancel: () => Promise<
+						ApiOperationResponse<"cancelMyVolunteerAssignment">
+					>;
+				}
+			: {};

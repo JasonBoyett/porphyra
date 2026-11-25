@@ -1,12 +1,13 @@
 from datetime import datetime
-from typing import Self
+from typing import ClassVar, Self
 from uuid import UUID
 
 from pydantic import Field, RootModel
 
+from app.api.v1.campuses.schemas import CampusLocationResponse
 from app.db.schemas import RoleTemplateData, TeamRoleData
 from app.schemas.base import ApiModel
-from app.sync.model import SyncableApiModel
+from app.sync.model import SyncableApiModel, SyncModel
 
 
 class CreateCampusEventRequest(ApiModel):
@@ -78,6 +79,7 @@ class EventResponse(ApiModel):
 
 class CampusEventResponse(EventResponse, SyncableApiModel):
 	campus_id: UUID
+	campus_location: CampusLocationResponse
 
 
 class ScheduledMinistryResponse(SyncableApiModel):
@@ -132,7 +134,53 @@ class VolunteerAssignmentResponse(SyncableApiModel):
 	conflict_confirmed_at: datetime | None
 
 
-class VolunteerRequestResponse(ApiModel):
+class VolunteerAssignmentIdentity(ApiModel):
+	id: UUID
+	campus_event_team_id: UUID
+
+
+class MyVolunteerAssignmentResponse(ApiModel, SyncModel[VolunteerAssignmentIdentity]):
+	sync_tag: ClassVar[str] = "volunteer-assignments"
+	id: UUID
+	campus_event_team_id: UUID
+	campus_id: UUID
+	campus_name: str
+	campus_location: CampusLocationResponse
+	event_id: UUID
+	event_title: str
+	event_starts_at: datetime
+	ministry_id: UUID
+	ministry_name: str
+	team_id: UUID
+	team_name: str
+	role_name: str | None
+	role_emoji: str | None
+	call_time: datetime | None
+	notes: list[str]
+
+	@classmethod
+	def sync_identity_type(cls) -> type[VolunteerAssignmentIdentity]:
+		return VolunteerAssignmentIdentity
+
+	def sync_identity(self) -> VolunteerAssignmentIdentity:
+		return VolunteerAssignmentIdentity(
+			id=self.id,
+			campus_event_team_id=self.campus_event_team_id,
+		)
+
+
+class MyVolunteerAssignmentsResponse(ApiModel):
+	user_id: UUID
+	assignments: list[MyVolunteerAssignmentResponse]
+
+
+class VolunteerRequestIdentity(ApiModel):
+	id: UUID
+	campus_event_team_id: UUID
+
+
+class VolunteerRequestResponse(ApiModel, SyncModel[VolunteerRequestIdentity]):
+	sync_tag: ClassVar[str] = "volunteer-requests"
 	id: UUID
 	campus_event_team_id: UUID
 	team_membership_id: UUID
@@ -140,6 +188,16 @@ class VolunteerRequestResponse(ApiModel):
 	role_emoji: str | None
 	status: str
 	replacing_id: UUID | None
+
+	@classmethod
+	def sync_identity_type(cls) -> type[VolunteerRequestIdentity]:
+		return VolunteerRequestIdentity
+
+	def sync_identity(self) -> VolunteerRequestIdentity:
+		return VolunteerRequestIdentity(
+			id=self.id,
+			campus_event_team_id=self.campus_event_team_id,
+		)
 
 
 class VolunteerRequestRosterResponse(VolunteerRequestResponse):
@@ -195,6 +253,7 @@ class CampusEventListItem(ApiModel):
 	church_name: str
 	campus_id: UUID
 	campus_name: str
+	campus_location: CampusLocationResponse
 	title: str
 	starts_at: datetime
 	ends_at: datetime | None

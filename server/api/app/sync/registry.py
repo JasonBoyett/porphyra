@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 
 from fastapi import WebSocket
 
+from app.sync.contracts import SyncTarget
 from app.sync.tags import SyncTag
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,8 @@ logger = logging.getLogger(__name__)
 class SyncNotification:
     recipients: tuple[UUID, ...]
     tags: tuple[SyncTag, ...]
+    targets: tuple[SyncTarget, ...] = ()
+    call_key: UUID | None = None
 
 
 @dataclass(frozen=True)
@@ -53,7 +56,18 @@ class SocketRegistry:
                 self._sockets.pop(user_id, None)
 
     def notify(self, notification: SyncNotification) -> None:
-        payload = {"type": "changed", "tags": list(notification.tags)}
+        payload: dict[str, Any]
+        if notification.targets:
+            payload = {
+                "type": "sync.invalidate",
+                "targets": [target.wire_value() for target in notification.targets],
+            }
+            if notification.tags:
+                payload["tags"] = list(notification.tags)
+            if notification.call_key is not None:
+                payload["callKey"] = str(notification.call_key)
+        else:
+            payload = {"type": "changed", "tags": list(notification.tags)}
         with self._lock:
             connections = [
                 connection

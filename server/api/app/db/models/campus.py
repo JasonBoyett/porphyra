@@ -18,7 +18,13 @@ class Campus(DatabaseModel, table=True):
 	__table_args__ = (UniqueConstraint("church_id", "name"),)
 
 	name: str
+	address_line_1: str = typed_field(default="")
+	address_line_2: str | None = typed_field(default=None, nullable=True)
 	city: str = typed_field(default="")
+	region: str = typed_field(default="")
+	postal_code: str = typed_field(default="")
+	country_code: str = typed_field(default="")
+	time_zone: str = typed_field(default="Etc/UTC")
 
 	church_id: UUID = typed_field(foreign_key="church.id")
 	church: "Church" = typed_relationship(

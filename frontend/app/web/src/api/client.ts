@@ -4,10 +4,12 @@ import { apiOperations } from "@porphyra/frontend/api/operations"
 import type {
 	CampusEventPlanningResponse,
 	DashboardResponse,
+	MyVolunteerAssignmentResponse,
 	ScheduledVolunteerResponse,
 	TeamRoleResponse,
 	VolunteerAssignmentResponse,
 	VolunteerRequestRosterResponse,
+	ApiSyncResourceActionMethods,
 } from "@porphyra/frontend/api/types"
 
 import { getStoredSession } from "@/auth"
@@ -19,7 +21,11 @@ export type PlannedVolunteer = ScheduledVolunteerResponse
 export type TeamRole = TeamRoleResponse
 export type VolunteerRequestStatus = VolunteerRequestRosterResponse["status"]
 export type VolunteerRequest = VolunteerRequestRosterResponse
+export type VolunteerRequestWithActions = VolunteerRequest &
+	ApiSyncResourceActionMethods<"volunteer-requests">
 export type VolunteerAssignment = VolunteerAssignmentResponse
+export type VolunteerAssignmentWithActions = MyVolunteerAssignmentResponse &
+	ApiSyncResourceActionMethods<"volunteer-assignments">
 export type CampusEventPlanning = CampusEventPlanningResponse
 
 const http = axios.create({

@@ -12,6 +12,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/church-memberships/",
 		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	getChurchMembership: {
 		method: "get",
@@ -21,6 +23,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/church-memberships/{church_id}",
 		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	getDashboard: {
 		method: "get",
@@ -30,6 +34,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/dashboard/",
 		syncTags: ["dashboard"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	getCampusEvents: {
 		method: "get",
@@ -39,6 +45,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/events/campus/",
 		syncTags: ["campus-events"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	createCampusEvent: {
 		method: "post",
@@ -48,6 +56,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	getCampusEventTeamVolunteerRequests: {
 		method: "get",
@@ -56,7 +66,48 @@ export const apiOperations = {
 		queryParams: ["include_resolved"],
 		requestContentType: null,
 		route: "/api/v1/events/campus/teams/{event_team_id}/volunteer-requests",
-		syncTags: ["campus-events", "campus-event-planning"],
+		syncTags: ["campus-event-team-volunteer-requests"],
+		syncResourceViews: [
+			{
+				tag: "volunteer-requests",
+				path: "$[]",
+				identity: ["id", "campusEventTeamId"],
+			},
+		],
+		syncQueryTargets: [
+			{
+				tag: "campus-event-team-volunteer-requests",
+				identity: {
+					eventTeamId: "$input.event_team_id",
+				},
+			},
+		],
+	},
+	getMyVolunteerAssignments: {
+		method: "get",
+		hasBody: false,
+		pathParams: [],
+		queryParams: [],
+		requestContentType: null,
+		route: "/api/v1/events/campus/volunteer-assignments",
+		syncTags: [
+			"campus-events",
+			"campus-event-planning",
+			"my-volunteer-assignments",
+		],
+		syncResourceViews: [
+			{
+				tag: "my-volunteer-assignments",
+				path: "$",
+				identity: ["userId"],
+			},
+			{
+				tag: "volunteer-assignments",
+				path: "$.assignments[]",
+				identity: ["id", "campusEventTeamId"],
+			},
+		],
+		syncQueryTargets: [],
 	},
 	getMyVolunteerRequests: {
 		method: "get",
@@ -66,6 +117,14 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/events/campus/volunteer-requests",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [
+			{
+				tag: "volunteer-requests",
+				path: "$[]",
+				identity: ["id", "campusEventTeamId"],
+			},
+		],
+		syncQueryTargets: [],
 	},
 	getCampusEventPlanning: {
 		method: "get",
@@ -75,6 +134,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/events/campus/{event_id}",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	createChurchEvent: {
 		method: "post",
@@ -84,6 +145,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/church/",
 		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	scheduleCampusEventMinistry: {
 		method: "post",
@@ -93,6 +156,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/{event_id}/ministries",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	scheduleCampusEventTeam: {
 		method: "post",
@@ -102,6 +167,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/ministries/{event_ministry_id}/teams",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	updateCampusEventTeamRoleRequirements: {
 		method: "patch",
@@ -111,6 +178,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/{event_team_id}/roles",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	assignCampusEventVolunteer: {
 		method: "post",
@@ -119,7 +188,9 @@ export const apiOperations = {
 		queryParams: [],
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/{event_team_id}/volunteers",
-		syncTags: ["campus-events", "campus-event-planning"],
+		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	createVolunteerReplacement: {
 		method: "post",
@@ -129,7 +200,9 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route:
 			"/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/replacement",
-		syncTags: ["campus-events", "campus-event-planning"],
+		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	acceptVolunteerRequest: {
 		method: "post",
@@ -139,7 +212,9 @@ export const apiOperations = {
 		requestContentType: null,
 		route:
 			"/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/accept",
-		syncTags: ["campus-events", "campus-event-planning"],
+		syncTags: ["volunteer-requests"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	declineVolunteerRequest: {
 		method: "post",
@@ -149,7 +224,9 @@ export const apiOperations = {
 		requestContentType: null,
 		route:
 			"/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/decline",
-		syncTags: ["campus-events", "campus-event-planning"],
+		syncTags: ["volunteer-requests"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	changeCampusEventVolunteerRole: {
 		method: "post",
@@ -160,6 +237,8 @@ export const apiOperations = {
 		route:
 			"/api/v1/events/campus/{event_team_id}/volunteers/role/{volunteer_id}",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	dropCampusEventVolunteer: {
 		method: "post",
@@ -170,6 +249,20 @@ export const apiOperations = {
 		route:
 			"/api/v1/events/campus/{event_team_id}/volunteers/drop/{volunteer_id}",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
+	},
+	cancelMyVolunteerAssignment: {
+		method: "post",
+		hasBody: false,
+		pathParams: ["event_team_id", "volunteer_id"],
+		queryParams: [],
+		requestContentType: null,
+		route:
+			"/api/v1/events/campus/{event_team_id}/volunteers/{volunteer_id}/cancel",
+		syncTags: ["volunteer-assignments"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	confirmCampusEventTeam: {
 		method: "post",
@@ -179,6 +272,8 @@ export const apiOperations = {
 		requestContentType: "application/json",
 		route: "/api/v1/events/campus/{event_team_id}/confirmation",
 		syncTags: ["campus-events", "campus-event-planning"],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	getCurrentUser: {
 		method: "get",
@@ -188,6 +283,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/api/v1/me/",
 		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 	health_health_get: {
 		method: "get",
@@ -197,6 +294,8 @@ export const apiOperations = {
 		requestContentType: null,
 		route: "/health",
 		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
 	},
 } as const;
 
@@ -204,6 +303,69 @@ export const apiSyncTags = [
 	"dashboard",
 	"campus-events",
 	"campus-event-planning",
+	"campus-event-team-volunteer-requests",
+	"my-volunteer-assignments",
+	"volunteer-requests",
+	"volunteer-assignments",
 ] as const;
 export type ApiSyncTag =
 	(typeof apiOperations)[keyof typeof apiOperations]["syncTags"][number];
+
+export const apiSyncResources = [
+	{
+		kind: "resource",
+		tag: "volunteer-requests",
+		identity: ["id", "campusEventTeamId"],
+		refreshOperationId: null,
+		mutateOperationId: null,
+		actions: [
+			{
+				name: "accept",
+				operationId: "acceptVolunteerRequest",
+				parameterBindings: {
+					event_team_id: "campusEventTeamId",
+					request_id: "id",
+				},
+			},
+			{
+				name: "decline",
+				operationId: "declineVolunteerRequest",
+				parameterBindings: {
+					event_team_id: "campusEventTeamId",
+					request_id: "id",
+				},
+			},
+		],
+	},
+	{
+		kind: "collection",
+		tag: "campus-event-team-volunteer-requests",
+		identity: ["eventTeamId"],
+		memberTag: "volunteer-requests",
+		refreshOperationId: "getCampusEventTeamVolunteerRequests",
+	},
+	{
+		kind: "resource",
+		tag: "volunteer-assignments",
+		identity: ["id", "campusEventTeamId"],
+		refreshOperationId: null,
+		mutateOperationId: null,
+		actions: [
+			{
+				name: "cancel",
+				operationId: "cancelMyVolunteerAssignment",
+				parameterBindings: {
+					event_team_id: "campusEventTeamId",
+					volunteer_id: "id",
+				},
+			},
+		],
+	},
+	{
+		kind: "collection",
+		tag: "my-volunteer-assignments",
+		identity: ["userId"],
+		memberTag: "volunteer-assignments",
+		refreshOperationId: "getMyVolunteerAssignments",
+	},
+] as const;

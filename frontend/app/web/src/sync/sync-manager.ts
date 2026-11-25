@@ -1,9 +1,27 @@
 import type { Query, QueryClient } from "@tanstack/react-query"
 
 import { isApiTag, type ApiTag } from "../api/tags"
+import {
+	isSyncIdentity,
+	syncIdentitiesIn,
+	syncIdentityKey,
+	type SyncIdentity,
+	type SyncResourceView,
+} from "./identity"
+import { consumeSyncCallKey } from "./call-keys"
 
-type TaggedQueryMeta = { syncTags?: readonly ApiTag[] }
+type TaggedQueryMeta = {
+	syncTags?: readonly ApiTag[]
+	syncTargets?: readonly SyncIdentity[]
+	syncResourceViews?: readonly SyncResourceView[]
+}
 type SyncEvent = { type: "changed"; tags: ApiTag[] }
+type IdentitySyncEvent = {
+	type: "sync.invalidate"
+	targets: SyncIdentity[]
+	tags?: ApiTag[]
+	callKey?: string
+}
 type SocketFactory = (url: string, protocols: string[]) => WebSocket
 type TimerHandle = ReturnType<typeof setTimeout>
 
@@ -41,6 +59,8 @@ export class SyncManager {
 	readonly #reconnectDelayMs: number
 	readonly #schedule: (callback: () => void, delay: number) => TimerHandle
 	readonly #cancelSchedule: (handle: TimerHandle) => void
+	readonly #identityIndex = new Map<string, Set<Query>>()
+	readonly #unsubscribeCache: () => void
 	#accessToken: string | null
 	#socket: WebSocket | undefined
 	#reconnectTimer: TimerHandle | undefined
@@ -58,6 +78,10 @@ export class SyncManager {
 		this.#reconnectDelayMs = options.reconnectDelayMs ?? 1_000
 		this.#schedule = options.schedule ?? ((callback, delay) => setTimeout(callback, delay))
 		this.#cancelSchedule = options.cancelSchedule ?? ((handle) => clearTimeout(handle))
+		this.#unsubscribeCache = queryClient.getQueryCache().subscribe((event) => {
+			if (event.query !== undefined) this.#indexQuery(event.query)
+		})
+		for (const query of queryClient.getQueryCache().getAll()) this.#indexQuery(query)
 	}
 
 	public addTags(tags: readonly ApiTag[]) {
@@ -88,6 +112,7 @@ export class SyncManager {
 	public dispose() {
 		if (this.#disposed) return
 		this.#disposed = true
+		this.#unsubscribeCache()
 		this.#activeTags.clear()
 		this.#disconnect()
 	}
@@ -162,7 +187,25 @@ export class SyncManager {
 		} catch {
 			return
 		}
+		if (this.#isIdentitySyncEvent(message)) {
+			if (message.callKey !== undefined && consumeSyncCallKey(message.callKey)) return
+			this.#invalidateTargets(message.targets)
+			if (message.tags !== undefined) this.#invalidateTags(message.tags)
+			return
+		}
 		if (this.#isSyncEvent(message)) this.#invalidateTags(message.tags)
+	}
+
+	#isIdentitySyncEvent(message: unknown): message is IdentitySyncEvent {
+		if (typeof message !== "object" || message === null) return false
+		const candidate = message as Partial<IdentitySyncEvent>
+		return (
+			candidate.type === "sync.invalidate" &&
+			Array.isArray(candidate.targets) &&
+			candidate.targets.every(isSyncIdentity) &&
+			(candidate.tags === undefined || (Array.isArray(candidate.tags) && candidate.tags.every(isApiTag))) &&
+			(candidate.callKey === undefined || typeof candidate.callKey === "string")
+		)
 	}
 
 	#isSyncEvent(message: unknown): message is SyncEvent {
@@ -185,5 +228,33 @@ export class SyncManager {
 		void this.#queryClient.invalidateQueries({
 			predicate: (query) => tagsForQuery(query).some((tag) => changedTags.has(tag)),
 		})
+	}
+
+	#invalidateTargets(targets: readonly SyncIdentity[]) {
+		const changedQueries = new Set<Query>()
+		for (const target of targets) {
+			for (const query of this.#identityIndex.get(syncIdentityKey(target)) ?? []) {
+				changedQueries.add(query)
+			}
+		}
+		if (changedQueries.size === 0) return
+		void this.#queryClient.invalidateQueries({
+			predicate: (query) => changedQueries.has(query),
+		})
+	}
+
+	#indexQuery(query: Query) {
+		for (const queries of this.#identityIndex.values()) queries.delete(query)
+		const meta = query.meta as TaggedQueryMeta | undefined
+		const identities = [
+			...(meta?.syncTargets ?? []),
+			...syncIdentitiesIn(query.state.data, meta?.syncResourceViews ?? []),
+		]
+		for (const identity of identities) {
+			const key = syncIdentityKey(identity)
+			const queries = this.#identityIndex.get(key) ?? new Set<Query>()
+			queries.add(query)
+			this.#identityIndex.set(key, queries)
+		}
 	}
 }

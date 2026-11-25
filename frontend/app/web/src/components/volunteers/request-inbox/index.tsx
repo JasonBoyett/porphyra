@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Check, X } from "lucide-react"
+import { toast } from "sonner"
 
-import { apiClient, type VolunteerRequest } from "@/api/client"
+import type { VolunteerRequestWithActions } from "@/api/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,18 +10,15 @@ import type { RequestInboxProps } from "./types"
 
 export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
 	const [respondedRequestIds, setRespondedRequestIds] = useState<string[]>([])
-	const accept = apiClient.acceptVolunteerRequest.useMutation()
-	const decline = apiClient.declineVolunteerRequest.useMutation()
-	const pendingRequests = requests.filter(
-		(request) => request.status === "pending" && !respondedRequestIds.includes(request.id),
-	)
-	const respond = (request: VolunteerRequest, response: "accept" | "decline") => {
+	const pendingRequests = requests.filter((request) => !respondedRequestIds.includes(request.id))
+	const respond = async (request: VolunteerRequestWithActions, response: "accept" | "decline") => {
 		setRespondedRequestIds((ids) => [...ids, request.id])
-		const mutation = response === "accept" ? accept : decline
-		mutation.mutate(
-			{ event_team_id: request.campusEventTeamId, request_id: request.id },
-			{ onError: () => setRespondedRequestIds((ids) => ids.filter((id) => id !== request.id)) },
-		)
+		try {
+			await request[response]()
+		} catch {
+			setRespondedRequestIds((ids) => ids.filter((id) => id !== request.id))
+			toast.error("Your response could not be saved. Please try again.")
+		}
 	}
 
 	if (pendingRequests.length === 0) {
@@ -53,7 +51,7 @@ export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
 						</p>
 						<div className="flex gap-2">
 							<Button
-								disabled={accept.isPending || decline.isPending}
+								disabled={respondedRequestIds.includes(request.id)}
 								onClick={() => respond(request, "decline")}
 								size="sm"
 								variant="outline"
@@ -62,7 +60,7 @@ export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
 								Decline
 							</Button>
 							<Button
-								disabled={accept.isPending || decline.isPending}
+								disabled={respondedRequestIds.includes(request.id)}
 								onClick={() => respond(request, "accept")}
 								size="sm"
 							>

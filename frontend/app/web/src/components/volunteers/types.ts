@@ -8,13 +8,17 @@ export type VolunteerAssignment = {
 	campusId: Campus["id"]
 	ministry: string
 	team: string
+	roleName?: string
 	eventName: string
+	eventStartsAt: string
 	dateLabel: string
 	dayOfWeek: string
 	month: string
 	day: string
 	location: string
+	mapUrl: string
 	callTime?: string
 	eventStartTime: string
-	note: string
+	note?: string
+	cancel?: () => Promise<unknown>
 }

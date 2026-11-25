@@ -20,6 +20,7 @@ from app.db.models import (
 )
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 from app.sync.audience import church_member_user_ids
+from app.sync.contracts import SyncTarget
 from app.sync.openapi import sync_tags
 from app.sync.publish import publish
 
@@ -106,6 +107,10 @@ def update_team_role_requirements(
         for assignment in event_team.volunteers
         if call_time_changed or assignment.role_name not in payload.roles.root
     ]
+    schedule_user_ids = {
+        assignment.team_membership.church_membership.user_id
+        for assignment in event_team.volunteers
+    }
     missing_actions = [
         assignment.id
         for assignment in affected_assignments
@@ -206,6 +211,26 @@ def update_team_role_requirements(
     db.add(event_team)
     db.flush()
     db.refresh(event_team)
+    for schedule_user_id in schedule_user_ids:
+        publish(
+            ScheduledTeamResponse(
+                sync_recipient_ids=[schedule_user_id],
+                id=event_team.id,
+                team_id=event_team.team_id,
+                call_time=event_team.call_time,
+                notes=event_team.notes,
+                confirmed_at=event_team.confirmed_at,
+                is_fully_staffed=event_team.is_fully_staffed,
+                roles=TeamRoleResponseData.from_role_data(event_team.role_data),
+            ),
+            targets=(
+                SyncTarget(
+                    "my-volunteer-assignments",
+                    {"userId": str(schedule_user_id)},
+                ),
+            ),
+            session=db,
+        )
     response = publish(
         ScheduledTeamResponse(
             sync_recipient_ids=church_member_user_ids(

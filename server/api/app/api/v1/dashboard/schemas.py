@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from app.api.v1.campuses.schemas import CampusLocationResponse
 from app.schemas.base import ApiModel
 
 
@@ -24,7 +25,7 @@ class DashboardMinistryResponse(ApiModel):
 class DashboardCampusResponse(ApiModel):
 	id: UUID
 	name: str
-	city: str
+	location: CampusLocationResponse
 
 
 class DashboardChurchResponse(ApiModel):

@@ -7,6 +7,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from app.config import settings
 from app.main import app
+from app.sync.contracts import SyncTarget
 from app.sync.registry import SyncNotification, socket_registry
 
 
@@ -76,9 +77,7 @@ def test_sync_socket_supports_multiple_tabs_and_isolates_recipients() -> None:
             ) as other_user_tab,
         ):
             assert first_tab.accepted_subprotocol == "porphyra.sync.v1"
-            socket_registry.notify(
-                SyncNotification((first_user_id,), ("dashboard",))
-            )
+            socket_registry.notify(SyncNotification((first_user_id,), ("dashboard",)))
             assert first_tab.receive_json() == {
                 "type": "changed",
                 "tags": ["dashboard"],
@@ -111,3 +110,32 @@ def test_disconnected_tab_does_not_prevent_remaining_tab_delivery() -> None:
                 SyncNotification((user_id,), ("campus-event-planning",))
             )
             assert remaining_tab.receive_json()["tags"] == ["campus-event-planning"]
+
+
+def test_sync_socket_broadcasts_identity_targets_to_every_tab() -> None:
+    token = _token("sync-target", "sync-target@example.com")
+    with TestClient(app) as client:
+        user_id = _provision(client, token)
+        with (
+            client.websocket_connect(
+                "/api/v1/sync", subprotocols=_protocols(token)
+            ) as first_tab,
+            client.websocket_connect(
+                "/api/v1/sync", subprotocols=_protocols(token)
+            ) as second_tab,
+        ):
+            socket_registry.notify(
+                SyncNotification(
+                    (user_id,),
+                    (),
+                    (SyncTarget("assignments", {"id": "assignment-42"}),),
+                )
+            )
+            expected = {
+                "type": "sync.invalidate",
+                "targets": [
+                    {"tag": "assignments", "identity": {"id": "assignment-42"}}
+                ],
+            }
+            assert first_tab.receive_json() == expected
+            assert second_tab.receive_json() == expected

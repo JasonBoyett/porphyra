@@ -1,0 +1,1 @@
+"""Campus API value objects."""

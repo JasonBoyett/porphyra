@@ -69,7 +69,7 @@ export const Dashboard = ({ churches, isError, isLoading, viewerName }: Dashboar
 											key={campus.id}
 										>
 											<MapPin className="size-4 shrink-0 text-primary" />
-											{campus.name} · {campus.city}
+											{campus.name} · {campus.location.city}
 										</span>
 									))}
 								</div>

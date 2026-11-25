@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Localized, LocalizationScope } from "@/localization"
 import type { TeamCardProps } from "./types"
 
 const formatTime = (value: string) =>
@@ -24,9 +25,13 @@ export const TeamCard = (props: TeamCardProps) => {
 	const pendingRequests = (props.team.volunteerRequests ?? []).filter(
 		(request) => request.status === "pending",
 	)
-	const rejectedRequests = (props.team.volunteerRequests ?? []).filter(
+	const declinedRequests = (props.team.volunteerRequests ?? []).filter(
 		(request) => request.status === "rejected",
 	)
+	const cancelledRequests = (props.team.volunteerRequests ?? []).filter(
+		(request) => request.status === "cancelled",
+	)
+	const replacementRequests = [...cancelledRequests, ...declinedRequests]
 	const volunteerCount = props.team.volunteers.length + pendingRequests.length
 	const acceptedCount = Object.values(props.team.roles).reduce(
 		(total, role) => total + (role.acceptedCount ?? role.scheduledUsers.length),
@@ -41,21 +46,21 @@ export const TeamCard = (props: TeamCardProps) => {
 		0,
 	)
 	const status =
-		rejectedRequests.length > 0
+		replacementRequests.length > 0
 			? {
-					className: "bg-rejected/10 text-rejected hover:bg-rejected/10",
-					label: "Pending rejections",
-				}
+				className: "bg-rejected/10 text-rejected hover:bg-rejected/10",
+				label: cancelledRequests.length > 0 ? "Cancelled assignments" : "Pending rejections",
+			}
 			: acceptedCount + pendingCount < requiredCount
 				? {
-						className: "bg-secondary/60 text-secondary-foreground hover:bg-secondary/60",
-						label: "Needs volunteers",
-					}
+					className: "bg-secondary/60 text-secondary-foreground hover:bg-secondary/60",
+					label: "Needs volunteers",
+				}
 				: pendingCount > 0
 					? {
-							className: "bg-accent/20 text-accent-foreground hover:bg-accent/20",
-							label: "Awaiting confirmation",
-						}
+						className: "bg-accent/20 text-accent-foreground hover:bg-accent/20",
+						label: "Awaiting confirmation",
+					}
 					: { className: "bg-primary/10 text-primary hover:bg-primary/10", label: "Ready" }
 
 	return (
@@ -97,9 +102,11 @@ export const TeamCard = (props: TeamCardProps) => {
 				<Separator />
 				<div>
 					<div className="flex justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-						<span>Service roles</span>
+						<Localized asChild str="planning.serviceRoles">
+							<span />
+						</Localized>
 					</div>
-					<div className="mt-3 grid gap-2">
+					<div className="my-3 grid gap-2">
 						{Object.entries(props.team.roles).map(([roleName, role]) => {
 							const accepted = role.acceptedCount ?? role.scheduledUsers.length
 							const pending = role.pendingCount ?? 0
@@ -133,14 +140,22 @@ export const TeamCard = (props: TeamCardProps) => {
 					</div>
 				</div>
 				<Separator />
-				<div>
+				<div className="pt-2">
 					<div className="flex justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
 						<span>Roster</span>
-						<span>
-							{volunteerCount} {volunteerCount === 1 ? "volunteer" : "volunteers"}
-						</span>
+						<Localized
+							asChild
+							str={
+								volunteerCount === 1
+									? "planning.volunteerCount"
+									: "planning.volunteerCountPlural"
+							}
+							values={{ count: volunteerCount }}
+						>
+							<span />
+						</Localized>
 					</div>
-					{volunteerCount > 0 || rejectedRequests.length > 0 ? (
+					{volunteerCount > 0 || replacementRequests.length > 0 ? (
 						<div className="min-w-0 max-w-full">
 							<ScrollArea
 								className="mt-3 w-full min-w-0 max-w-full overflow-hidden"
@@ -148,29 +163,46 @@ export const TeamCard = (props: TeamCardProps) => {
 								type="hover"
 							>
 								<div className="flex w-max gap-3 pb-3">
-									{rejectedRequests.map((request) => (
-										<Button
-											aria-label={`Find a replacement for ${request.name} as ${request.roleName}`}
-											className="h-auto w-64 shrink-0 justify-start border-rejected/50 bg-rejected/10 p-3 text-left text-rejected hover:border-rejected hover:bg-rejected/15"
-											disabled={request.roleName === null}
-											key={request.id}
-											onClick={() => {
-												if (request.roleName !== null) {
-													props.onSchedule(request.roleName, request.id)
-												}
-											}}
-											variant="outline"
-										>
-											<AlertTriangle data-icon="inline-start" />
-											<span className="grid gap-0.5">
-												<strong>{request.name} declined</strong>
-												<span className="text-xs font-normal">
-													{request.roleEmoji ?? "✨"} {request.roleName ?? "Volunteer"} · Find
-													replacement
+									{replacementRequests.map((request) => (
+										<LocalizationScope name="planning.replacement-request" key={request.id}>
+											<Button
+												aria-label={`Find a replacement for ${request.name} as ${request.roleName}`}
+												className="h-auto w-64 shrink-0 justify-start border-rejected/50 bg-rejected/10 p-3 text-left text-rejected hover:border-rejected hover:bg-rejected/15"
+												disabled={request.roleName === null}
+												onClick={() => {
+													if (request.roleName !== null) {
+														props.onSchedule(request.roleName, request.id)
+													}
+												}}
+												variant="outline"
+											>
+												<AlertTriangle data-icon="inline-start" />
+												<span className="grid gap-0.5">
+													{request.status === "cancelled" ? (
+														<Localized
+															asChild
+															str="planning.volunteerCancelled"
+															values={{ name: request.name }}
+														>
+															<strong />
+														</Localized>
+													) : (
+														<Localized
+															asChild
+															str="planning.volunteerDeclined"
+															values={{ name: request.name }}
+														>
+															<strong />
+														</Localized>
+													)}
+													<span className="text-xs font-normal">
+														{request.roleEmoji ?? "✨"} {request.roleName ?? "Volunteer"} · Find
+														replacement
+													</span>
 												</span>
-											</span>
-											<UserPlus data-icon="inline-end" />
-										</Button>
+												<UserPlus data-icon="inline-end" />
+											</Button>
+										</LocalizationScope>
 									))}
 									{props.team.volunteers.map((volunteer) => (
 										<RosterVolunteer

@@ -2,24 +2,25 @@ from sqlmodel import Session, SQLModel, select
 
 from app.db.engine import create_database_engine
 from app.db.models import (
+	Campus,
 	CampusEvent,
 	CampusEventTeamVolunteer,
 	Church,
 	ChurchMembership,
-	User,
 	VolunteerRequest,
 	VolunteerRequestStatus,
 )
 from app.seed.load import seed_database
 
 
-def test_seeded_sunday_service_assigns_development_user_idempotently() -> None:
+def test_seeded_sunday_service_leaves_development_user_available_idempotently() -> None:
 	engine = create_database_engine("sqlite://")
 	SQLModel.metadata.create_all(engine)
 	try:
 		with Session(engine) as db:
 			seed_database(db)
 			seed_database(db)
+			seeded_campuses = db.exec(select(Campus)).all()
 			event = db.exec(
 				select(CampusEvent).where(
 					CampusEvent.title == "Sunday Worship Service"
@@ -31,24 +32,20 @@ def test_seeded_sunday_service_assigns_development_user_idempotently() -> None:
 				for team in ministry.teams
 			}
 			assignments = db.exec(select(CampusEventTeamVolunteer)).all()
-			development_user = db.exec(
-				select(User).where(User.email == "dev@a244.tech")
-			).one()
 
 			assert len(planned_teams) == 4
 			assert event.is_staffed is False
 			assert {
 				team.id for team in event.teams_needing_confirmation
 			} == {team.id for team in planned_teams.values()}
-			assert len(assignments) == 2
-			assert {
-				assignment.team_membership.church_membership.user_id
-				for assignment in assignments
-			} == {development_user.id}
-			assert {assignment.event_team.team.name for assignment in assignments} == {
-				"Band",
-				"Fourth Grade",
-			}
+			assert assignments == []
+			assert all(campus.address_line_1 for campus in seeded_campuses)
+			assert all(campus.region for campus in seeded_campuses)
+			assert all(campus.postal_code for campus in seeded_campuses)
+			assert all(campus.country_code == "US" for campus in seeded_campuses)
+			assert all(
+				campus.time_zone == "America/Chicago" for campus in seeded_campuses
+			)
 			assert planned_teams["Band"].call_time is not None
 			assert planned_teams["Fourth Grade"].call_time is None
 			assert (

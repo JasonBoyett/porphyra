@@ -29,6 +29,36 @@ from app.db.models import (
 from app.seed.load import seed_database
 
 
+def _assign_development_user(
+	event_team: CampusEventTeam,
+	role_name: str,
+	db: Session,
+	user: User,
+) -> CampusEventTeamVolunteer:
+	membership = db.exec(
+		select(TeamMembership)
+		.join(ChurchMembership)
+		.where(
+			TeamMembership.team_id == event_team.team_id,
+			ChurchMembership.user_id == user.id,
+		)
+	).one()
+	request = assign_volunteer(
+		event_team.id,
+		AssignVolunteerRequest(
+			team_membership_id=membership.id,
+			role_name=role_name,
+			confirm_conflict=True,
+		),
+		db,
+		user,
+	)
+	assignment = accept_volunteer_request(event_team.id, request.id, db, user)
+	persisted_assignment = db.get(CampusEventTeamVolunteer, assignment.id)
+	assert persisted_assignment is not None
+	return persisted_assignment
+
+
 def test_overlapping_assignment_requires_explicit_confirmation() -> None:
 	engine = create_database_engine("sqlite://")
 	SQLModel.metadata.create_all(engine)
@@ -40,7 +70,19 @@ def test_overlapping_assignment_requires_explicit_confirmation() -> None:
 				.join(Team)
 				.where(Team.name == "Choir")
 			).one()
+			band = db.exec(
+				select(CampusEventTeam)
+				.join(Team)
+				.where(Team.name == "Band")
+			).one()
+			toddlers = db.exec(
+				select(CampusEventTeam)
+				.join(Team)
+				.where(Team.name == "Toddlers")
+			).one()
 			user = db.exec(select(User).where(User.email == "dev@a244.tech")).one()
+			_assign_development_user(band, "Worship leader", db, user)
+			_assign_development_user(toddlers, "Room lead", db, user)
 			choir_membership = db.exec(
 				select(TeamMembership)
 				.join(ChurchMembership)
@@ -117,11 +159,7 @@ def test_event_team_roles_track_the_user_filling_each_requirement() -> None:
 				.where(Team.name == "Band")
 			).one()
 			user = db.exec(select(User).where(User.email == "dev@a244.tech")).one()
-			assignment = db.exec(
-				select(CampusEventTeamVolunteer).where(
-					CampusEventTeamVolunteer.campus_event_team_id == band.id
-				)
-			).one()
+			assignment = _assign_development_user(band, "Worship leader", db, user)
 
 			response = update_team_role_requirements(
 				band.id,
@@ -171,11 +209,7 @@ def test_dropping_a_volunteer_removes_them_from_the_role_roster() -> None:
 				.where(Team.name == "Band")
 			).one()
 			user = db.exec(select(User).where(User.email == "dev@a244.tech")).one()
-			assignment = db.exec(
-				select(CampusEventTeamVolunteer).where(
-					CampusEventTeamVolunteer.campus_event_team_id == band.id
-				)
-			).one()
+			assignment = _assign_development_user(band, "Worship leader", db, user)
 
 			drop_volunteer(band.id, assignment.id, db, user)
 

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from app.api.v1.campuses.schemas import CampusLocationResponse
 from app.api.v1.events.schemas import (
     CampusEventMinistryScheduleResponse,
     CampusEventPlanningResponse,
@@ -24,6 +25,15 @@ def test_planning_response_camel_cases_nested_role_assignments() -> None:
         church_name="Church",
         campus_id=uuid4(),
         campus_name="Campus",
+        campus_location=CampusLocationResponse(
+            address_line_1="123 Main Street",
+            address_line_2=None,
+            city="Springfield",
+            region="IL",
+            postal_code="62701",
+            country_code="US",
+            time_zone="America/Chicago",
+        ),
         title="Service",
         description="",
         starts_at=datetime.now(timezone.utc),

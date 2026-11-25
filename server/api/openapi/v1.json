@@ -235,16 +235,79 @@
             }
           }
         },
+        "x-sync-resource-views": [
+          {
+            "tag": "volunteer-requests",
+            "path": "$[]",
+            "identity": [
+              "id",
+              "campusEventTeamId"
+            ]
+          }
+        ],
+        "x-sync-query-targets": [
+          {
+            "tag": "campus-event-team-volunteer-requests",
+            "identity": {
+              "eventTeamId": "$input.event_team_id"
+            }
+          }
+        ],
+        "x-sync-tags": [
+          "campus-event-team-volunteer-requests"
+        ]
+      }
+    },
+    "/api/v1/events/campus/volunteer-assignments": {
+      "get": {
+        "summary": "Get My Volunteer Assignments",
+        "description": "Accepted campus-event assignments for the signed-in volunteer.",
+        "operationId": "getMyVolunteerAssignments",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyVolunteerAssignmentsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "x-sync-tags": [
           "campus-events",
-          "campus-event-planning"
+          "campus-event-planning",
+          "my-volunteer-assignments"
+        ],
+        "x-sync-resource-views": [
+          {
+            "tag": "my-volunteer-assignments",
+            "path": "$",
+            "identity": [
+              "userId"
+            ]
+          },
+          {
+            "tag": "volunteer-assignments",
+            "path": "$.assignments[]",
+            "identity": [
+              "id",
+              "campusEventTeamId"
+            ]
+          }
         ]
       }
     },
     "/api/v1/events/campus/volunteer-requests": {
       "get": {
         "summary": "Get My Volunteer Requests",
-        "description": "Request records for the signed-in volunteer's tab.",
+        "description": "Pending requests for the signed-in volunteer, unless history is requested.",
         "operationId": "getMyVolunteerRequests",
         "security": [
           {
@@ -292,6 +355,16 @@
         "x-sync-tags": [
           "campus-events",
           "campus-event-planning"
+        ],
+        "x-sync-resource-views": [
+          {
+            "tag": "volunteer-requests",
+            "path": "$[]",
+            "identity": [
+              "id",
+              "campusEventTeamId"
+            ]
+          }
         ]
       }
     },
@@ -617,11 +690,7 @@
               }
             }
           }
-        },
-        "x-sync-tags": [
-          "campus-events",
-          "campus-event-planning"
-        ]
+        }
       }
     },
     "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/replacement": {
@@ -686,11 +755,7 @@
               }
             }
           }
-        },
-        "x-sync-tags": [
-          "campus-events",
-          "campus-event-planning"
-        ]
+        }
       }
     },
     "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/accept": {
@@ -747,8 +812,7 @@
           }
         },
         "x-sync-tags": [
-          "campus-events",
-          "campus-event-planning"
+          "volunteer-requests"
         ]
       }
     },
@@ -806,8 +870,7 @@
           }
         },
         "x-sync-tags": [
-          "campus-events",
-          "campus-event-planning"
+          "volunteer-requests"
         ]
       }
     },
@@ -937,6 +1000,65 @@
         "x-sync-tags": [
           "campus-events",
           "campus-event-planning"
+        ]
+      }
+    },
+    "/api/v1/events/campus/{event_team_id}/volunteers/{volunteer_id}/cancel": {
+      "post": {
+        "summary": "Cancel My Volunteer Assignment",
+        "description": "Allow a volunteer to remove their own accepted assignment.",
+        "operationId": "cancelMyVolunteerAssignment",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Event Team Id"
+            }
+          },
+          {
+            "name": "volunteer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Volunteer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerAssignmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "volunteer-assignments"
         ]
       }
     },
@@ -1146,6 +1268,9 @@
             "type": "string",
             "title": "Campusname"
           },
+          "campusLocation": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
+          },
           "title": {
             "type": "string",
             "title": "Title"
@@ -1183,6 +1308,7 @@
           "churchName",
           "campusId",
           "campusName",
+          "campusLocation",
           "title",
           "startsAt",
           "endsAt",
@@ -1276,6 +1402,9 @@
             "format": "uuid",
             "title": "Campusid"
           },
+          "campusLocation": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
+          },
           "churchName": {
             "type": "string",
             "title": "Churchname"
@@ -1304,6 +1433,7 @@
           "isFullyStaffed",
           "teamsNeedingConfirmation",
           "campusId",
+          "campusLocation",
           "churchName",
           "campusName",
           "ministries"
@@ -1367,6 +1497,9 @@
             "type": "string",
             "format": "uuid",
             "title": "Campusid"
+          },
+          "campusLocation": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
           }
         },
         "type": "object",
@@ -1380,7 +1513,8 @@
           "isStaffed",
           "isFullyStaffed",
           "teamsNeedingConfirmation",
-          "campusId"
+          "campusId",
+          "campusLocation"
         ],
         "title": "CampusEventResponse"
       },
@@ -1474,6 +1608,59 @@
           "eligibleVolunteers"
         ],
         "title": "CampusEventTeamScheduleResponse"
+      },
+      "CampusLocationResponse": {
+        "properties": {
+          "addressLine1": {
+            "type": "string",
+            "title": "Addressline1"
+          },
+          "addressLine2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addressline2"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          },
+          "postalCode": {
+            "type": "string",
+            "title": "Postalcode"
+          },
+          "countryCode": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Countrycode"
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Timezone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "addressLine1",
+          "addressLine2",
+          "city",
+          "region",
+          "postalCode",
+          "countryCode",
+          "timeZone"
+        ],
+        "title": "CampusLocationResponse",
+        "description": "A campus's physical address and authoritative local scheduling timezone."
       },
       "ChurchMembership": {
         "properties": {
@@ -1620,16 +1807,15 @@
             "type": "string",
             "title": "Name"
           },
-          "city": {
-            "type": "string",
-            "title": "City"
+          "location": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "city"
+          "location"
         ],
         "title": "DashboardCampusResponse"
       },
@@ -1853,6 +2039,147 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "MyVolunteerAssignmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campusEventTeamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campuseventteamid"
+          },
+          "campusId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campusid"
+          },
+          "campusName": {
+            "type": "string",
+            "title": "Campusname"
+          },
+          "campusLocation": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Eventid"
+          },
+          "eventTitle": {
+            "type": "string",
+            "title": "Eventtitle"
+          },
+          "eventStartsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Eventstartsat"
+          },
+          "ministryId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ministryid"
+          },
+          "ministryName": {
+            "type": "string",
+            "title": "Ministryname"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Teamid"
+          },
+          "teamName": {
+            "type": "string",
+            "title": "Teamname"
+          },
+          "roleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolename"
+          },
+          "roleEmoji": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roleemoji"
+          },
+          "callTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calltime"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campusEventTeamId",
+          "campusId",
+          "campusName",
+          "campusLocation",
+          "eventId",
+          "eventTitle",
+          "eventStartsAt",
+          "ministryId",
+          "ministryName",
+          "teamId",
+          "teamName",
+          "roleName",
+          "roleEmoji",
+          "callTime",
+          "notes"
+        ],
+        "title": "MyVolunteerAssignmentResponse"
+      },
+      "MyVolunteerAssignmentsResponse": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Userid"
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/MyVolunteerAssignmentResponse"
+            },
+            "type": "array",
+            "title": "Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "userId",
+          "assignments"
+        ],
+        "title": "MyVolunteerAssignmentsResponse"
       },
       "RoleTemplateData": {
         "additionalProperties": {
@@ -2515,5 +2842,73 @@
         "scheme": "bearer"
       }
     }
-  }
+  },
+  "x-sync-resources": [
+    {
+      "kind": "resource",
+      "tag": "volunteer-requests",
+      "identity": [
+        "id",
+        "campusEventTeamId"
+      ],
+      "refreshOperationId": null,
+      "mutateOperationId": null,
+      "actions": [
+        {
+          "name": "accept",
+          "operationId": "acceptVolunteerRequest",
+          "parameterBindings": {
+            "event_team_id": "campusEventTeamId",
+            "request_id": "id"
+          }
+        },
+        {
+          "name": "decline",
+          "operationId": "declineVolunteerRequest",
+          "parameterBindings": {
+            "event_team_id": "campusEventTeamId",
+            "request_id": "id"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "collection",
+      "tag": "campus-event-team-volunteer-requests",
+      "identity": [
+        "eventTeamId"
+      ],
+      "memberTag": "volunteer-requests",
+      "refreshOperationId": "getCampusEventTeamVolunteerRequests"
+    },
+    {
+      "kind": "resource",
+      "tag": "volunteer-assignments",
+      "identity": [
+        "id",
+        "campusEventTeamId"
+      ],
+      "refreshOperationId": null,
+      "mutateOperationId": null,
+      "actions": [
+        {
+          "name": "cancel",
+          "operationId": "cancelMyVolunteerAssignment",
+          "parameterBindings": {
+            "event_team_id": "campusEventTeamId",
+            "volunteer_id": "id"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "collection",
+      "tag": "my-volunteer-assignments",
+      "identity": [
+        "userId"
+      ],
+      "memberTag": "volunteer-assignments",
+      "refreshOperationId": "getMyVolunteerAssignments"
+    }
+  ]
 }

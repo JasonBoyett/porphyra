@@ -1,31 +1,36 @@
 export type PresentationOverride = Readonly<{
-	backgroundColor?: string
-	color?: string
-	fontSize?: string
-	fontStyle?: "italic" | "normal"
-	fontWeight?: number | string
-	textDecoration?: string
-}>
+	backgroundColor?: string;
+	color?: string;
+	fontSize?: string;
+	fontStyle?: "italic" | "normal";
+	fontWeight?: number | string;
+	textDecoration?: string;
+}>;
 
 export type ContextualOverride = Readonly<{
-	presentation?: PresentationOverride
-	text?: string
-}>
+	presentation?: PresentationOverride;
+	text?: string;
+}>;
 
-export type LocaleCatalog = Readonly<Record<string, string>>
+export type LocaleCatalog = Readonly<Record<string, string>>;
 
 export type TranslationCatalog = Readonly<{
-	contextual?: Readonly<Record<string, Readonly<Record<string, ContextualOverride>>>>
-	locales: Readonly<Record<string, LocaleCatalog>>
-	sourceLocale: string
-}>
+	contextual?: Readonly<
+		Record<string, Readonly<Record<string, ContextualOverride>>>
+	>;
+	locales: Readonly<Record<string, LocaleCatalog>>;
+	sourceLocale: string;
+}>;
 
-export type TranslationValues = Readonly<Record<string, string | number>>
+export type TranslationValues = Readonly<Record<string, string | number>>;
 
-export const interpolate = (template: string, values?: TranslationValues): string =>
+export const interpolate = (
+	template: string,
+	values?: TranslationValues,
+): string =>
 	template.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
 		values?.[name] === undefined ? placeholder : String(values[name]),
-	)
+	);
 
 /**
  * The application catalog is intentionally data-only. React applications inject it
@@ -41,7 +46,8 @@ export const porphyraCatalog = {
 			"auth.signInFailed": "Unable to sign in. Please try again.",
 			"auth.title": "Sign in to serve your church.",
 			"auth.welcome": "Welcome to Porphyra",
-			"auth.description": "Use the seeded development account to explore church, campus, ministry, and team workspaces.",
+			"auth.description":
+				"Use the seeded development account to explore church, campus, ministry, and team workspaces.",
 			"auth.continue": "Continue to Porphyra",
 			"auth.createAccount": "Need an account? Create one",
 			"common.all": "All",
@@ -52,12 +58,14 @@ export const porphyraCatalog = {
 			"dashboard.apiUnavailable": "The API is not running yet. Start it with",
 			"dashboard.church": "Church",
 			"dashboard.churches": "{count} churches",
-			"dashboard.description": "Choose a church below, or move between Planning, Volunteer, and Kiosk from the web workspace.",
+			"dashboard.description":
+				"Choose a church below, or move between Planning, Volunteer, and Kiosk from the web workspace.",
 			"dashboard.friend": "friend",
 			"dashboard.greeting": "Good morning, {name}",
 			"dashboard.title": "Serve your churches with clarity.",
 			"dashboard.loadingChurches": "Loading churches…",
-			"kiosk.description": "Create welcoming, dependable on-site experiences for your campuses.",
+			"kiosk.description":
+				"Create welcoming, dependable on-site experiences for your campuses.",
 			"kiosk.title": "Kiosk",
 			"navigation.applicationAreas": "Application areas",
 			"navigation.kiosk": "Kiosk",
@@ -68,24 +76,44 @@ export const porphyraCatalog = {
 			"planning.loadingSchedule": "Loading schedule…",
 			"planning.noEvents": "No events are available to plan yet.",
 			"planning.noTeams": "No teams match these filters",
-			"planning.noTeamsDescription": "Try a different ministry or schedule view.",
+			"planning.noTeamsDescription":
+				"Try a different ministry or schedule view.",
 			"planning.servicePlanning": "Service planning",
 			"planning.role": "Role",
 			"planning.roleAriaLabel": "{name}'s role",
 			"planning.save": "Save",
 			"planning.saveChanges": "Save changes",
+			"planning.serviceRoles": "Service roles",
+			"planning.volunteerCount": "{count} volunteer",
+			"planning.volunteerCountPlural": "{count} volunteers",
 			"planning.applyChanges": "Apply changes",
-			"planning.unableToLoad": "Unable to load this schedule. Please try again.",
+			"planning.unableToLoad":
+				"Unable to load this schedule. Please try again.",
+			"planning.volunteerDeclined": "{name} declined",
+			"planning.volunteerCancelled": "{name} cancelled their assignment",
 			"volunteers.myServing": "My serving",
+			"volunteers.callTime": "Call time",
+			"volunteers.eventStartsAt": "Event starts at",
+			"volunteers.assignmentTiming": "{eventName} starts at {eventStartTime}.",
+			"volunteers.assignmentArrivalTiming":
+				"{eventName} starts at {eventStartTime}. Please arrive at {callTime}.",
+			"volunteers.assignmentActions": "Assignment actions",
+			"volunteers.cancelAssignment": "Cancel assignment",
+			"volunteers.cancelAssignmentFailed":
+				"Your assignment could not be cancelled. Please try again.",
 			"volunteers.noAssignments": "Nothing scheduled here",
-			"volunteers.noAssignmentsDescription": "Try another campus or one of your ministries.",
+			"volunteers.noAssignmentsDescription":
+				"Try another campus or one of your ministries.",
 			"welcome.eyebrow": "Church planning by Acts 2:44 Technology",
 			"welcome.title": "Tools that help your church focus on ministry.",
-			"welcome.description": "Porphyra brings service planning, volunteer coordination, team schedules, and campus operations together in one dependable platform.",
+			"welcome.description":
+				"Porphyra brings service planning, volunteer coordination, team schedules, and campus operations together in one dependable platform.",
 			"welcome.createAccount": "Create a free account",
-			"welcome.openSource": "Free and open source. Built for churches of every size.",
+			"welcome.openSource":
+				"Free and open source. Built for churches of every size.",
 			"welcome.madeFor": "Made for the people who make Sunday happen.",
-			"welcome.madeForDescription": "We reduce administrative burden so staff and volunteers can serve people with more presence, care, and confidence.",
+			"welcome.madeForDescription":
+				"We reduce administrative burden so staff and volunteers can serve people with more presence, care, and confidence.",
 			"welcome.planTogether": "Plan together",
 			"welcome.serveTogether": "Serve together",
 			"welcome.stewardWisely": "Steward wisely",
@@ -94,6 +122,7 @@ export const porphyraCatalog = {
 		// Missing values resolve to the declared source locale.
 		test: {},
 	},
-} as const satisfies TranslationCatalog
+} as const satisfies TranslationCatalog;
 
-export type PorphyraTranslationKey = keyof (typeof porphyraCatalog)["locales"]["en"]
+export type PorphyraTranslationKey =
+	keyof (typeof porphyraCatalog)["locales"]["en"];

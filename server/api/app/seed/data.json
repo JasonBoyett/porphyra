@@ -11,11 +11,25 @@
       "campuses": [
         {
           "name": "Downtown",
-          "city": "Nashville"
+          "location": {
+            "addressLine1": "120 2nd Avenue North",
+            "city": "Nashville",
+            "region": "TN",
+            "postalCode": "37201",
+            "countryCode": "US",
+            "timeZone": "America/Chicago"
+          }
         },
         {
           "name": "Eastside",
-          "city": "Nashville"
+          "location": {
+            "addressLine1": "2100 Eastland Avenue",
+            "city": "Nashville",
+            "region": "TN",
+            "postalCode": "37206",
+            "countryCode": "US",
+            "timeZone": "America/Chicago"
+          }
         }
       ],
       "ministries": [
@@ -65,15 +79,15 @@
           "title": "Sunday Worship Service",
           "description": "A weekly gathering for worship, teaching, and community.",
           "campus": "Downtown",
-          "startsAt": "2026-11-23T07:30:59.915985+00:00",
-          "endsAt": "2026-11-23T08:45:59.915985+00:00",
+          "startsAt": "2026-12-02T21:57:04.579668+00:00",
+          "endsAt": "2026-12-02T23:12:04.579668+00:00",
           "ministries": [
             {
               "name": "Music",
               "teams": [
                 {
                   "name": "Band",
-                  "callTime": "2026-11-23T06:00:59.915985+00:00",
+                  "callTime": "2026-12-02T20:27:04.579668+00:00",
                   "notes": [
                     "Meet in the green room for soundcheck."
                   ],
@@ -86,26 +100,44 @@
                       "emoji": "🎹",
                       "count": 1
                     },
+                    "Guitar": {
+                      "emoji": "🎸",
+                      "count": 1
+                    },
                     "Sound": {
                       "emoji": "🎚️",
                       "count": 1
                     }
                   },
-                   "assignDevelopmentUser": true,
-                   "assignDevelopmentUserRole": "Worship leader",
-                   "volunteerRequests": [
-                     { "id": "keys-declined", "volunteer": "Chloe Davis", "role": "Keys", "status": "rejected" },
-                     { "id": "keys-replacement", "volunteer": "Gabriel Hayes", "role": "Keys", "status": "pending", "replaces": "keys-declined" },
-                     { "id": "sound-pending", "volunteer": "Katherine Lewis", "role": "Sound", "status": "pending" }
-                   ]
+                  "volunteerRequests": [
+                    {
+                      "id": "keys-declined",
+                      "volunteer": "Chloe Davis",
+                      "role": "Keys",
+                      "status": "rejected"
+                    },
+                    {
+                      "id": "keys-replacement",
+                      "volunteer": "Gabriel Hayes",
+                      "role": "Keys",
+                      "status": "pending",
+                      "replaces": "keys-declined"
+                    },
+                    {
+                      "id": "sound-pending",
+                      "volunteer": "Katherine Lewis",
+                      "role": "Sound",
+                      "status": "pending"
+                    }
+                  ]
                 },
                 {
                   "name": "Choir",
-                  "callTime": "2026-11-23T06:30:59.915985+00:00",
+                  "callTime": "2026-12-02T20:57:04.579668+00:00",
                   "notes": [
                     "Warm up in the choir room before soundcheck."
                   ],
-                   "roles": {
+                  "roles": {
                     "Choir director": {
                       "emoji": "🎼",
                       "count": 1
@@ -114,14 +146,19 @@
                       "emoji": "🎶",
                       "count": 2
                     },
-                     "Alto": {
-                       "emoji": "🎶",
-                       "count": 2
-                     }
-                   },
-                   "volunteerRequests": [
-                     { "id": "choir-rejected", "volunteer": "Daniel Ellis", "role": "Soprano", "status": "rejected" }
-                   ]
+                    "Alto": {
+                      "emoji": "🎶",
+                      "count": 2
+                    }
+                  },
+                  "volunteerRequests": [
+                    {
+                      "id": "choir-rejected",
+                      "volunteer": "Daniel Ellis",
+                      "role": "Soprano",
+                      "status": "rejected"
+                    }
+                  ]
                 }
               ]
             },
@@ -130,7 +167,7 @@
               "teams": [
                 {
                   "name": "Toddlers",
-                  "callTime": "2026-11-23T06:45:59.915985+00:00",
+                  "callTime": "2026-12-02T21:12:04.579668+00:00",
                   "notes": [
                     "Prepare the toddler room before families arrive."
                   ],
@@ -160,9 +197,7 @@
                       "emoji": "✏️",
                       "count": 1
                     }
-                  },
-                  "assignDevelopmentUser": true,
-                  "assignDevelopmentUserRole": "Teacher"
+                  }
                 }
               ]
             }
@@ -176,7 +211,14 @@
       "campuses": [
         {
           "name": "Main Campus",
-          "city": "Franklin"
+          "location": {
+            "addressLine1": "100 Main Street",
+            "city": "Franklin",
+            "region": "TN",
+            "postalCode": "37064",
+            "countryCode": "US",
+            "timeZone": "America/Chicago"
+          }
         }
       ],
       "ministries": [
@@ -221,7 +263,14 @@
       "campuses": [
         {
           "name": "Gathering House",
-          "city": "Murfreesboro"
+          "location": {
+            "addressLine1": "200 West Main Street",
+            "city": "Murfreesboro",
+            "region": "TN",
+            "postalCode": "37130",
+            "countryCode": "US",
+            "timeZone": "America/Chicago"
+          }
         }
       ],
       "ministries": [

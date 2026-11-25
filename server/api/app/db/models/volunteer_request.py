@@ -15,12 +15,43 @@ if TYPE_CHECKING:
 
 
 class VolunteerRequestStatus(StrEnum):
-	PENDING = "pending"
-	ACCEPTED = "accepted"
-	REJECTED = "rejected"
-	REJECTED_RESOLVED = "rejected_resolved"
-	RESOLVED = "resolved"
-	DROPED = "dropped"
+	"""The lifecycle state of a volunteer invitation or assignment request."""
+
+	def __new__(cls, value: str, description: str):
+		member = str.__new__(cls, value)
+		member._value_ = value
+		member.__doc__ = description
+		return member
+
+	PENDING = (
+		"pending",
+		"The volunteer has not yet accepted or declined the invitation.",
+	)
+	ACCEPTED = (
+		"accepted",
+		"The volunteer accepted the invitation and has an active assignment.",
+	)
+	REJECTED = (
+		"rejected",
+		"The volunteer declined an invitation; a planner may find a replacement.",
+	)
+	CANCELLED = (
+		"cancelled",
+		"The volunteer withdrew from an accepted assignment; a planner may "
+		"find a replacement.",
+	)
+	DROPPED = (
+		"dropped",
+		"A church administrator removed the volunteer from an assignment.",
+	)
+	REJECTED_RESOLVED = (
+		"rejected_resolved",
+		"A declined invitation was replaced and no longer requires planner action.",
+	)
+	RESOLVED = (
+		"resolved",
+		"The request no longer needs action, usually because its role was filled.",
+	)
 
 
 class VolunteerRequest(DatabaseModel, table=True):
@@ -73,8 +104,11 @@ class VolunteerRequest(DatabaseModel, table=True):
 				raise ValueError(
 					"Replacement requests must belong to the same team and role."
 				)
-			if parent.status != VolunteerRequestStatus.REJECTED:
-				raise ValueError("Only rejected requests can be replaced.")
+			if parent.status not in {
+				VolunteerRequestStatus.REJECTED,
+				VolunteerRequestStatus.CANCELLED,
+			}:
+				raise ValueError("Only declined or cancelled requests can be replaced.")
 			seen.add(parent.id)
 			ancestors.append(parent)
 			current = parent

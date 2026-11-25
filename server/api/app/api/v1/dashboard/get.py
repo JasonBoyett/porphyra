@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from sqlmodel import select
 
+from app.api.v1.campuses._responses import campus_location_response
 from app.api.v1.dashboard.schemas import DashboardResponse
 from app.api.v1.dependencies.database import DatabaseSession
 from app.auth import CurrentUser
@@ -29,7 +30,7 @@ def get_dashboard(user: CurrentUser, db: DatabaseSession) -> DashboardResponse:
 				{
 					"id": str(campus.id),
 					"name": campus.name,
-					"city": campus.city,
+					"location": campus_location_response(campus),
 				}
 				for campus in sorted(
 					membership.church.campuses,

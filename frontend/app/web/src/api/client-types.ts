@@ -65,6 +65,10 @@ type ApiQueryMembers<TOperationId extends ApiClientOperationId> =
 					input: ApiOperationInput<TOperationId>,
 					options?: ApiQueryOptions<TOperationId, TSelected>,
 				) => UseQueryResult<TSelected, Error>
+				useResourceQuery: <TSelected = ApiOperationResponse<TOperationId>>(
+					input: ApiOperationInput<TOperationId>,
+					options?: ApiQueryOptions<TOperationId, TSelected>,
+				) => UseQueryResult<TSelected, Error>
 			}
 		: {
 				queryKey: () => ApiQueryKey<TOperationId>
@@ -72,6 +76,9 @@ type ApiQueryMembers<TOperationId extends ApiClientOperationId> =
 					options?: ApiQueryOptions<TOperationId, TSelected>,
 				) => ApiQueryOptionsResult<TOperationId, TSelected>
 				useQuery: <TSelected = ApiOperationResponse<TOperationId>>(
+					options?: ApiQueryOptions<TOperationId, TSelected>,
+				) => UseQueryResult<TSelected, Error>
+				useResourceQuery: <TSelected = ApiOperationResponse<TOperationId>>(
 					options?: ApiQueryOptions<TOperationId, TSelected>,
 				) => UseQueryResult<TSelected, Error>
 			}

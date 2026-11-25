@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from sqlalchemy import or_
 from sqlmodel import Session, select
@@ -29,6 +29,29 @@ from app.scheduling.roles import RoleAssignment, build_team_role_data
 def load_seed_data() -> dict[str, Any]:
 	path = Path(__file__).with_name("data.json")
 	return json.loads(path.read_text())
+
+
+class _CampusLocationFields(TypedDict):
+	address_line_1: str
+	address_line_2: str | None
+	city: str
+	region: str
+	postal_code: str
+	country_code: str
+	time_zone: str
+
+
+def _campus_location_fields(campus_data: dict[str, Any]) -> _CampusLocationFields:
+	location = campus_data["location"]
+	return {
+		"address_line_1": location["addressLine1"],
+		"address_line_2": location.get("addressLine2"),
+		"city": location["city"],
+		"region": location["region"],
+		"postal_code": location["postalCode"],
+		"country_code": location["countryCode"],
+		"time_zone": location["timeZone"],
+	}
 
 
 def seed_database(db: Session) -> None:
@@ -64,7 +87,10 @@ def seed_database(db: Session) -> None:
 				name=church_data["name"],
 				description=church_data["description"],
 				campuses=[
-					Campus(name=campus_data["name"], city=campus_data["city"])
+					Campus(
+						name=campus_data["name"],
+						**_campus_location_fields(campus_data),
+					)
 					for campus_data in church_data["campuses"]
 				],
 			)
@@ -96,11 +122,12 @@ def seed_database(db: Session) -> None:
 					Campus(
 						church_id=church.id,
 						name=campus_data["name"],
-						city=campus_data["city"],
+						**_campus_location_fields(campus_data),
 					)
 				)
 			else:
-				campus.city = campus_data["city"]
+				for field_name, value in _campus_location_fields(campus_data).items():
+					setattr(campus, field_name, value)
 
 		for ministry_data in church_data["ministries"]:
 			ministry = db.exec(
@@ -339,16 +366,25 @@ def seed_database(db: Session) -> None:
 								TeamMembership.team_id == team.id,
 							)
 						).one()
-						request = db.exec(
-							select(VolunteerRequest).where(
+						role_name = request_data["role"]
+						replaces = request_data.get("replaces")
+						if replaces is None:
+							request_query = select(VolunteerRequest).where(
 								VolunteerRequest.campus_event_team_id == event_team.id,
 								VolunteerRequest.team_membership_id
 								== request_membership.id,
+								VolunteerRequest.role_name == role_name,
+								VolunteerRequest.status
+								== VolunteerRequestStatus(request_data["status"]),
+								VolunteerRequest.replacing_id == None,  # noqa: E711
 							)
-						).one_or_none()
+						else:
+							request_query = select(VolunteerRequest).where(
+								VolunteerRequest.replacing_id
+								== requests_by_seed_id[replaces].id
+							)
+						request = db.exec(request_query).first()
 						if request is None:
-							role_name = request_data["role"]
-							replaces = request_data.get("replaces")
 							request = VolunteerRequest(
 								campus_event_team_id=event_team.id,
 								team_membership_id=request_membership.id,

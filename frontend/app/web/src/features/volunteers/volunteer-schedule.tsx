@@ -1,54 +1,19 @@
-import { useMemo, useState } from "react"
-import { apiClient } from "@/api/client"
+import { useState } from "react"
+import {
+	apiClient,
+	type VolunteerAssignmentWithActions,
+	type VolunteerRequestWithActions,
+} from "@/api/client"
 import { useAuth } from "@/auth"
 import { ScheduleFilters } from "@/components/volunteers/schedule-filters"
 import { RequestInbox } from "@/components/volunteers/request-inbox"
 import { VolunteerScheduleHeader } from "@/components/volunteers/schedule-header"
 import { UpcomingAssignments } from "@/components/volunteers/upcoming-assignments"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Campus, VolunteerAssignment } from "@/components/volunteers/types"
+import { toVolunteerScheduleData } from "./volunteer-schedule-data"
 
 const allCampuses = "all-campuses"
 const allMinistries = "all-ministries"
-
-// Local, presentation-focused seed data until this feature receives its schedule API adapter.
-const schedule = {
-	campuses: [
-		{ id: "downtown", label: "Grace Harbor Church — Downtown" },
-	] satisfies readonly Campus[],
-	ministries: ["Music", "Kids"],
-	assignments: [
-		{
-			id: "sunday-worship-band",
-			campusId: "downtown",
-			ministry: "Music",
-			team: "Band",
-			eventName: "Sunday Worship Service",
-			dateLabel: "Sunday, November 15",
-			dayOfWeek: "SUN",
-			month: "NOV",
-			day: "15",
-			location: "Downtown",
-			callTime: "7:30 AM",
-			eventStartTime: "9:00 AM",
-			note: "Meet in the green room for soundcheck.",
-		},
-		{
-			id: "sunday-worship-fourth-grade",
-			campusId: "downtown",
-			ministry: "Kids",
-			team: "Fourth Grade",
-			eventName: "Sunday Worship Service",
-			dateLabel: "Sunday, November 15",
-			dayOfWeek: "SUN",
-			month: "NOV",
-			day: "15",
-			location: "Downtown",
-			eventStartTime: "9:00 AM",
-			note: "Review the lesson and prepare activity supplies.",
-		},
-	] satisfies readonly VolunteerAssignment[],
-}
 
 /** A self-contained volunteer schedule view ready to mount in the web App. */
 export const VolunteerSchedule = () => {
@@ -56,19 +21,22 @@ export const VolunteerSchedule = () => {
 	const [campusId, setCampusId] = useState(allCampuses)
 	const [ministry, setMinistry] = useState(allMinistries)
 	const accessToken = auth.session?.accessToken ?? ""
-	const requests = apiClient.getMyVolunteerRequests.useSyncQuery(
+	const scheduleQuery = apiClient.getMyVolunteerAssignments.useResourceQuery({
+		enabled: accessToken !== "",
+	})
+	const requests = apiClient.getMyVolunteerRequests.useResourceQuery(
 		{},
 		{ enabled: accessToken !== "" },
 	)
 
-	const assignments = useMemo(
-		() =>
-			schedule.assignments.filter(
-				(assignment) =>
-					(campusId === allCampuses || assignment.campusId === campusId) &&
-					(ministry === allMinistries || assignment.ministry === ministry),
-			),
-		[campusId, ministry],
+	const schedule = toVolunteerScheduleData(
+		(scheduleQuery.data?.assignments ?? []) as VolunteerAssignmentWithActions[],
+	)
+	const assignments = schedule.assignments.filter(
+		(assignment) =>
+			new Date(assignment.eventStartsAt) >= new Date() &&
+			(campusId === allCampuses || assignment.campusId === campusId) &&
+			(ministry === allMinistries || assignment.ministry === ministry),
 	)
 
 	return (
@@ -98,7 +66,10 @@ export const VolunteerSchedule = () => {
 					<UpcomingAssignments assignments={assignments} />
 				</TabsContent>
 				<TabsContent className="mt-6" value="requests">
-					<RequestInbox accessToken={accessToken} requests={requests.data ?? []} />
+					<RequestInbox
+						accessToken={accessToken}
+						requests={(requests.data ?? []) as VolunteerRequestWithActions[]}
+					/>
 				</TabsContent>
 			</Tabs>
 		</main>

@@ -34,6 +34,69 @@ const syncTagsForOperation = (
 	return [...new Set(syncTags)];
 };
 
+type SyncResourceView = {
+	tag: string;
+	path: string;
+	identity: string[];
+};
+
+type SyncQueryTarget = {
+	tag: string;
+	identity: Record<string, string>;
+};
+
+const syncResourceViewsForOperation = (
+	operation: Record<string, unknown>,
+	operationId: string,
+): SyncResourceView[] => {
+	const views = operation["x-sync-resource-views"];
+	if (views === undefined) return [];
+	if (!Array.isArray(views)) {
+		throw new Error(`x-sync-resource-views for ${operationId} must be an array`);
+	}
+	return views.map((view) => {
+		if (typeof view !== "object" || view === null || Array.isArray(view)) {
+			throw new Error(`Invalid sync resource view for ${operationId}`);
+		}
+		const candidate = view as Partial<SyncResourceView>;
+		if (
+			typeof candidate.tag !== "string" ||
+			typeof candidate.path !== "string" ||
+			!Array.isArray(candidate.identity) ||
+			candidate.identity.some((field) => typeof field !== "string")
+		) {
+			throw new Error(`Invalid sync resource view for ${operationId}`);
+		}
+		return { tag: candidate.tag, path: candidate.path, identity: candidate.identity };
+	});
+};
+
+const syncQueryTargetsForOperation = (
+	operation: Record<string, unknown>,
+	operationId: string,
+): SyncQueryTarget[] => {
+	const targets = operation["x-sync-query-targets"];
+	if (targets === undefined) return [];
+	if (!Array.isArray(targets)) {
+		throw new Error(`x-sync-query-targets for ${operationId} must be an array`);
+	}
+	return targets.map((target) => {
+		if (typeof target !== "object" || target === null || Array.isArray(target)) {
+			throw new Error(`Invalid sync query target for ${operationId}`);
+		}
+		const candidate = target as Partial<SyncQueryTarget>;
+		if (
+			typeof candidate.tag !== "string" ||
+			typeof candidate.identity !== "object" ||
+			candidate.identity === null ||
+			Object.values(candidate.identity).some((value) => typeof value !== "string")
+		) {
+			throw new Error(`Invalid sync query target for ${operationId}`);
+		}
+		return { tag: candidate.tag, identity: candidate.identity };
+	});
+};
+
 const generateOpenApiDocument = () => {
 	const document = execFileSync(
 		"uv",
@@ -64,7 +127,38 @@ execFileSync(
 const openApi = JSON.parse(readFileSync(openApiPath, "utf8")) as {
 	components?: { schemas?: Record<string, unknown> };
 	paths?: Record<string, Record<string, Record<string, unknown>>>;
+	"x-sync-resources"?: unknown;
 };
+if (
+	openApi["x-sync-resources"] !== undefined &&
+	!Array.isArray(openApi["x-sync-resources"])
+) {
+	throw new Error("x-sync-resources must be an array");
+}
+const syncResources = openApi["x-sync-resources"] ?? [];
+const resourceActionTypes = syncResources
+	.filter(
+		(resource): resource is {
+			kind: "resource";
+			tag: string;
+			actions: Array<{ name: string; operationId: string }>;
+		} =>
+			typeof resource === "object" &&
+			resource !== null &&
+			(resource as { kind?: unknown }).kind === "resource" &&
+			typeof (resource as { tag?: unknown }).tag === "string" &&
+			Array.isArray((resource as { actions?: unknown }).actions),
+	)
+	.map(
+		(resource) =>
+			`TTag extends ${JSON.stringify(resource.tag)} ? {\n${resource.actions
+				.map(
+					(action) =>
+						`\t${action.name}: () => Promise<ApiOperationResponse<${JSON.stringify(action.operationId)}>>`,
+				)
+				.join("\n")}\n} :`,
+	)
+	.join("\n\t");
 const schemaNames = Object.keys(openApi.components?.schemas ?? {}).sort();
 const operationEntries = Object.entries(openApi.paths ?? {}).flatMap(
 	([route, pathItem]) =>
@@ -106,6 +200,14 @@ const operationEntries = Object.entries(openApi.paths ?? {}).flatMap(
 							: null,
 						route,
 						syncTags: syncTagsForOperation(operation, operation.operationId),
+						syncResourceViews: syncResourceViewsForOperation(
+							operation,
+							operation.operationId,
+						),
+						syncQueryTargets: syncQueryTargetsForOperation(
+							operation,
+							operation.operationId,
+						),
 					},
 				],
 			];
@@ -166,6 +268,9 @@ ${schemaNames
 			`export type ${schemaName} = components["schemas"]["${schemaName}"]`,
 	)
 	.join("\n")}
+
+export type ApiSyncResourceActionMethods<TTag extends string> =
+	${resourceActionTypes || "{}"} {}
 `,
 );
 
@@ -180,6 +285,8 @@ export const apiOperations = ${JSON.stringify(Object.fromEntries(operationEntrie
 
 export const apiSyncTags = ${JSON.stringify(syncTags)} as const
 export type ApiSyncTag = (typeof apiOperations)[keyof typeof apiOperations]["syncTags"][number]
+
+export const apiSyncResources = ${JSON.stringify(syncResources, null, 2)} as const
 `,
 );
 

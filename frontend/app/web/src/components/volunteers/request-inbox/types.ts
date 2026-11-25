@@ -1,6 +1,6 @@
-import type { VolunteerRequest } from "@/api/client"
+import type { VolunteerRequestWithActions } from "@/api/client"
 
 export type RequestInboxProps = {
 	accessToken: string
-	requests: VolunteerRequest[]
+	requests: VolunteerRequestWithActions[]
 }

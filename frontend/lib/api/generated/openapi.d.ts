@@ -93,6 +93,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/events/campus/volunteer-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Volunteer Assignments
+         * @description Accepted campus-event assignments for the signed-in volunteer.
+         */
+        get: operations["getMyVolunteerAssignments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events/campus/volunteer-requests": {
         parameters: {
             query?: never;
@@ -102,7 +122,7 @@ export interface paths {
         };
         /**
          * Get My Volunteer Requests
-         * @description Request records for the signed-in volunteer's tab.
+         * @description Pending requests for the signed-in volunteer, unless history is requested.
          */
         get: operations["getMyVolunteerRequests"];
         put?: never;
@@ -306,6 +326,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/events/campus/{event_team_id}/volunteers/{volunteer_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel My Volunteer Assignment
+         * @description Allow a volunteer to remove their own accepted assignment.
+         */
+        post: operations["cancelMyVolunteerAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events/campus/{event_team_id}/confirmation": {
         parameters: {
             query?: never;
@@ -411,6 +451,7 @@ export interface components {
             campusId: string;
             /** Campusname */
             campusName: string;
+            campusLocation: components["schemas"]["CampusLocationResponse"];
             /** Title */
             title: string;
             /**
@@ -471,6 +512,7 @@ export interface components {
              * Format: uuid
              */
             campusId: string;
+            campusLocation: components["schemas"]["CampusLocationResponse"];
             /** Churchname */
             churchName: string;
             /** Campusname */
@@ -512,6 +554,7 @@ export interface components {
              * Format: uuid
              */
             campusId: string;
+            campusLocation: components["schemas"]["CampusLocationResponse"];
         };
         /** CampusEventTeamScheduleResponse */
         CampusEventTeamScheduleResponse: {
@@ -542,6 +585,26 @@ export interface components {
             volunteerRequests?: components["schemas"]["VolunteerRequestRosterResponse"][];
             /** Eligiblevolunteers */
             eligibleVolunteers: components["schemas"]["ScheduledVolunteerResponse"][];
+        };
+        /**
+         * CampusLocationResponse
+         * @description A campus's physical address and authoritative local scheduling timezone.
+         */
+        CampusLocationResponse: {
+            /** Addressline1 */
+            addressLine1: string;
+            /** Addressline2 */
+            addressLine2: string | null;
+            /** City */
+            city: string;
+            /** Region */
+            region: string;
+            /** Postalcode */
+            postalCode: string;
+            /** Countrycode */
+            countryCode: string;
+            /** Timezone */
+            timeZone: string;
         };
         /** ChurchMembership */
         ChurchMembership: {
@@ -632,8 +695,7 @@ export interface components {
             id: string;
             /** Name */
             name: string;
-            /** City */
-            city: string;
+            location: components["schemas"]["CampusLocationResponse"];
         };
         /** DashboardChurchResponse */
         DashboardChurchResponse: {
@@ -729,6 +791,71 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** MyVolunteerAssignmentResponse */
+        MyVolunteerAssignmentResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Campuseventteamid
+             * Format: uuid
+             */
+            campusEventTeamId: string;
+            /**
+             * Campusid
+             * Format: uuid
+             */
+            campusId: string;
+            /** Campusname */
+            campusName: string;
+            campusLocation: components["schemas"]["CampusLocationResponse"];
+            /**
+             * Eventid
+             * Format: uuid
+             */
+            eventId: string;
+            /** Eventtitle */
+            eventTitle: string;
+            /**
+             * Eventstartsat
+             * Format: date-time
+             */
+            eventStartsAt: string;
+            /**
+             * Ministryid
+             * Format: uuid
+             */
+            ministryId: string;
+            /** Ministryname */
+            ministryName: string;
+            /**
+             * Teamid
+             * Format: uuid
+             */
+            teamId: string;
+            /** Teamname */
+            teamName: string;
+            /** Rolename */
+            roleName: string | null;
+            /** Roleemoji */
+            roleEmoji: string | null;
+            /** Calltime */
+            callTime: string | null;
+            /** Notes */
+            notes: string[];
+        };
+        /** MyVolunteerAssignmentsResponse */
+        MyVolunteerAssignmentsResponse: {
+            /**
+             * Userid
+             * Format: uuid
+             */
+            userId: string;
+            /** Assignments */
+            assignments: components["schemas"]["MyVolunteerAssignmentResponse"][];
         };
         /**
          * RoleTemplateData
@@ -1155,6 +1282,26 @@ export interface operations {
             };
         };
     };
+    getMyVolunteerAssignments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyVolunteerAssignmentsResponse"];
+                };
+            };
+        };
+    };
     getMyVolunteerRequests: {
         parameters: {
             query?: {
@@ -1527,6 +1674,38 @@ export interface operations {
         };
     };
     dropCampusEventVolunteer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_team_id: string;
+                volunteer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerAssignmentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancelMyVolunteerAssignment: {
         parameters: {
             query?: never;
             header?: never;
