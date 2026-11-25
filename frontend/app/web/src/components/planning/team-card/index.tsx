@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Localized, LocalizationScope } from "@/localization"
+import { Localized, LocalizationScope, useSimpleLocalizedString } from "@/localization"
 import type { TeamCardProps } from "./types"
 
 const formatTime = (value: string) =>
@@ -16,9 +16,6 @@ const formatTime = (value: string) =>
 		hour: "numeric",
 		minute: "2-digit",
 	}).format(new Date(value))
-
-const eventTime = (team: TeamCardProps["team"], event: TeamCardProps["event"]) =>
-	team.callTime === null ? `Event start ${formatTime(event.startsAt)}` : formatTime(team.callTime)
 
 export const TeamCard = (props: TeamCardProps) => {
 	const [isEditing, setIsEditing] = useState(false)
@@ -45,27 +42,43 @@ export const TeamCard = (props: TeamCardProps) => {
 		(total, role) => total + role.count,
 		0,
 	)
-	const status =
+	const status = (
 		replacementRequests.length > 0
 			? {
 				className: "bg-rejected/10 text-rejected hover:bg-rejected/10",
-				label: cancelledRequests.length > 0 ? "Cancelled assignments" : "Pending rejections",
+				statusKey:
+					cancelledRequests.length > 0
+						? "planning.cancelledAssignments"
+						: "planning.pendingRejections",
 			}
 			: acceptedCount + pendingCount < requiredCount
 				? {
 					className: "bg-secondary/60 text-secondary-foreground hover:bg-secondary/60",
-					label: "Needs volunteers",
+					statusKey: "planning.needsVolunteers",
 				}
 				: pendingCount > 0
 					? {
 						className: "bg-accent/20 text-accent-foreground hover:bg-accent/20",
-						label: "Awaiting confirmation",
+						statusKey: "planning.awaitingConfirmation",
 					}
-					: { className: "bg-primary/10 text-primary hover:bg-primary/10", label: "Ready" }
+					: {
+						className: "bg-primary/10 text-primary hover:bg-primary/10",
+						statusKey: "planning.ready",
+					}
+	) satisfies {
+		className: string
+		statusKey:
+			| "planning.awaitingConfirmation"
+			| "planning.cancelledAssignments"
+			| "planning.needsVolunteers"
+			| "planning.pendingRejections"
+			| "planning.ready"
+	}
+	const statusLabel = useSimpleLocalizedString(status.statusKey)
 
 	return (
 		<Card
-			aria-label={`${props.team.name}, ${status.label}`}
+			aria-label={`${props.team.name}, ${statusLabel}`}
 			className="porphyra-card min-h-96 gap-0 py-0"
 		>
 			<CardHeader className="flex flex-row items-start justify-between gap-4 px-5 pt-5">
@@ -75,13 +88,20 @@ export const TeamCard = (props: TeamCardProps) => {
 						className={`mt-2 flex items-center gap-1 text-sm font-bold ${props.team.callTime === null ? "text-muted-foreground" : "text-primary"}`}
 					>
 						<Clock3 aria-hidden="true" size={15} />
-						{eventTime(props.team, props.event)}
+						{props.team.callTime === null ? (
+							<Localized
+								str="planning.eventStartsAt"
+								values={{ time: formatTime(props.event.startsAt) }}
+							/>
+						) : (
+							formatTime(props.team.callTime)
+						)}
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
 					<Badge className={status.className} variant="secondary">
-						{status.label === "Ready" && <Check aria-hidden="true" size={14} />}
-						{status.label}
+						{status.statusKey === "planning.ready" && <Check aria-hidden="true" size={14} />}
+						<Localized str={status.statusKey} />
 					</Badge>
 					<Button
 						aria-label={`Edit ${props.team.name}`}

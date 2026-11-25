@@ -29,7 +29,11 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 	<main className="mx-auto max-w-310 px-6 pt-14 pb-16 max-md:px-4 max-md:pt-10 max-md:pb-8">
 		<header className="mb-8 flex items-end justify-between gap-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
 			<div>
-				<p className="porphyra-eyebrow">Service planning</p>
+				<LocalizationScope name="planning.schedule-eyebrow">
+					<Localized asChild str="planning.servicePlanning">
+						<p className="porphyra-eyebrow" />
+					</Localized>
+				</LocalizationScope>
 				<h1 className="m-0 font-serif text-[clamp(2.35rem,5vw,4.4rem)] leading-[.98] tracking-[-.05em]">
 					{props.event.title}
 				</h1>
@@ -38,7 +42,12 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 					{formatDate(props.event.startsAt)}
 					<span aria-hidden="true">·</span>
 					<Clock3 aria-hidden="true" size={17} />
-					Event start {formatTime(props.event.startsAt)}
+					<LocalizationScope name="planning.event-start-time">
+						<Localized
+							str="planning.eventStartsAt"
+							values={{ time: formatTime(props.event.startsAt) }}
+						/>
+					</LocalizationScope>
 				</p>
 			</div>
 			<label className="grid min-w-[min(100%,20rem)] gap-2 text-sm font-bold">
@@ -117,9 +126,15 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 			</div>
 		</section>
 
-		<p aria-live="polite" className="my-6 text-sm text-muted-foreground">
-			{props.visibleTeamCount} planned {props.visibleTeamCount === 1 ? "team" : "teams"}
-		</p>
+		<LocalizationScope name="planning.planned-team-count">
+			<p aria-live="polite" className="my-6 text-sm text-muted-foreground">
+				<Localized
+					pluralize
+					str="planning.plannedTeamCount"
+					values={{ count: props.visibleTeamCount }}
+				/>
+			</p>
+		</LocalizationScope>
 		<LocalizationScope name="planning.team-rosters">
 			<section aria-label="Planned teams" className="grid gap-9">
 				{props.teamsByMinistry.map((group) => (

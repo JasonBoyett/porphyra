@@ -14,6 +14,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
+import { Localized, LocalizationScope } from "@/localization"
 import type { SchedulingDialogProps } from "./types"
 
 const formatTime = (value: string) =>
@@ -21,12 +22,6 @@ const formatTime = (value: string) =>
 		hour: "numeric",
 		minute: "2-digit",
 	}).format(new Date(value))
-
-const eventTime = (
-	team: NonNullable<SchedulingDialogProps["team"]>,
-	event: SchedulingDialogProps["event"],
-) =>
-	team.callTime === null ? `Event start ${formatTime(event.startsAt)}` : formatTime(team.callTime)
 
 const initials = (name: string) =>
 	name
@@ -86,7 +81,17 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 					<p className="porphyra-eyebrow">Schedule volunteer</p>
 					<DialogTitle className="font-serif text-3xl">{props.team.name}</DialogTitle>
 					<DialogDescription>
-						{props.ministry} · {eventTime(props.team, props.event)}
+						{props.ministry} ·{" "}
+						{props.team.callTime === null ? (
+							<LocalizationScope name="planning.scheduling-dialog-event-start-time">
+								<Localized
+									str="planning.eventStartsAt"
+									values={{ time: formatTime(props.event.startsAt) }}
+								/>
+							</LocalizationScope>
+						) : (
+							formatTime(props.team.callTime)
+						)}
 					</DialogDescription>
 				</DialogHeader>
 
