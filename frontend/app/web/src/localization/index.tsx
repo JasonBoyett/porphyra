@@ -2,10 +2,14 @@ import {
 	interpolate,
 	type ContextualOverride,
 	type PorphyraTranslationKey,
+	type PorphyraTranslation,
 	type PresentationOverride,
+	type PluralizedTranslation,
 	resolvePluralizedTranslation,
 	type TranslationCatalog,
 	type TranslationValues,
+	type TranslationValuesFor,
+	type TranslationValueNames,
 } from "@porphyra/frontend/localization"
 import {
 	createContext,
@@ -195,10 +199,16 @@ export const useSimpleLocalizedString = (
 	pluralize = false,
 ): string => useTranslation().resolveShared(key, values, pluralize)
 
-export type LocalizedProps = {
-	pluralize?: boolean
-	str: PorphyraTranslationKey
-	values?: TranslationValues
+type LocalizationValuesProp<T extends PorphyraTranslation<PorphyraTranslationKey>> =
+	[TranslationValueNames<T>] extends [never]
+		? { values?: never }
+		: { values: TranslationValuesFor<T> }
+
+type PluralizationProp<T extends PorphyraTranslation<PorphyraTranslationKey>> =
+	T extends PluralizedTranslation ? { pluralize?: boolean } : { pluralize?: false | undefined }
+
+export type LocalizedProps<K extends PorphyraTranslationKey> = {
+	str: K
 	/**
 	 * Applies localization metadata and any presentation override directly to
 	 * this element. This avoids a wrapper around existing interactive or layout
@@ -206,15 +216,12 @@ export type LocalizedProps = {
 	 */
 	asChild?: boolean
 	children?: ReactElement
-}
+} &
+	LocalizationValuesProp<PorphyraTranslation<K>> &
+	PluralizationProp<PorphyraTranslation<K>>
 
-export const Localized = ({
-	asChild = false,
-	children,
-	pluralize = false,
-	str,
-	values,
-}: LocalizedProps) => {
+export const Localized = <K extends PorphyraTranslationKey>(props: LocalizedProps<K>) => {
+	const { asChild = false, children, pluralize = false, str, values } = props
 	const { contextualId, presentation, text } = useLocalizedString(str, values, pluralize)
 	if (asChild) {
 		if (!isValidElement(children)) {
@@ -242,8 +249,10 @@ export const Localized = ({
 	)
 }
 
-export const SimpleLocalized = ({ str, values }: Pick<LocalizedProps, "str" | "values">) =>
-	useSimpleLocalizedString(str, values)
+export const SimpleLocalized = <K extends PorphyraTranslationKey>({
+	str,
+	values,
+}: Pick<LocalizedProps<K>, "str" | "values">) => useSimpleLocalizedString(str, values)
 
 export const DevelopmentLocaleSwitcher = () => {
 	const { activeLocale, setLocale, supportedLocales } = useTranslation()

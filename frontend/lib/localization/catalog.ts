@@ -146,3 +146,19 @@ export const porphyraCatalog = {
 
 export type PorphyraTranslationKey =
 	keyof (typeof porphyraCatalog)["locales"]["en"];
+
+export type PorphyraTranslation<K extends PorphyraTranslationKey> =
+	(typeof porphyraCatalog)["locales"]["en"][K];
+
+type TemplateValues<T extends string> =
+	T extends `${string}{${infer Name}}${infer Rest}` ? Name | TemplateValues<Rest> : never;
+
+export type TranslationValueNames<T extends Translation> = T extends string
+	? TemplateValues<T>
+	: T extends PluralizedTranslation
+		? TemplateValues<T["singular"]> | TemplateValues<T["plural"]>
+		: never;
+
+export type TranslationValuesFor<T extends Translation> = Readonly<{
+	[Name in TranslationValueNames<T>]: string | number;
+}>;

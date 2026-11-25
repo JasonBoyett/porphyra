@@ -39,6 +39,21 @@ const catalog: TranslationCatalog = {
 	},
 }
 
+const _localizedPropTypeChecks = () => (
+	<>
+		<Localized str="dashboard.greeting" values={{ name: "Ada" }} />
+		<Localized pluralize str="planning.volunteerCount" values={{ count: 2 }} />
+		{/* @ts-expect-error Non-plural catalog entries cannot enable pluralization. */}
+		<Localized pluralize str="planning.serviceRoles" />
+		{/* @ts-expect-error Interpolation values are required when the selected entry declares them. */}
+		<Localized str="dashboard.greeting" />
+		{/* @ts-expect-error Entries without interpolation placeholders do not accept values. */}
+		<Localized str="planning.serviceRoles" values={{ count: 1 }} />
+		{/* @ts-expect-error Interpolation values cannot include undeclared placeholders. */}
+		<Localized str="dashboard.greeting" values={{ name: "Ada", title: "Pastor" }} />
+	</>
+)
+
 describe("localization resolution", () => {
 	it("resolves shared translations, source fallback, interpolation, and contextual presentation", () => {
 		const target = "test:target:common.hello"
