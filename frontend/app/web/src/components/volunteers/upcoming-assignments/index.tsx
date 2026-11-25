@@ -12,31 +12,16 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { useSimpleLocalizedString } from "@/localization"
+import { Localized, LocalizationScope, useSimpleLocalizedString } from "@/localization"
 import type { AssignmentCardProps, UpcomingAssignmentsProps } from "./types"
 
 const AssignmentCard = ({ assignment }: AssignmentCardProps) => {
 	const [isCancelling, setIsCancelling] = useState(false)
 	const hasCallTime = assignment.callTime !== undefined
 	const arrivalTime = assignment.callTime ?? assignment.eventStartTime
-	const callTimeLabel = useSimpleLocalizedString("volunteers.callTime")
-	const eventStartsAtLabel = useSimpleLocalizedString("volunteers.eventStartsAt")
 	const assignmentActionsLabel = useSimpleLocalizedString("volunteers.assignmentActions")
 	const cancelAssignmentLabel = useSimpleLocalizedString("volunteers.cancelAssignment")
 	const cancelAssignmentFailed = useSimpleLocalizedString("volunteers.cancelAssignmentFailed")
-	const timingDescription = useSimpleLocalizedString(
-		hasCallTime ? "volunteers.assignmentArrivalTiming" : "volunteers.assignmentTiming",
-		hasCallTime
-			? {
-					eventName: assignment.eventName,
-					eventStartTime: assignment.eventStartTime,
-					callTime: arrivalTime,
-				}
-			: {
-					eventName: assignment.eventName,
-					eventStartTime: assignment.eventStartTime,
-				},
-	)
 	const cancelAssignment = async () => {
 		if (assignment.cancel === undefined) return
 		setIsCancelling(true)
@@ -106,7 +91,9 @@ const AssignmentCard = ({ assignment }: AssignmentCardProps) => {
 						className={`shrink-0 rounded-xl p-3 ${hasCallTime ? "bg-primary/10 text-primary" : "bg-accent text-accent-foreground max-sm:w-full"}`}
 					>
 						<span className="block text-xs font-bold tracking-wider uppercase">
-							{hasCallTime ? callTimeLabel : eventStartsAtLabel}
+							<LocalizationScope name="volunteers.assignment-arrival-label">
+								<Localized str={hasCallTime ? "volunteers.callTime" : "volunteers.eventStartsAt"} />
+							</LocalizationScope>
 						</span>
 						<strong className="mt-1 flex items-center gap-1 text-xl">
 							<Clock3 aria-hidden="true" size={18} />
@@ -127,7 +114,27 @@ const AssignmentCard = ({ assignment }: AssignmentCardProps) => {
 						target="_blank"
 					>
 						<MapPin aria-hidden="true" size={16} />
-						{assignment.location} · {timingDescription}
+						{assignment.location} ·{" "}
+						<LocalizationScope name="volunteers.assignment-timing">
+							{hasCallTime ? (
+								<Localized
+									str="volunteers.assignmentArrivalTiming"
+									values={{
+										callTime: arrivalTime,
+										eventName: assignment.eventName,
+										eventStartTime: assignment.eventStartTime,
+									}}
+								/>
+							) : (
+								<Localized
+									str="volunteers.assignmentTiming"
+									values={{
+										eventName: assignment.eventName,
+										eventStartTime: assignment.eventStartTime,
+									}}
+								/>
+							)}
+						</LocalizationScope>
 					</a>
 					{assignment.note !== undefined && <p className="mt-2 leading-6">{assignment.note}</p>}
 				</div>
@@ -140,12 +147,19 @@ export const UpcomingAssignments = ({ assignments }: UpcomingAssignmentsProps) =
 	<section aria-labelledby="upcoming-assignments" className="mt-10">
 		<div className="mb-4 flex items-end justify-between">
 			<div>
-				<h2 className="m-0 font-serif text-3xl" id="upcoming-assignments">
-					Upcoming
-				</h2>
-				<p className="mt-1 text-muted-foreground">
-					{assignments.length} assignment{assignments.length === 1 ? "" : "s"}
-				</p>
+				<LocalizationScope name="volunteers.upcoming-assignments">
+					<Localized asChild str="volunteers.upcoming">
+						<h2 className="m-0 font-serif text-3xl" id="upcoming-assignments" />
+					</Localized>
+					<Localized
+						asChild
+						pluralize
+						str="volunteers.assignmentCount"
+						values={{ count: assignments.length }}
+					>
+						<p className="mt-1 text-muted-foreground" />
+					</Localized>
+				</LocalizationScope>
 			</div>
 		</div>
 		{assignments.length > 0 ? (
@@ -156,8 +170,14 @@ export const UpcomingAssignments = ({ assignments }: UpcomingAssignmentsProps) =
 			</div>
 		) : (
 			<Card className="items-center border-dashed py-12 text-center">
-				<h3 className="m-0 font-serif text-2xl">Nothing scheduled here</h3>
-				<p className="m-0 text-muted-foreground">Try another campus or one of your ministries.</p>
+				<LocalizationScope name="volunteers.empty-assignments">
+					<Localized asChild str="volunteers.noAssignments">
+						<h3 className="m-0 font-serif text-2xl" />
+					</Localized>
+					<Localized asChild str="volunteers.noAssignmentsDescription">
+						<p className="m-0 text-muted-foreground" />
+					</Localized>
+				</LocalizationScope>
 			</Card>
 		)}
 	</section>

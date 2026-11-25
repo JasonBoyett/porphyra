@@ -10,6 +10,7 @@ import { RequestInbox } from "@/components/volunteers/request-inbox"
 import { VolunteerScheduleHeader } from "@/components/volunteers/schedule-header"
 import { UpcomingAssignments } from "@/components/volunteers/upcoming-assignments"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Localized, LocalizationScope } from "@/localization"
 import { toVolunteerScheduleData } from "./volunteer-schedule-data"
 
 const allCampuses = "all-campuses"
@@ -44,9 +45,15 @@ export const VolunteerSchedule = () => {
 			<VolunteerScheduleHeader />
 			<Tabs className="mt-8" defaultValue="schedule">
 				<TabsList>
-					<TabsTrigger value="schedule">My schedule</TabsTrigger>
+					<TabsTrigger value="schedule">
+						<LocalizationScope name="volunteers.schedule-tab">
+							<Localized str="volunteers.mySchedule" />
+						</LocalizationScope>
+					</TabsTrigger>
 					<TabsTrigger value="requests">
-						Requests
+						<LocalizationScope name="volunteers.requests-tab">
+							<Localized str="volunteers.requests" />
+						</LocalizationScope>
 						{(requests.data ?? []).length > 0 && (
 							<span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
 								{requests.data?.length}

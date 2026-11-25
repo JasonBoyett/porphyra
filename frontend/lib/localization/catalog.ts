@@ -132,10 +132,14 @@ export const porphyraCatalog = {
 			"planning.volunteerCancelled": "{name} cancelled their assignment",
 			"volunteers.myServing": "My serving",
 			"volunteers.myMinistries": "My ministries",
+			"volunteers.noRequestsWaiting": "You have no requests waiting for a response.",
 			"volunteers.allCampuses": "All campuses",
 			"volunteers.allMyMinistries": "All my ministries",
 			"volunteers.campus": "Campus",
 			"volunteers.callTime": "Call time",
+			"volunteers.availability": "Availability",
+			"volunteers.decline": "Decline",
+			"volunteers.mySchedule": "My schedule",
 			"volunteers.eventStartsAt": "Event starts at",
 			"volunteers.assignmentTiming": "{eventName} starts at {eventStartTime}.",
 			"volunteers.assignmentArrivalTiming":
@@ -147,6 +151,20 @@ export const porphyraCatalog = {
 			"volunteers.noAssignments": "Nothing scheduled here",
 			"volunteers.noAssignmentsDescription":
 				"Try another campus or one of your ministries.",
+			"volunteers.openRole": "Open role",
+			"volunteers.requestResponseFailed": "Your response could not be saved. Please try again.",
+			"volunteers.requests": "Requests",
+			"volunteers.upcoming": "Upcoming",
+			"volunteers.upcomingSchedule": "Upcoming schedule",
+			"volunteers.upcomingScheduleDescription":
+				"Your assignments, with the time you need to arrive first.",
+			"volunteers.assignmentCount": {
+				singular: "{count} assignment",
+				plural: "{count} assignments",
+			},
+			"volunteers.volunteerRequest": "Volunteer request",
+			"volunteers.respondToServiceRequest": "Respond to this service request.",
+			"volunteers.responseNeeded": "Response needed",
 			"welcome.eyebrow": "Church planning by Acts 2:44 Technology",
 			"welcome.title": "Tools that help your church focus on ministry.",
 			"welcome.description":

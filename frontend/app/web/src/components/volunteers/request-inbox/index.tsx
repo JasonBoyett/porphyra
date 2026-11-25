@@ -6,6 +6,7 @@ import type { VolunteerRequestWithActions } from "@/api/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Localized, LocalizationScope } from "@/localization"
 import type { RequestInboxProps } from "./types"
 
 export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
@@ -23,9 +24,11 @@ export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
 
 	if (pendingRequests.length === 0) {
 		return (
-			<p className="m-0 text-sm text-muted-foreground">
-				You have no requests waiting for a response.
-			</p>
+			<LocalizationScope name="volunteers.empty-request-inbox">
+				<Localized asChild str="volunteers.noRequestsWaiting">
+					<p className="m-0 text-sm text-muted-foreground" />
+				</Localized>
+			</LocalizationScope>
 		)
 	}
 
