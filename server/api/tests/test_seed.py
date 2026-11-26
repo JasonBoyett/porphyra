@@ -7,9 +7,11 @@ from app.db.models import (
 	CampusEventTeamVolunteer,
 	Church,
 	ChurchMembership,
+	User,
 	VolunteerRequest,
 	VolunteerRequestStatus,
 )
+from app.permissions import action_is_permitted
 from app.seed.load import seed_database
 
 
@@ -93,6 +95,48 @@ def test_each_seeded_church_has_a_full_volunteer_roster() -> None:
 					)
 				).all()
 				assert len(memberships) == 25
+	finally:
+		SQLModel.metadata.drop_all(engine)
+		engine.dispose()
+
+
+def test_seeded_roles_exercise_church_campus_and_team_scopes() -> None:
+	engine = create_database_engine("sqlite://")
+	SQLModel.metadata.create_all(engine)
+	try:
+		with Session(engine) as db:
+			seed_database(db)
+			church = db.exec(
+				select(Church).where(Church.name == "Grace Harbor Church")
+			).one()
+			downtown = next(
+				campus for campus in church.campuses if campus.name == "Downtown"
+			)
+			eastside = next(
+				campus for campus in church.campuses if campus.name == "Eastside"
+			)
+			amelia = db.exec(select(User).where(User.name == "Amelia Brooks")).one()
+			membership = db.exec(
+				select(ChurchMembership).where(
+					ChurchMembership.user_id == amelia.id,
+					ChurchMembership.church_id == church.id,
+				)
+			).one()
+
+			assert action_is_permitted(
+				membership,
+				db,
+				action="schedule.manage",
+				church_id=church.id,
+				campus_id=downtown.id,
+			)
+			assert not action_is_permitted(
+				membership,
+				db,
+				action="schedule.manage",
+				church_id=church.id,
+				campus_id=eastside.id,
+			)
 	finally:
 		SQLModel.metadata.drop_all(engine)
 		engine.dispose()

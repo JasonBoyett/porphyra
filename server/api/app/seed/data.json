@@ -74,6 +74,36 @@
         "Yasmin Zane",
         "Zachary Allen"
       ],
+      "roles": [
+        {
+          "name": "Downtown Planner",
+          "permissions": ["schedule.manage"],
+          "assignments": [
+            { "member": "Amelia Brooks", "campus": "Downtown" }
+          ]
+        },
+        {
+          "name": "Eastside Administrator",
+          "isAdministrator": true,
+          "assignments": [
+            { "member": "Benjamin Carter", "campus": "Eastside" }
+          ]
+        },
+        {
+          "name": "Request Responder",
+          "permissions": ["volunteer.respond"],
+          "assignments": [
+            { "member": "Chloe Davis", "campus": "Downtown" }
+          ]
+        },
+        {
+          "name": "Band Coordinator",
+          "permissions": ["schedule.manage"],
+          "assignments": [
+            { "member": "Daniel Ellis", "campus": "Downtown", "team": "Band" }
+          ]
+        }
+      ],
       "campusEvents": [
         {
           "title": "Sunday Worship Service",

@@ -14,6 +14,9 @@ from app.db.models import (
     CampusEventTeamVolunteer,
     Church,
     ChurchMembership,
+    ChurchRole,
+    ChurchRoleAssignment,
+    ChurchRolePermission,
     Ministry,
     MinistryLeadership,
     Team,
@@ -23,6 +26,7 @@ from app.db.models import (
     VolunteerRequestStatus,
 )
 from app.db.schemas import RoleTemplateData
+from app.permissions import ALL_PERMISSIONS
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 
 
@@ -112,14 +116,11 @@ def seed_database(db: Session) -> None:
 
         # Every church begins with a top-level administrator. Future role-management
         # screens may add custom roles but must preserve at least one such assignment.
-        from app.db.models import ChurchRole, ChurchRoleAssignment
-
-        role_table = ChurchRole.__table__  # pyright: ignore[reportAttributeAccessIssue]
         assignment_table = ChurchRoleAssignment.__table__  # pyright: ignore[reportAttributeAccessIssue]
         administrator = db.exec(
             select(ChurchRole).where(
                 ChurchRole.church_id == church.id,
-                role_table.c.is_administrator.is_(True),
+                ChurchRole.name == "Administrator",
             )
         ).one_or_none()
         if administrator is None:
@@ -273,6 +274,85 @@ def seed_database(db: Session) -> None:
                             church_membership_id=volunteer_membership.id,
                             team_id=team.id,
                             notes=[],
+                        )
+                    )
+
+        for role_data in church_data.get("roles", []):
+            role = db.exec(
+                select(ChurchRole).where(
+                    ChurchRole.church_id == church.id,
+                    ChurchRole.name == role_data["name"],
+                )
+            ).one_or_none()
+            if role is None:
+                role = ChurchRole(
+                    church_id=church.id,
+                    name=role_data["name"],
+                    is_administrator=role_data.get("isAdministrator", False),
+                )
+                db.add(role)
+                db.flush()
+            for permission in role_data.get("permissions", []):
+                if permission not in ALL_PERMISSIONS:
+                    raise ValueError(f"Unknown seed permission: {permission}")
+                existing_permission = db.exec(
+                    select(ChurchRolePermission).where(
+                        ChurchRolePermission.church_role_id == role.id,
+                        ChurchRolePermission.permission == permission,
+                    )
+                ).one_or_none()
+                if existing_permission is None:
+                    db.add(
+                        ChurchRolePermission(
+                            church_role_id=role.id,
+                            permission=permission,
+                        )
+                    )
+            for assignment_data in role_data.get("assignments", []):
+                assigned_user = db.exec(
+                    select(User).where(User.name == assignment_data["member"])
+                ).one()
+                assigned_membership = db.exec(
+                    select(ChurchMembership).where(
+                        ChurchMembership.user_id == assigned_user.id,
+                        ChurchMembership.church_id == church.id,
+                    )
+                ).one()
+                campus = db.exec(
+                    select(Campus).where(
+                        Campus.church_id == church.id,
+                        Campus.name == assignment_data["campus"],
+                    )
+                ).one()
+                team_name = assignment_data.get("team")
+                team = (
+                    db.exec(
+                        select(Team)
+                        .join(Ministry)
+                        .where(
+                            Ministry.church_id == church.id,
+                            Team.name == team_name,
+                        )
+                    ).one()
+                    if team_name is not None
+                    else None
+                )
+                existing_assignment = db.exec(
+                    select(ChurchRoleAssignment).where(
+                        ChurchRoleAssignment.church_membership_id
+                        == assigned_membership.id,
+                        ChurchRoleAssignment.church_role_id == role.id,
+                        ChurchRoleAssignment.campus_id == campus.id,
+                        ChurchRoleAssignment.team_id == (team.id if team else None),
+                    )
+                ).one_or_none()
+                if existing_assignment is None:
+                    db.add(
+                        ChurchRoleAssignment(
+                            church_membership_id=assigned_membership.id,
+                            church_role_id=role.id,
+                            campus_id=campus.id,
+                            team_id=team.id if team else None,
                         )
                     )
 
