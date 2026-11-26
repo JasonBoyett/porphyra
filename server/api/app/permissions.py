@@ -1,13 +1,22 @@
 """Scoped, server-authoritative permission evaluation."""
 
-from typing import Literal, get_args
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal, get_args
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, exists, or_
 from sqlmodel import Session, select
 
-from app.db.models.church_membership import ChurchMembership
+from app.db.models.church_role import (
+    ChurchRole,
+    ChurchRoleAssignment,
+    ChurchRolePermission,
+)
+
+if TYPE_CHECKING:
+    from app.db.models.church_membership import ChurchMembership
 
 Permission = Literal[
     "events.manage",
@@ -33,12 +42,6 @@ def action_is_permitted(
     The EXISTS query deliberately keeps role expansion in SQLite. The caller supplies
     the level from a resource it loaded, never from untrusted request input.
     """
-    from app.db.models.church_role import (
-        ChurchRole,
-        ChurchRoleAssignment,
-        ChurchRolePermission,
-    )
-
     if membership.church_id != church_id:
         return False
     assignments = ChurchRoleAssignment.__table__.c  # pyright: ignore[reportAttributeAccessIssue]
