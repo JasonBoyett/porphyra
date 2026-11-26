@@ -51,7 +51,12 @@ describe("PlanningScheduleBoard", () => {
 		restoreApiClient = replaceGlobalClientWith(rendered.apiClient)
 
 		await act(async () => {
-			window.history.pushState({}, "", "/app/planning")
+			const event = Object.values(mockDatabase.campusEvents)[0]
+			window.history.pushState(
+				{},
+				"",
+				`/app/planning/churches/${event.churchId}/events/${event.id}`,
+			)
 			window.dispatchEvent(new PopStateEvent("popstate"))
 		})
 

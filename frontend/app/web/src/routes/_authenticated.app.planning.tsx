@@ -1,12 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
-
-import { PlanningScheduleBoard } from "@/features/planning"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_authenticated/app/planning")({
-	component: PlanningRoute,
+	component: Outlet,
 })
-
-function PlanningRoute() {
-	const { accessToken } = Route.useRouteContext()
-	return <PlanningScheduleBoard accessToken={accessToken} />
-}

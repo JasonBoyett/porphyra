@@ -6,8 +6,8 @@ import type { ScheduleFilter } from "@/components/planning/planning-schedule-boa
 import { SchedulingDialog } from "@/components/planning/scheduling-dialog"
 import { Localized, LocalizationScope } from "@/localization"
 
-export const PlanningScheduleBoard = (props: { accessToken: string }) => {
-	const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+export const PlanningScheduleBoard = (props: { accessToken: string; eventId?: string }) => {
+	const [selectedEventId, setSelectedEventId] = useState<string | null>(props.eventId ?? null)
 	const [ministry, setMinistry] = useState("All ministries")
 	const [filter, setFilter] = useState<ScheduleFilter>("all")
 	const [roleToSchedule, setRoleToSchedule] = useState<{
@@ -18,10 +18,14 @@ export const PlanningScheduleBoard = (props: { accessToken: string }) => {
 	const events = apiClient.getCampusEvents.useSyncQuery()
 
 	useEffect(() => {
+		if (props.eventId !== undefined) {
+			setSelectedEventId(props.eventId)
+			return
+		}
 		if (selectedEventId === null && events.data?.[0] !== undefined) {
 			setSelectedEventId(events.data[0].id)
 		}
-	}, [events.data, selectedEventId])
+	}, [events.data, props.eventId, selectedEventId])
 
 	const planning = apiClient.getCampusEventPlanning.useSyncQuery(
 		{ event_id: selectedEventId ?? "" },

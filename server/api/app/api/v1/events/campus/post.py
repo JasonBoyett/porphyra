@@ -7,6 +7,7 @@ from app.api.v1.events._responses import campus_event_response
 from app.api.v1.events.schemas import CampusEventResponse, CreateCampusEventRequest
 from app.auth import CurrentUser
 from app.db.models import Campus, CampusEvent
+from app.permissions import require_action
 from app.sync.audience import church_member_user_ids
 from app.sync.openapi import sync_tags
 from app.sync.publish import publish
@@ -15,17 +16,24 @@ router = APIRouter()
 
 
 @router.post(
-	"/",
-	operation_id="createCampusEvent",
-	status_code=status.HTTP_201_CREATED,
-	openapi_extra=sync_tags("campus-events", "campus-event-planning"),
+    "/",
+    operation_id="createCampusEvent",
+    status_code=status.HTTP_201_CREATED,
+    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
 def create_campus_event(
     payload: CreateCampusEventRequest,
     db: DatabaseSession,
     user: CurrentUser,
 ) -> CampusEventResponse:
-    get_church_membership_or_404(payload.church_id, user=user, db=db)
+    membership = get_church_membership_or_404(payload.church_id, user=user, db=db)
+    require_action(
+        membership,
+        db,
+        action="events.manage",
+        church_id=payload.church_id,
+        campus_id=payload.campus_id,
+    )
     campus = db.exec(
         select(Campus).where(
             Campus.church_id == payload.church_id,

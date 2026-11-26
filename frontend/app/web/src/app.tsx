@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider } from "@tanstack/react-router"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { appDependencies, type ApplicationDependencies } from "@/app-dependencies"
 import { AuthProvider, useAuth } from "@/auth"
@@ -10,6 +10,7 @@ import { createAppRouter, router } from "@/router"
 import { SyncProvider } from "@/sync/sync-provider"
 import { DevelopmentThemeSwitcher, ThemeProvider } from "@/theme"
 import { Toaster } from "@/components/ui/sonner"
+import { PermissionStore } from "@/api/permission-store"
 
 type ApplicationRouterProps = {
 	dependencies: ApplicationDependencies
@@ -19,6 +20,12 @@ type ApplicationRouterProps = {
 const ApplicationRouter = ({ dependencies, router: applicationRouter }: ApplicationRouterProps) => {
 	const auth = useAuth()
 	const accessToken = auth.session?.accessToken ?? null
+	const [permissionStore] = useState(() => new PermissionStore())
+	const refreshPermissions = (churchId: string) => {
+		void dependencies.apiClient.getChurchPermissions({ church_id: churchId }).then((snapshot) => {
+			permissionStore.replace(snapshot)
+		}).catch(() => permissionStore.clear(churchId))
+	}
 
 	useEffect(() => {
 		applicationRouter.update({
@@ -36,6 +43,7 @@ const ApplicationRouter = ({ dependencies, router: applicationRouter }: Applicat
 			accessToken={accessToken}
 			enabled={dependencies.syncEnabled}
 			queryClient={dependencies.queryClient}
+			onAuthorizationChanged={refreshPermissions}
 		>
 			<RouterProvider
 				context={{

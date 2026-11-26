@@ -380,6 +380,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/permissions/{church_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Church Permissions */
+        get: operations["getChurchPermissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -606,6 +623,15 @@ export interface components {
             /** Timezone */
             timeZone: string;
         };
+        /** CampusPermissionSnapshot */
+        CampusPermissionSnapshot: {
+            /** Permissions */
+            permissions: string[];
+            /** Teams */
+            teams: {
+                [key: string]: components["schemas"]["TeamPermissionSnapshot"];
+            };
+        };
         /** ChurchMembership */
         ChurchMembership: {
             /**
@@ -628,6 +654,20 @@ export interface components {
              * Format: uuid
              */
             church_id: string;
+        };
+        /** ChurchPermissionSnapshot */
+        ChurchPermissionSnapshot: {
+            /**
+             * Churchid
+             * Format: uuid
+             */
+            churchId: string;
+            /** Permissions */
+            permissions: string[];
+            /** Campuses */
+            campuses: {
+                [key: string]: components["schemas"]["CampusPermissionSnapshot"];
+            };
         };
         /** ConfirmScheduleRequest */
         ConfirmScheduleRequest: {
@@ -948,6 +988,11 @@ export interface components {
             roleEmoji: string | null;
             /** Conflictconfirmedat */
             conflictConfirmedAt: string | null;
+        };
+        /** TeamPermissionSnapshot */
+        TeamPermissionSnapshot: {
+            /** Permissions */
+            permissions: string[];
         };
         /** TeamRoleResponse */
         TeamRoleResponse: {
@@ -1788,6 +1833,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    getChurchPermissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchPermissionSnapshot"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

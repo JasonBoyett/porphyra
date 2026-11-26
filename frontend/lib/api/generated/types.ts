@@ -55,7 +55,11 @@ export type CampusEventTeamScheduleResponse =
 	components["schemas"]["CampusEventTeamScheduleResponse"];
 export type CampusLocationResponse =
 	components["schemas"]["CampusLocationResponse"];
+export type CampusPermissionSnapshot =
+	components["schemas"]["CampusPermissionSnapshot"];
 export type ChurchMembership = components["schemas"]["ChurchMembership"];
+export type ChurchPermissionSnapshot =
+	components["schemas"]["ChurchPermissionSnapshot"];
 export type ConfirmScheduleRequest =
 	components["schemas"]["ConfirmScheduleRequest"];
 export type CreateCampusEventRequest =
@@ -89,6 +93,8 @@ export type ScheduledTeamResponse =
 	components["schemas"]["ScheduledTeamResponse"];
 export type ScheduledVolunteerResponse =
 	components["schemas"]["ScheduledVolunteerResponse"];
+export type TeamPermissionSnapshot =
+	components["schemas"]["TeamPermissionSnapshot"];
 export type TeamRoleResponse = components["schemas"]["TeamRoleResponse"];
 export type TeamRoleResponseData =
 	components["schemas"]["TeamRoleResponseData"];

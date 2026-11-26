@@ -16,6 +16,7 @@ from app.api.v1.events.campus.teams.volunteers.post import (
 )
 from app.api.v1.events.church.post import router as church_event_post_router
 from app.api.v1.me.get import router as me_get_router
+from app.api.v1.permissions.get import router as permissions_get_router
 from app.api.v1.sync.websocket import router as sync_websocket_router
 
 router = APIRouter(prefix="/api/v1")
@@ -29,4 +30,5 @@ router.include_router(campus_team_post_router, prefix="/events/campus")
 router.include_router(campus_team_volunteer_post_router, prefix="/events/campus")
 router.include_router(campus_team_confirmation_post_router, prefix="/events/campus")
 router.include_router(me_get_router, prefix="/me")
+router.include_router(permissions_get_router, prefix="/permissions")
 router.include_router(sync_websocket_router, prefix="/sync")

@@ -26,7 +26,8 @@ import { mockOperation as mockOperation18 } from "./operations/dropCampusEventVo
 import { mockOperation as mockOperation19 } from "./operations/cancelMyVolunteerAssignment"
 import { mockOperation as mockOperation20 } from "./operations/confirmCampusEventTeam"
 import { mockOperation as mockOperation21 } from "./operations/getCurrentUser"
-import { mockOperation as mockOperation22 } from "./operations/health_health_get"
+import { mockOperation as mockOperation22 } from "./operations/getChurchPermissions"
+import { mockOperation as mockOperation23 } from "./operations/health_health_get"
 
 export const mockApiClientTransport: ApiClientTransport = {
 	getAllChurchMemberships: mockOperation0,
@@ -51,5 +52,6 @@ export const mockApiClientTransport: ApiClientTransport = {
 	cancelMyVolunteerAssignment: mockOperation19,
 	confirmCampusEventTeam: mockOperation20,
 	getCurrentUser: mockOperation21,
-	health_health_get: mockOperation22,
+	getChurchPermissions: mockOperation22,
+	health_health_get: mockOperation23,
 }

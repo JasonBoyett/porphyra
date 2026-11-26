@@ -9,12 +9,17 @@ from app.db.models.church_event_ministry import ChurchEventMinistry
 from app.db.models.church_event_team import ChurchEventTeam
 from app.db.models.church_event_team_volunteer import ChurchEventTeamVolunteer
 from app.db.models.church_membership import ChurchMembership
+from app.db.models.church_role import (
+    ChurchRole,
+    ChurchRoleAssignment,
+    ChurchRolePermission,
+)
 from app.db.models.ministry import Ministry
 from app.db.models.ministry_leadership import MinistryLeadership
 from app.db.models.role_template import (
-	CampusRoleTemplate,
-	ChurchRoleTemplate,
-	PublicRoleTemplate,
+    CampusRoleTemplate,
+    ChurchRoleTemplate,
+    PublicRoleTemplate,
 )
 from app.db.models.team import Team
 from app.db.models.team_membership import TeamMembership
@@ -22,25 +27,28 @@ from app.db.models.user import User
 from app.db.models.volunteer_request import VolunteerRequest, VolunteerRequestStatus
 
 __all__ = [
-	"Campus",
-	"CampusEvent",
-	"CampusEventMinistry",
-	"CampusEventTeam",
-	"CampusEventTeamVolunteer",
-	"Church",
-	"ChurchEvent",
-	"ChurchEventMinistry",
-	"ChurchEventTeam",
-	"ChurchEventTeamVolunteer",
-	"ChurchMembership",
-	"Ministry",
-	"MinistryLeadership",
-	"CampusRoleTemplate",
-	"ChurchRoleTemplate",
-	"PublicRoleTemplate",
-	"Team",
-	"TeamMembership",
-	"User",
-	"VolunteerRequest",
-	"VolunteerRequestStatus",
+    "Campus",
+    "CampusEvent",
+    "CampusEventMinistry",
+    "CampusEventTeam",
+    "CampusEventTeamVolunteer",
+    "Church",
+    "ChurchEvent",
+    "ChurchEventMinistry",
+    "ChurchEventTeam",
+    "ChurchEventTeamVolunteer",
+    "ChurchMembership",
+    "ChurchRole",
+    "ChurchRoleAssignment",
+    "ChurchRolePermission",
+    "Ministry",
+    "MinistryLeadership",
+    "CampusRoleTemplate",
+    "ChurchRoleTemplate",
+    "PublicRoleTemplate",
+    "Team",
+    "TeamMembership",
+    "User",
+    "VolunteerRequest",
+    "VolunteerRequestStatus",
 ]

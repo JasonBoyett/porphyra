@@ -1144,6 +1144,51 @@
         ]
       }
     },
+    "/api/v1/permissions/{church_id}": {
+      "get": {
+        "summary": "Get Church Permissions",
+        "operationId": "getChurchPermissions",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Church Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurchPermissionSnapshot"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -1662,6 +1707,33 @@
         "title": "CampusLocationResponse",
         "description": "A campus's physical address and authoritative local scheduling timezone."
       },
+      "CampusPermissionSnapshot": {
+        "properties": {
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "teams": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TeamPermissionSnapshot"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "permissions",
+          "teams"
+        ],
+        "title": "CampusPermissionSnapshot"
+      },
       "ChurchMembership": {
         "properties": {
           "id": {
@@ -1691,6 +1763,39 @@
           "church_id"
         ],
         "title": "ChurchMembership"
+      },
+      "ChurchPermissionSnapshot": {
+        "properties": {
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "campuses": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CampusPermissionSnapshot"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Campuses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "churchId",
+          "permissions",
+          "campuses"
+        ],
+        "title": "ChurchPermissionSnapshot"
       },
       "ConfirmScheduleRequest": {
         "properties": {
@@ -2396,6 +2501,22 @@
           "conflictConfirmedAt"
         ],
         "title": "ScheduledVolunteerResponse"
+      },
+      "TeamPermissionSnapshot": {
+        "properties": {
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "permissions"
+        ],
+        "title": "TeamPermissionSnapshot"
       },
       "TeamRoleResponse": {
         "properties": {

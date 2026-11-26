@@ -30,6 +30,7 @@ export type SyncManagerOptions = {
 	apiUrl: string
 	createSocket?: SocketFactory
 	onConnectionError?: (error: unknown) => void
+	onAuthorizationChanged?: (churchId: string, campusId?: string) => void
 	reconnectDelayMs?: number
 	schedule?: (callback: () => void, delay: number) => TimerHandle
 	cancelSchedule?: (handle: TimerHandle) => void
@@ -56,6 +57,7 @@ export class SyncManager {
 	readonly #apiUrl: string
 	readonly #createSocket: SocketFactory
 	readonly #onConnectionError: (error: unknown) => void
+	readonly #onAuthorizationChanged: (churchId: string, campusId?: string) => void
 	readonly #reconnectDelayMs: number
 	readonly #schedule: (callback: () => void, delay: number) => TimerHandle
 	readonly #cancelSchedule: (handle: TimerHandle) => void
@@ -75,6 +77,7 @@ export class SyncManager {
 		this.#onConnectionError =
 			options.onConnectionError ??
 			((error) => console.warn("Porphyra realtime sync could not connect.", error))
+		this.#onAuthorizationChanged = options.onAuthorizationChanged ?? (() => {})
 		this.#reconnectDelayMs = options.reconnectDelayMs ?? 1_000
 		this.#schedule = options.schedule ?? ((callback, delay) => setTimeout(callback, delay))
 		this.#cancelSchedule = options.cancelSchedule ?? ((handle) => clearTimeout(handle))
@@ -193,6 +196,10 @@ export class SyncManager {
 			if (message.tags !== undefined) this.#invalidateTags(message.tags)
 			return
 		}
+		if (this.#isAuthorizationChangedEvent(message)) {
+			this.#onAuthorizationChanged(message.churchId, message.campusId)
+			return
+		}
 		if (this.#isSyncEvent(message)) this.#invalidateTags(message.tags)
 	}
 
@@ -219,6 +226,20 @@ export class SyncManager {
 			candidate.type === "changed" &&
 			Array.isArray(candidate.tags) &&
 			candidate.tags.every(isApiTag)
+		)
+	}
+
+	#isAuthorizationChangedEvent(message: unknown): message is {
+		type: "authorization.changed"
+		churchId: string
+		campusId?: string
+	} {
+		if (typeof message !== "object" || message === null) return false
+		const candidate = message as { type?: unknown; churchId?: unknown; campusId?: unknown }
+		return (
+			candidate.type === "authorization.changed" &&
+			typeof candidate.churchId === "string" &&
+			(candidate.campusId === undefined || typeof candidate.campusId === "string")
 		)
 	}
 

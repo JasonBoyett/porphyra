@@ -12,6 +12,7 @@ from app.api.v1.events.schemas import (
 from app.auth import CurrentUser
 from app.db.models import CampusEventTeam, TeamMembership
 from app.db.utils import utc_now
+from app.permissions import require_action
 from app.sync.audience import church_member_user_ids
 from app.sync.openapi import sync_tags
 from app.sync.publish import publish
@@ -33,8 +34,16 @@ def confirm_schedule(
     event_team = db.get(CampusEventTeam, event_team_id)
     if event_team is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    get_church_membership_or_404(
+    membership = get_church_membership_or_404(
         event_team.event_ministry.event.church_id, user=user, db=db
+    )
+    require_action(
+        membership,
+        db,
+        action="schedule.manage",
+        church_id=event_team.event_ministry.event.church_id,
+        campus_id=event_team.event_ministry.event.campus_id,
+        team_id=event_team.team_id,
     )
     team_membership = db.get(TeamMembership, payload.team_membership_id)
     if team_membership is None or team_membership.team_id != event_team.team_id:

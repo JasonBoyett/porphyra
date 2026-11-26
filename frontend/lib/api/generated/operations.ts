@@ -286,6 +286,17 @@ export const apiOperations = {
 		syncResourceViews: [],
 		syncQueryTargets: [],
 	},
+	getChurchPermissions: {
+		method: "get",
+		hasBody: false,
+		pathParams: ["church_id"],
+		queryParams: [],
+		requestContentType: null,
+		route: "/api/v1/permissions/{church_id}",
+		syncTags: [],
+		syncResourceViews: [],
+		syncQueryTargets: [],
+	},
 	health_health_get: {
 		method: "get",
 		hasBody: false,

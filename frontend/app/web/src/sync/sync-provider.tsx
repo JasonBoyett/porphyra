@@ -10,6 +10,7 @@ export const SyncProvider = (
 	props: PropsWithChildren<{
 		accessToken: string | null
 		enabled?: boolean
+		onAuthorizationChanged?: (churchId: string, campusId?: string) => void
 		queryClient: QueryClient
 	}>,
 ) => {
@@ -19,6 +20,7 @@ export const SyncProvider = (
 			: new SyncManager(props.queryClient, {
 					accessToken: props.accessToken,
 					apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+					onAuthorizationChanged: props.onAuthorizationChanged,
 				}),
 	)
 

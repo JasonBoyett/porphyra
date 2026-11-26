@@ -8,7 +8,7 @@ from app.api.v1.dependencies.church_membership import get_church_membership_or_4
 from app.api.v1.dependencies.database import DatabaseSession
 from app.api.v1.events.campus.sync import (
     accept_volunteer_request_action,
-	cancel_volunteer_assignment_action,
+    cancel_volunteer_assignment_action,
     decline_volunteer_request_action,
 )
 from app.api.v1.events.schemas import (
@@ -25,6 +25,7 @@ from app.db.models import (
     VolunteerRequest,
     VolunteerRequestStatus,
 )
+from app.permissions import Permission, require_action
 from app.scheduling.conflicts import get_schedule_conflicts
 from app.scheduling.roles import assign_user_to_role
 from app.sync.audience import church_member_user_ids
@@ -48,14 +49,27 @@ def _request_response(request: VolunteerRequest) -> VolunteerRequestResponse:
 
 
 def _get_event_team(
-    event_team_id: UUID, db: DatabaseSession, user: CurrentUser
+    event_team_id: UUID,
+    db: DatabaseSession,
+    user: CurrentUser,
+    *,
+    action: Permission | None = "schedule.manage",
 ) -> CampusEventTeam:
     event_team = db.get(CampusEventTeam, event_team_id)
     if event_team is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    get_church_membership_or_404(
+    membership = get_church_membership_or_404(
         event_team.event_ministry.event.church_id, user=user, db=db
     )
+    if action is not None:
+        require_action(
+            membership,
+            db,
+            action=action,
+            church_id=event_team.event_ministry.event.church_id,
+            campus_id=event_team.event_ministry.event.campus_id,
+            team_id=event_team.team_id,
+        )
     return event_team
 
 
@@ -352,7 +366,7 @@ def accept_volunteer_request(
     db: DatabaseSession,
     user: CurrentUser,
 ) -> VolunteerAssignmentResponse:
-    event_team = _get_event_team(event_team_id, db, user)
+    event_team = _get_event_team(event_team_id, db, user, action="volunteer.respond")
     request = db.get(VolunteerRequest, request_id)
     if (
         request is None
@@ -405,9 +419,7 @@ def accept_volunteer_request(
         role_emoji=assignment.role_emoji,
         conflict_confirmed_at=assignment.conflict_confirmed_at,
     )
-    _publish_volunteer_schedule_change(
-        assignment_response, assignment, event_team, db
-    )
+    _publish_volunteer_schedule_change(assignment_response, assignment, event_team, db)
     response = publish(
         assignment_response,
         tags=("campus-events", "campus-event-planning"),
@@ -441,7 +453,7 @@ def decline_volunteer_request(
     db: DatabaseSession,
     user: CurrentUser,
 ) -> VolunteerRequestResponse:
-    event_team = _get_event_team(event_team_id, db, user)
+    event_team = _get_event_team(event_team_id, db, user, action="volunteer.respond")
     request = db.get(VolunteerRequest, request_id)
     if (
         request is None
@@ -527,9 +539,7 @@ def update_volunteer_role(
         role_emoji=assignment.role_emoji,
         conflict_confirmed_at=assignment.conflict_confirmed_at,
     )
-    _publish_volunteer_schedule_change(
-        assignment_response, assignment, event_team, db
-    )
+    _publish_volunteer_schedule_change(assignment_response, assignment, event_team, db)
     response = publish(
         assignment_response,
         tags=("campus-events", "campus-event-planning"),
@@ -556,8 +566,7 @@ def _drop_volunteer_assignment(
     accepted_request: VolunteerRequest | None = None
     if cancelled_by_volunteer:
         accepted_requests = db.exec(
-            select(VolunteerRequest)
-            .where(
+            select(VolunteerRequest).where(
                 VolunteerRequest.campus_event_team_id == event_team.id,
                 VolunteerRequest.team_membership_id == assignment.team_membership_id,
                 VolunteerRequest.role_name == assignment.role_name,
@@ -582,9 +591,7 @@ def _drop_volunteer_assignment(
         role_emoji=assignment.role_emoji,
         conflict_confirmed_at=assignment.conflict_confirmed_at,
     )
-    _publish_volunteer_schedule_change(
-        assignment_response, assignment, event_team, db
-    )
+    _publish_volunteer_schedule_change(assignment_response, assignment, event_team, db)
     if accepted_request is not None:
         publish(
             _request_response(accepted_request),
@@ -637,7 +644,7 @@ def cancel_my_volunteer_assignment(
     user: CurrentUser,
 ) -> VolunteerAssignmentResponse:
     """Allow a volunteer to remove their own accepted assignment."""
-    event_team = _get_event_team(event_team_id, db, user)
+    event_team = _get_event_team(event_team_id, db, user, action=None)
     assignment = db.get(CampusEventTeamVolunteer, volunteer_id)
     if (
         assignment is None
@@ -645,6 +652,17 @@ def cancel_my_volunteer_assignment(
         or assignment.team_membership.church_membership.user_id != user.id
     ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    membership = get_church_membership_or_404(
+        event_team.event_ministry.event.church_id, user=user, db=db
+    )
+    require_action(
+        membership,
+        db,
+        action="volunteer.respond",
+        church_id=event_team.event_ministry.event.church_id,
+        campus_id=event_team.event_ministry.event.campus_id,
+        team_id=event_team.team_id,
+    )
     return _drop_volunteer_assignment(
         event_team, assignment, db, cancelled_by_volunteer=True
     )
