@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Localized, LocalizationScope } from "@/localization"
+import { ComputedText, Localized, LocalizationScope } from "@/localization"
 import type { DashboardProps } from "./types"
 
 export const Dashboard = ({ churches, isError, isLoading, viewerName }: DashboardProps) => (
@@ -50,14 +50,20 @@ export const Dashboard = ({ churches, isError, isLoading, viewerName }: Dashboar
 							<CardHeader className="px-5">
 								<Avatar className="rounded-xl" size="lg">
 									<AvatarImage alt={`${church.name} profile`} src={church.avatarUrl} />
-									<AvatarFallback className="rounded-xl">{church.name.slice(0, 1)}</AvatarFallback>
+									<AvatarFallback className="rounded-xl">
+										<ComputedText value={church.name.slice(0, 1)} />
+									</AvatarFallback>
 								</Avatar>
 								<div className="mt-3">
 									<Localized asChild str="dashboard.church">
 										<p className="mb-2 text-xs font-extrabold tracking-[0.12em] text-primary uppercase" />
 									</Localized>
-									<CardTitle className="font-serif text-2xl">{church.name}</CardTitle>
-									<CardDescription className="mt-2 leading-6">{church.description}</CardDescription>
+									<CardTitle className="font-serif text-2xl">
+										<ComputedText value={church.name} />
+									</CardTitle>
+									<CardDescription className="mt-2 leading-6">
+										<ComputedText value={church.description} />
+									</CardDescription>
 								</div>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-4 px-5">
@@ -69,7 +75,7 @@ export const Dashboard = ({ churches, isError, isLoading, viewerName }: Dashboar
 											key={campus.id}
 										>
 											<MapPin className="size-4 shrink-0 text-primary" />
-											{campus.name} · {campus.location.city}
+											<ComputedText value={`${campus.name} · ${campus.location.city}`} />
 										</span>
 									))}
 								</div>
@@ -79,7 +85,7 @@ export const Dashboard = ({ churches, isError, isLoading, viewerName }: Dashboar
 										{church.ministries.flatMap((ministry) =>
 											ministry.teams.map((team) => (
 												<Badge key={team.id} variant="secondary">
-													{ministry.name} · {team.name}
+													<ComputedText value={`${ministry.name} · ${team.name}`} />
 												</Badge>
 											)),
 										)}

@@ -27,7 +27,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Localized, LocalizationScope } from "@/localization"
+import { ComputedText, Localized, LocalizationScope } from "@/localization"
 import type { RosterVolunteerProps } from "./types"
 
 const initials = (name: string) =>
@@ -87,16 +87,28 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 		<div className="porphyra-roster-item relative flex w-64 shrink-0 items-center gap-3 pr-9 text-secondary-foreground">
 			<Avatar className="size-10">
 				<AvatarImage alt={`${props.name} profile`} src={props.avatarUrl} />
-				<AvatarFallback>{initials(props.name)}</AvatarFallback>
+				<AvatarFallback>
+					<ComputedText value={initials(props.name)} />
+				</AvatarFallback>
 			</Avatar>
 			<div className="min-w-0 flex-1">
-				<strong>{props.name}</strong>
-				<small className="block truncate text-xs">{props.email}</small>
+				<strong>
+					<ComputedText value={props.name} />
+				</strong>
+				<small className="block truncate text-xs">
+					<ComputedText value={props.email} />
+				</small>
 				<div className="mt-1 flex items-center gap-1 text-xs">
-					<span>{props.roleEmoji ?? "✨"}</span>
+					<span>
+						<ComputedText value={props.roleEmoji ?? "✨"} />
+					</span>
 					<LocalizationScope name="planning.roster-volunteer-status">
 						<span>
-							{props.roleName ?? <Localized str="navigation.volunteer" />}
+							{props.roleName === null ? (
+								<Localized str="navigation.volunteer" />
+							) : (
+								<ComputedText value={props.roleName} />
+							)}
 						</span>
 						<Badge
 							className={
@@ -135,7 +147,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 								<DropdownMenuSub>
 									<DropdownMenuSubTrigger>
 										<Pencil />
-										Change role
+										<Localized str="planning.changeRole" />
 									</DropdownMenuSubTrigger>
 									<DropdownMenuSubContent>
 										<DropdownMenuGroup>
@@ -151,7 +163,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 														onSelect={() => changeRoleTo(roleName)}
 														value={roleName}
 													>
-														{role.emoji ?? "✨"} {roleName}
+														<ComputedText value={`${role.emoji ?? "✨"} ${roleName}`} />
 													</DropdownMenuRadioItem>
 												))}
 											</DropdownMenuRadioGroup>
@@ -167,7 +179,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 									variant="destructive"
 								>
 									<UserMinus />
-									Drop from service
+									<Localized str="planning.dropFromService" />
 								</DropdownMenuItem>
 							</DropdownMenuGroup>
 						</DropdownMenuContent>
@@ -175,19 +187,23 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 					<Dialog onOpenChange={setIsDropDialogOpen} open={isDropDialogOpen}>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Drop {props.name} from this service?</DialogTitle>
+								<DialogTitle>
+									<Localized str="planning.dropVolunteerTitle" values={{ name: props.name }} />
+								</DialogTitle>
 								<DialogDescription>
-									{props.name} will be removed from the roster and their role will become available
-									to fill.
+									<Localized
+										str="planning.dropVolunteerDescription"
+										values={{ name: props.name }}
+									/>
 								</DialogDescription>
 							</DialogHeader>
 							<DialogFooter>
 								<Button onClick={() => setIsDropDialogOpen(false)} variant="outline">
-									Cancel
+									<Localized str="planning.cancel" />
 								</Button>
 								<Button disabled={dropVolunteer.isPending} onClick={drop} variant="destructive">
 									<UserMinus data-icon="inline-start" />
-									Drop volunteer
+									<Localized str="planning.dropVolunteer" />
 								</Button>
 							</DialogFooter>
 						</DialogContent>

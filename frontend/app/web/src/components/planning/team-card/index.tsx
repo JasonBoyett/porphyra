@@ -8,7 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Localized, LocalizationScope, useSimpleLocalizedString } from "@/localization"
+import {
+	ComputedText,
+	Localized,
+	LocalizationScope,
+	useSimpleLocalizedString,
+} from "@/localization"
 import type { TeamCardProps } from "./types"
 
 const formatTime = (value: string) =>
@@ -45,26 +50,26 @@ export const TeamCard = (props: TeamCardProps) => {
 	const status = (
 		replacementRequests.length > 0
 			? {
-				className: "bg-rejected/10 text-rejected hover:bg-rejected/10",
-				statusKey:
-					cancelledRequests.length > 0
-						? "planning.cancelledAssignments"
-						: "planning.pendingRejections",
-			}
+					className: "bg-rejected/10 text-rejected hover:bg-rejected/10",
+					statusKey:
+						cancelledRequests.length > 0
+							? "planning.cancelledAssignments"
+							: "planning.pendingRejections",
+				}
 			: acceptedCount + pendingCount < requiredCount
 				? {
-					className: "bg-secondary/60 text-secondary-foreground hover:bg-secondary/60",
-					statusKey: "planning.needsVolunteers",
-				}
+						className: "bg-secondary/60 text-secondary-foreground hover:bg-secondary/60",
+						statusKey: "planning.needsVolunteers",
+					}
 				: pendingCount > 0
 					? {
-						className: "bg-accent/20 text-accent-foreground hover:bg-accent/20",
-						statusKey: "planning.awaitingConfirmation",
-					}
+							className: "bg-accent/20 text-accent-foreground hover:bg-accent/20",
+							statusKey: "planning.awaitingConfirmation",
+						}
 					: {
-						className: "bg-primary/10 text-primary hover:bg-primary/10",
-						statusKey: "planning.ready",
-					}
+							className: "bg-primary/10 text-primary hover:bg-primary/10",
+							statusKey: "planning.ready",
+						}
 	) satisfies {
 		className: string
 		statusKey:
@@ -83,7 +88,9 @@ export const TeamCard = (props: TeamCardProps) => {
 		>
 			<CardHeader className="flex flex-row items-start justify-between gap-4 px-5 pt-5">
 				<div>
-					<h3 className="m-0 text-lg font-semibold">{props.team.name}</h3>
+					<h3 className="m-0 text-lg font-semibold">
+						<ComputedText value={props.team.name} />
+					</h3>
 					<p
 						className={`mt-2 flex items-center gap-1 text-sm font-bold ${props.team.callTime === null ? "text-muted-foreground" : "text-primary"}`}
 					>
@@ -94,7 +101,7 @@ export const TeamCard = (props: TeamCardProps) => {
 								values={{ time: formatTime(props.event.startsAt) }}
 							/>
 						) : (
-							formatTime(props.team.callTime)
+							<ComputedText value={formatTime(props.team.callTime)} />
 						)}
 					</p>
 				</div>
@@ -116,7 +123,7 @@ export const TeamCard = (props: TeamCardProps) => {
 			<CardContent>
 				{props.team.notes.map((note) => (
 					<p className="m-0 text-sm leading-6 text-muted-foreground" key={note}>
-						{note}
+						<ComputedText value={note} />
 					</p>
 				))}
 				<Separator />
@@ -147,11 +154,11 @@ export const TeamCard = (props: TeamCardProps) => {
 								>
 									<span className="flex items-center gap-2 font-semibold">
 										<span aria-hidden="true">{role.emoji ?? "✨"}</span>
-										{roleName}
+										<ComputedText value={roleName} />
 									</span>
 									<span className="flex items-center gap-2 text-muted-foreground">
-										{accepted} / {role.count}
-										{pending > 0 && ` · ${pending} pending`}
+										<ComputedText value={`${accepted} / ${role.count}`} />
+										{pending > 0 && <ComputedText value={` · ${pending} pending`} />}
 										{!isFull && <Plus aria-hidden="true" className="text-primary" />}
 									</span>
 								</button>
@@ -215,8 +222,12 @@ export const TeamCard = (props: TeamCardProps) => {
 														</Localized>
 													)}
 													<span className="text-xs font-normal">
-														{request.roleEmoji ?? "✨"} {request.roleName ?? "Volunteer"} · Find
-														replacement
+														<Localized
+															str="planning.findReplacement"
+															values={{
+																role: `${request.roleEmoji ?? "✨"} ${request.roleName ?? "Volunteer"}`,
+															}}
+														/>
 													</span>
 												</span>
 												<UserPlus data-icon="inline-end" />
@@ -253,7 +264,9 @@ export const TeamCard = (props: TeamCardProps) => {
 							</ScrollArea>
 						</div>
 					) : (
-						<p className="mt-3 text-sm text-muted-foreground">No volunteer scheduled yet.</p>
+						<p className="mt-3 text-sm text-muted-foreground">
+							<Localized str="planning.noVolunteerScheduled" />
+						</p>
 					)}
 				</div>
 			</CardContent>

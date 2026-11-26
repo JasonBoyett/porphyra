@@ -8,6 +8,8 @@
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:e2e": "playwright test",
+		"test:golden": "playwright test --config playwright.golden.config.ts",
+		"test:golden:update": "playwright test --config playwright.golden.config.ts --update-snapshots",
 		"format": "prettier --write .",
 		"format:check": "prettier --check ."
 	},

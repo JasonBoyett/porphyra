@@ -47,7 +47,9 @@ export const resolvePluralizedTranslation = (
 	}: Readonly<{ pluralize?: boolean; values?: TranslationValues }> = {},
 ): string => {
 	if (typeof translation === "string") return translation;
-	return pluralize && values?.count !== 1 ? translation.plural : translation.singular;
+	return pluralize && values?.count !== 1
+		? translation.plural
+		: translation.singular;
 };
 
 /**
@@ -74,6 +76,7 @@ export const porphyraCatalog = {
 			"common.inspectStrings": "Inspect strings",
 			"common.loading": "Loading…",
 			"common.locale": "Locale",
+			"common.porphyra": "Porphyra",
 			"common.signOut": "Sign out",
 			"dashboard.apiUnavailable": "The API is not running yet. Start it with",
 			"dashboard.church": "Church",
@@ -86,7 +89,9 @@ export const porphyraCatalog = {
 			"dashboard.loadingChurches": "Loading churches…",
 			"kiosk.description":
 				"Create welcoming, dependable on-site experiences for your campuses.",
+			"kiosk.open": "Open {title}",
 			"kiosk.title": "Kiosk",
+			"kiosk.workspace": "Web workspace",
 			"navigation.applicationAreas": "Application areas",
 			"navigation.kiosk": "Kiosk",
 			"navigation.overview": "Overview",
@@ -126,6 +131,39 @@ export const porphyraCatalog = {
 				plural: "{count} volunteers",
 			},
 			"planning.applyChanges": "Apply changes",
+			"planning.cancel": "Cancel",
+			"planning.callDate": "Call date",
+			"planning.callTimeChangeDescription":
+				"Changing this asks every scheduled volunteer to confirm again.",
+			"planning.callTime": "Call time",
+			"planning.changeRole": "Change role",
+			"planning.chooseVolunteer": "Choose a volunteer for {role}.",
+			"planning.confirmVolunteerChanges": "Confirm volunteer changes",
+			"planning.confirmVolunteerChangesDescription":
+				"Choose how to handle volunteers affected by these service changes. Reassigned volunteers receive a new request to confirm.",
+			"planning.dropFromService": "Drop from service",
+			"planning.dropVolunteer": "Drop volunteer",
+			"planning.dropVolunteerDescription":
+				"{name} will be removed from the roster and their role will become available to fill.",
+			"planning.dropVolunteerTitle": "Drop {name} from this service?",
+			"planning.editTeamDescription":
+				"Update the roles this team needs and its call time for this service.",
+			"planning.findReplacement": "{role} · Find replacement",
+			"planning.noAvailableVolunteers": "No available volunteers",
+			"planning.noAvailableVolunteersDescription":
+				"No available volunteers for {role} on this date. Adjust team membership or availability to schedule someone.",
+			"planning.noVolunteerScheduled": "No volunteer scheduled yet.",
+			"planning.roleFilled": "Role is filled",
+			"planning.roleFilledDescription":
+				"This role was filled while this window was open.",
+			"planning.reassign": "Reassign",
+			"planning.scheduleVolunteer": "Schedule volunteer",
+			"planning.sendingRequest": "Sending request…",
+			"planning.teamCallTimeChanged":
+				"The call time changed. Every scheduled volunteer will receive a new request to confirm.",
+			"planning.unableToSendRequest": "Unable to send request",
+			"planning.useDifferentDay": "Use a different day",
+			"planning.addRole": "Add role",
 			"planning.unableToLoad":
 				"Unable to load this schedule. Please try again.",
 			"planning.volunteerDeclined": "{name} declined",
@@ -134,7 +172,8 @@ export const porphyraCatalog = {
 			"planning.volunteerPending": "Pending",
 			"volunteers.myServing": "My serving",
 			"volunteers.myMinistries": "My ministries",
-			"volunteers.noRequestsWaiting": "You have no requests waiting for a response.",
+			"volunteers.noRequestsWaiting":
+				"You have no requests waiting for a response.",
 			"volunteers.allCampuses": "All campuses",
 			"volunteers.allMyMinistries": "All my ministries",
 			"volunteers.campus": "Campus",
@@ -146,6 +185,8 @@ export const porphyraCatalog = {
 			"volunteers.assignmentTiming": "{eventName} starts at {eventStartTime}.",
 			"volunteers.assignmentArrivalTiming":
 				"{eventName} starts at {eventStartTime}. Please arrive at {callTime}.",
+			"volunteers.assignmentStartsAt": "starts at",
+			"volunteers.pleaseArriveAt": "Please arrive at",
 			"volunteers.assignmentActions": "Assignment actions",
 			"volunteers.cancelAssignment": "Cancel assignment",
 			"volunteers.cancelAssignmentFailed":
@@ -154,7 +195,8 @@ export const porphyraCatalog = {
 			"volunteers.noAssignmentsDescription":
 				"Try another campus or one of your ministries.",
 			"volunteers.openRole": "Open role",
-			"volunteers.requestResponseFailed": "Your response could not be saved. Please try again.",
+			"volunteers.requestResponseFailed":
+				"Your response could not be saved. Please try again.",
 			"volunteers.requests": "Requests",
 			"volunteers.upcoming": "Upcoming",
 			"volunteers.upcomingSchedule": "Upcoming schedule",
@@ -164,6 +206,8 @@ export const porphyraCatalog = {
 				singular: "{count} assignment",
 				plural: "{count} assignments",
 			},
+			"volunteers.assignment": "assignment",
+			"volunteers.assignments": "assignments",
 			"volunteers.volunteerRequest": "Volunteer request",
 			"volunteers.respondToServiceRequest": "Respond to this service request.",
 			"volunteers.responseNeeded": "Response needed",
@@ -194,7 +238,9 @@ export type PorphyraTranslation<K extends PorphyraTranslationKey> =
 	(typeof porphyraCatalog)["locales"]["en"][K];
 
 type TemplateValues<T extends string> =
-	T extends `${string}{${infer Name}}${infer Rest}` ? Name | TemplateValues<Rest> : never;
+	T extends `${string}{${infer Name}}${infer Rest}`
+		? Name | TemplateValues<Rest>
+		: never;
 
 export type TranslationValueNames<T extends Translation> = T extends string
 	? TemplateValues<T>

@@ -31,6 +31,7 @@ type TranslationContextValue = {
 	catalog: TranslationCatalog
 	createScopeIdentity: IdentityStrategy
 	isLocalizationInspectionEnabled: boolean
+	isLocalizationTestEnabled: boolean
 	resolve: (
 		key: string,
 		contextualId: string,
@@ -62,6 +63,56 @@ const localizationInspectionStyle: CSSProperties = {
 	outline: "2px solid #f00",
 	outlineOffset: "2px",
 }
+
+const computedTextInspectionStyle: CSSProperties = {
+	backgroundColor: "#bdefff",
+	color: "#000",
+	outline: "2px dashed #006b8f",
+	outlineOffset: "2px",
+}
+
+const localizedTestMarkerStyle: CSSProperties = {
+	backgroundColor: "#d9f99d",
+	color: "#14532d",
+	outline: "2px solid #4d7c0f",
+	outlineOffset: "2px",
+}
+
+const computedTextTestMarkerStyle: CSSProperties = {
+	backgroundColor: "#bae6fd",
+	color: "#0c4a6e",
+	outline: "2px dashed #0369a1",
+	outlineOffset: "2px",
+}
+
+/** The inherited color used to expose visible text that bypasses localization primitives. */
+export const defaultLocalizationTestSentinelColor = "#d100d1"
+
+/**
+ * Enables a test-only visual audit for visible text. Text not rendered by an
+ * approved localization primitive inherits the sentinel color; approved output
+ * receives its own explicit marker style.
+ */
+export type LocalizationTestOptions = Readonly<{
+	sentinelColor?: string
+}>
+
+const localizationTestStyles = (sentinelColor: string) => `
+[data-localization-test-container="true"],
+[data-localization-test-container="true"] * {
+	color: ${sentinelColor} !important;
+}
+
+[data-localization-test-container="true"] [data-localization-kind="localized"],
+[data-localization-test-container="true"] [data-localization-kind="localized"] * {
+	color: #14532d !important;
+}
+
+[data-localization-test-container="true"] [data-localization-kind="computed"],
+[data-localization-test-container="true"] [data-localization-kind="computed"] * {
+	color: #0c4a6e !important;
+}
+`
 
 export const createLocalizedElementId = (scopeId: string, key: string) => `${scopeId}:${key}`
 
@@ -127,6 +178,7 @@ export type TranslationProviderProps = PropsWithChildren<{
 	catalog: TranslationCatalog
 	identityStrategy?: IdentityStrategy
 	initialLocalizationInspectionEnabled?: boolean
+	localizationTest?: boolean | LocalizationTestOptions
 }>
 
 export const TranslationProvider = ({
@@ -134,6 +186,7 @@ export const TranslationProvider = ({
 	children,
 	identityStrategy = defaultIdentityStrategy,
 	initialLocalizationInspectionEnabled = false,
+	localizationTest = false,
 }: TranslationProviderProps) => {
 	const [activeLocale, setLocale] = useState(() =>
 		selectLocale(catalog, typeof navigator === "undefined" ? [] : navigator.languages),
@@ -141,6 +194,11 @@ export const TranslationProvider = ({
 	const [isLocalizationInspectionEnabled, setLocalizationInspectionEnabled] = useState(
 		initialLocalizationInspectionEnabled,
 	)
+	const isLocalizationTestEnabled = localizationTest !== false
+	const localizationTestSentinelColor =
+		typeof localizationTest === "object"
+			? (localizationTest.sentinelColor ?? defaultLocalizationTestSentinelColor)
+			: defaultLocalizationTestSentinelColor
 	const supportedLocales = useMemo(() => Object.keys(catalog.locales), [catalog])
 	const value = useMemo<TranslationContextValue>(
 		() => ({
@@ -148,6 +206,7 @@ export const TranslationProvider = ({
 			catalog,
 			createScopeIdentity: identityStrategy,
 			isLocalizationInspectionEnabled,
+			isLocalizationTestEnabled,
 			resolve: (key, contextualId, values, pluralize) =>
 				resolveTranslation(catalog, activeLocale, key, contextualId, values, pluralize),
 			resolveShared: (key, values, pluralize) =>
@@ -157,9 +216,28 @@ export const TranslationProvider = ({
 			sourceLocale: catalog.sourceLocale,
 			supportedLocales,
 		}),
-		[activeLocale, catalog, identityStrategy, isLocalizationInspectionEnabled, supportedLocales],
+		[
+			activeLocale,
+			catalog,
+			identityStrategy,
+			isLocalizationInspectionEnabled,
+			isLocalizationTestEnabled,
+			supportedLocales,
+		],
 	)
-	return <translationContext.Provider value={value}>{children}</translationContext.Provider>
+	const content = isLocalizationTestEnabled ? (
+		<>
+			<style data-localization-test-styles="true">
+				{localizationTestStyles(localizationTestSentinelColor)}
+			</style>
+			<span data-localization-test-container="true" style={{ display: "contents" }}>
+				{children}
+			</span>
+		</>
+	) : (
+		children
+	)
+	return <translationContext.Provider value={value}>{content}</translationContext.Provider>
 }
 
 export const useTranslation = () => {
@@ -205,6 +283,7 @@ export const useLocalizedString = (
 	return {
 		contextualId,
 		isLocalizationInspectionEnabled: translation.isLocalizationInspectionEnabled,
+		isLocalizationTestEnabled: translation.isLocalizationTestEnabled,
 		...translation.resolve(key, contextualId, values, pluralize),
 	}
 }
@@ -219,10 +298,11 @@ export const useSimpleLocalizedString = (
 	pluralize = false,
 ): string => useTranslation().resolveShared(key, values, pluralize)
 
-type LocalizationValuesProp<T extends PorphyraTranslation<PorphyraTranslationKey>> =
-	[TranslationValueNames<T>] extends [never]
-		? { values?: never }
-		: { values: TranslationValuesFor<T> }
+type LocalizationValuesProp<T extends PorphyraTranslation<PorphyraTranslationKey>> = [
+	TranslationValueNames<T>,
+] extends [never]
+	? { values?: never }
+	: { values: TranslationValuesFor<T> }
 
 type PluralizationProp<T extends PorphyraTranslation<PorphyraTranslationKey>> =
 	T extends PluralizedTranslation ? { pluralize?: boolean } : { pluralize?: false | undefined }
@@ -236,18 +316,23 @@ export type LocalizedProps<K extends PorphyraTranslationKey> = {
 	 */
 	asChild?: boolean
 	children?: ReactElement
-} &
-	LocalizationValuesProp<PorphyraTranslation<K>> &
+} & LocalizationValuesProp<PorphyraTranslation<K>> &
 	PluralizationProp<PorphyraTranslation<K>>
 
 export const Localized = <K extends PorphyraTranslationKey>(props: LocalizedProps<K>) => {
 	const { asChild = false, children, pluralize = false, str, values } = props
-	const { contextualId, isLocalizationInspectionEnabled, presentation, text } = useLocalizedString(
-		str,
-		values,
-		pluralize,
-	)
-	const inspectionStyle = isLocalizationInspectionEnabled ? localizationInspectionStyle : undefined
+	const {
+		contextualId,
+		isLocalizationInspectionEnabled,
+		isLocalizationTestEnabled,
+		presentation,
+		text,
+	} = useLocalizedString(str, values, pluralize)
+	const markerStyle = isLocalizationTestEnabled
+		? localizedTestMarkerStyle
+		: isLocalizationInspectionEnabled
+			? localizationInspectionStyle
+			: undefined
 	if (asChild) {
 		if (!isValidElement(children)) {
 			throw new Error(
@@ -256,23 +341,50 @@ export const Localized = <K extends PorphyraTranslationKey>(props: LocalizedProp
 		}
 		const child = children as ReactElement<{
 			"data-localization-id"?: string
+			"data-localization-kind"?: string
 			children?: ReactNode
 			style?: CSSProperties
 		}>
 		return cloneElement(child, {
 			"data-localization-id": contextualId,
-			style: { ...child.props.style, ...presentation, ...inspectionStyle },
+			"data-localization-kind": "localized",
+			style: { ...child.props.style, ...presentation, ...markerStyle },
 			children: text,
 		})
 	}
 
-	if (presentation === undefined && inspectionStyle === undefined) return text
+	if (presentation === undefined && markerStyle === undefined) return text
 	return (
 		<span
 			data-localization-id={contextualId}
-			style={{ ...presentation, ...inspectionStyle } as CSSProperties}
+			data-localization-kind="localized"
+			style={{ ...presentation, ...markerStyle } as CSSProperties}
 		>
 			{text}
+		</span>
+	)
+}
+
+export type ComputedTextProps = Readonly<{
+	value: string | number
+}>
+
+/**
+ * Marks text computed from application data as intentional. It deliberately
+ * accepts a value instead of children so arbitrary markup cannot bypass the
+ * localization test audit.
+ */
+export const ComputedText = ({ value }: ComputedTextProps) => {
+	const { isLocalizationInspectionEnabled, isLocalizationTestEnabled } = useTranslation()
+	const markerStyle = isLocalizationTestEnabled
+		? computedTextTestMarkerStyle
+		: isLocalizationInspectionEnabled
+			? computedTextInspectionStyle
+			: undefined
+	if (markerStyle === undefined) return value
+	return (
+		<span data-localization-kind="computed" style={markerStyle}>
+			{value}
 		</span>
 	)
 }
@@ -290,8 +402,6 @@ export const DevelopmentLocaleSwitcher = () => {
 		setLocalizationInspectionEnabled,
 		supportedLocales,
 	} = useTranslation()
-	const inspectStringsLabel = useSimpleLocalizedString("common.inspectStrings")
-	const localeLabel = useSimpleLocalizedString("common.locale")
 	if (!import.meta.env.DEV || supportedLocales.length < 2) return null
 	return (
 		<div
@@ -299,7 +409,8 @@ export const DevelopmentLocaleSwitcher = () => {
 			className="fixed bottom-4 right-4 z-20 flex items-center gap-1 rounded-full border border-[color:var(--porphyra-surface-border)] bg-card/92 p-1 text-xs shadow-md backdrop-blur-md"
 		>
 			<span className="px-2 text-muted-foreground">
-				{localeLabel}: {activeLocale}
+				<Localized str="common.locale" />
+				<ComputedText value={`: ${activeLocale}`} />
 			</span>
 			{supportedLocales.map((locale) => (
 				<button
@@ -309,7 +420,7 @@ export const DevelopmentLocaleSwitcher = () => {
 					onClick={() => setLocale(locale)}
 					type="button"
 				>
-					{locale}
+					<ComputedText value={locale} />
 				</button>
 			))}
 			<button
@@ -318,7 +429,7 @@ export const DevelopmentLocaleSwitcher = () => {
 				onClick={() => setLocalizationInspectionEnabled(!isLocalizationInspectionEnabled)}
 				type="button"
 			>
-				{inspectStringsLabel}
+				<Localized str="common.inspectStrings" />
 			</button>
 		</div>
 	)

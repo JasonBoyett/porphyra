@@ -26,13 +26,13 @@ export const ScheduleFilters = ({
 					onChange={(event) => onCampusChange(event.target.value)}
 					value={campusId}
 				>
-					<option value={allCampuses}>
-						<LocalizationScope name="volunteers.all-campuses-option">
-							<Localized str="volunteers.allCampuses" />
-						</LocalizationScope>
-					</option>
+					<LocalizationScope name="volunteers.all-campuses-option">
+						<Localized asChild str="volunteers.allCampuses">
+							<option value={allCampuses} />
+						</Localized>
+					</LocalizationScope>
 					{campuses.map((campus) => (
-						<option key={campus.id} value={campus.id}>
+						<option data-localization-kind="computed" key={campus.id} value={campus.id}>
 							{campus.label}
 						</option>
 					))}
@@ -49,13 +49,13 @@ export const ScheduleFilters = ({
 					onChange={(event) => onMinistryChange(event.target.value)}
 					value={ministry}
 				>
-					<option value={allMinistries}>
-						<LocalizationScope name="volunteers.all-my-ministries-option">
-							<Localized str="volunteers.allMyMinistries" />
-						</LocalizationScope>
-					</option>
+					<LocalizationScope name="volunteers.all-my-ministries-option">
+						<Localized asChild str="volunteers.allMyMinistries">
+							<option value={allMinistries} />
+						</Localized>
+					</LocalizationScope>
 					{ministries.map((item) => (
-						<option key={item} value={item}>
+						<option data-localization-kind="computed" key={item} value={item}>
 							{item}
 						</option>
 					))}

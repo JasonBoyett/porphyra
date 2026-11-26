@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import type { MyVolunteerAssignmentResponse } from "@porphyra/frontend/api/types"
 
-import { toVolunteerScheduleData } from "./volunteer-schedule-data"
+import { toVolunteerScheduleData } from "../volunteer-schedule-data"
 
 const assignment = {
 	id: "assignment",

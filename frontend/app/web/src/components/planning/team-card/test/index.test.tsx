@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { CampusEventPlanning } from "@/api/client"
 import { LocalizationScope, TranslationProvider } from "@/localization"
 import { porphyraCatalog } from "@porphyra/frontend/localization"
-import { TeamCard } from "."
+import { TeamCard } from ".."
 
 const campusLocation = {
 	addressLine1: "120 2nd Avenue North",

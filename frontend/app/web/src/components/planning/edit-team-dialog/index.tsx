@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from "@/components/ui/emoji-picker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Localized } from "@/localization"
+import { ComputedText, Localized } from "@/localization"
 import type { EditTeamDialogProps } from "./types"
 
 type RoleDraft = {
@@ -147,12 +147,18 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 			<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>
-						{isConfirming ? "Confirm volunteer changes" : `Edit ${props.team.name}`}
+						{isConfirming ? (
+							<Localized str="planning.confirmVolunteerChanges" />
+						) : (
+							<ComputedText value={`Edit ${props.team.name}`} />
+						)}
 					</DialogTitle>
 					<DialogDescription>
-						{isConfirming
-							? "Choose how to handle volunteers affected by these service changes. Reassigned volunteers receive a new request to confirm."
-							: "Update the roles this team needs and its call time for this service."}
+						{isConfirming ? (
+							<Localized str="planning.confirmVolunteerChangesDescription" />
+						) : (
+							<Localized str="planning.editTeamDescription" />
+						)}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -160,8 +166,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 					<div className="grid gap-4">
 						{callTimeChanged && (
 							<p className="rounded-md border border-accent bg-accent/10 p-3 text-sm">
-								The call time changed. Every scheduled volunteer will receive a new request to
-								confirm.
+								<Localized str="planning.teamCallTimeChanged" />
 							</p>
 						)}
 						{affectedVolunteers.map((volunteer) => {
@@ -169,7 +174,9 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 							if (action === undefined) return null
 							return (
 								<div className="grid gap-2 rounded-md border p-3" key={volunteer.assignmentId}>
-									<strong>{volunteer.name}</strong>
+									<strong>
+										<ComputedText value={volunteer.name} />
+									</strong>
 									<div className="flex flex-wrap items-center gap-3 text-sm">
 										<label className="flex items-center gap-2">
 											<input
@@ -185,7 +192,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 												}
 												type="radio"
 											/>
-											Reassign
+											<Localized str="planning.reassign" />
 										</label>
 										<label className="flex items-center gap-2">
 											<input
@@ -201,7 +208,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 												}
 												type="radio"
 											/>
-											Drop from this service
+											<Localized str="planning.dropFromService" />
 										</label>
 										{action.action === "reassign" && (
 											<select
@@ -219,7 +226,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 											>
 												{roles.map((role) => (
 													<option key={role.name} value={role.name}>
-														{role.emoji} {role.name}
+														<ComputedText value={`${role.emoji} ${role.name}`} />
 													</option>
 												))}
 											</select>
@@ -232,7 +239,9 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 				) : (
 					<div className="grid gap-5">
 						<div className="grid gap-2">
-							<Label htmlFor="team-call-time">Call time</Label>
+							<Label htmlFor="team-call-time">
+								<Localized str="planning.callTime" />
+							</Label>
 							<Input
 								id="team-call-time"
 								onChange={(event) => {
@@ -254,11 +263,13 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 									}}
 									type="checkbox"
 								/>
-								Use a different day
+								<Localized str="planning.useDifferentDay" />
 							</label>
 							{usesDifferentCallDate && (
 								<div className="grid gap-2">
-									<Label htmlFor="team-call-date">Call date</Label>
+									<Label htmlFor="team-call-date">
+										<Localized str="planning.callDate" />
+									</Label>
 									<Input
 										id="team-call-date"
 										onChange={(event) => {
@@ -271,11 +282,13 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 								</div>
 							)}
 							<p className="text-xs text-muted-foreground">
-								Changing this asks every scheduled volunteer to confirm again.
+								<Localized str="planning.callTimeChangeDescription" />
 							</p>
 						</div>
 						<div className="grid gap-3">
-							<Label>Service roles</Label>
+							<Label>
+								<Localized str="planning.serviceRoles" />
+							</Label>
 							{roles.map((role, index) => (
 								<div className="grid grid-cols-[5rem_1fr_5rem_auto] gap-2" key={role.id}>
 									<Popover
@@ -345,7 +358,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 								type="button"
 								variant="outline"
 							>
-								<Plus /> Add role
+								<Plus /> <Localized str="planning.addRole" />
 							</Button>
 						</div>
 					</div>
@@ -357,7 +370,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 						type="button"
 						variant="ghost"
 					>
-						Cancel
+						<Localized str="planning.cancel" />
 					</Button>
 					<Button
 						disabled={

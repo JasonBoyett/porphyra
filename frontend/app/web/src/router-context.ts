@@ -1,10 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query"
 
-import type { apiClient } from "@/api/client"
+import type { ApiClient } from "@/api/client-types"
 import type { AuthState } from "@/auth/types"
 
 export type RouterContext = {
-	apiClient: typeof apiClient
+	apiClient: ApiClient
 	auth: AuthState
 	queryClient: QueryClient
 }

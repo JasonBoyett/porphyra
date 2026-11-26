@@ -35,7 +35,12 @@ export const getStoredSession = (): AuthSession | null => {
 	return { accessToken: legacyAccessToken, email: "" }
 }
 
-export const AuthProvider = ({ children }: PropsWithChildren) => {
+export type AuthProviderProps = PropsWithChildren<{
+	/** Supplies an isolated auth state, primarily for application tests. */
+	auth?: AuthState
+}>
+
+export const AuthProvider = ({ auth: providedAuth, children }: AuthProviderProps) => {
 	const [session, setSession] = useState<AuthSession | null>(getStoredSession)
 
 	const signIn = useCallback(async ({ email }: SignInInput) => {
@@ -69,7 +74,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 		[session, signIn, signOut],
 	)
 
-	return <authContext.Provider value={auth}>{children}</authContext.Provider>
+	return <authContext.Provider value={providedAuth ?? auth}>{children}</authContext.Provider>
 }
 
 export const useAuth = () => {

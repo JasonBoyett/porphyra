@@ -3,7 +3,7 @@ import { CalendarDays, Clock3 } from "lucide-react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 import { TeamCard } from "@/components/planning/team-card"
-import { Localized, LocalizationScope } from "@/localization"
+import { ComputedText, Localized, LocalizationScope } from "@/localization"
 import type { PorphyraTranslationKey } from "@porphyra/frontend/localization"
 import type { PlanningScheduleBoardProps, ScheduleFilter } from "./types"
 
@@ -35,11 +35,11 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 					</Localized>
 				</LocalizationScope>
 				<h1 className="m-0 font-serif text-[clamp(2.35rem,5vw,4.4rem)] leading-[.98] tracking-[-.05em]">
-					{props.event.title}
+					<ComputedText value={props.event.title} />
 				</h1>
 				<p className="mt-3 flex flex-wrap items-center gap-2 font-semibold text-muted-foreground">
 					<CalendarDays aria-hidden="true" size={17} />
-					{formatDate(props.event.startsAt)}
+					<ComputedText value={formatDate(props.event.startsAt)} />
 					<span aria-hidden="true">·</span>
 					<Clock3 aria-hidden="true" size={17} />
 					<LocalizationScope name="planning.event-start-time">
@@ -64,7 +64,7 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 				>
 					{props.events.map((item) => (
 						<option key={item.id} value={item.id}>
-							{item.title}
+							<ComputedText value={item.title} />
 						</option>
 					))}
 				</select>
@@ -86,13 +86,15 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 					onChange={(choice) => props.onMinistryChange(choice.target.value)}
 					value={props.ministry}
 				>
-					<option>
-						<LocalizationScope name="planning.all-ministries-option">
-							<Localized str="planning.allMinistries" />
-						</LocalizationScope>
-					</option>
+					<LocalizationScope name="planning.all-ministries-option">
+						<Localized asChild str="planning.allMinistries">
+							<option />
+						</Localized>
+					</LocalizationScope>
 					{props.event.ministries.map((eventMinistry) => (
-						<option key={eventMinistry.id}>{eventMinistry.name}</option>
+						<option key={eventMinistry.id}>
+							<ComputedText value={eventMinistry.name} />
+						</option>
 					))}
 				</select>
 			</label>
@@ -144,7 +146,7 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 						key={group.name}
 					>
 						<h2 className="m-0 font-serif text-3xl" id={`${group.name.toLowerCase()}-heading`}>
-							{group.name}
+							<ComputedText value={group.name} />
 						</h2>
 						<div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
 							{group.teams.map(({ team }) => (
@@ -163,8 +165,12 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 				))}
 				{props.teamsByMinistry.length === 0 && (
 					<div className="rounded-xl border border-dashed p-8 text-center">
-						<h2>No teams match these filters</h2>
-						<p>Try a different ministry or schedule view.</p>
+						<h2>
+							<Localized str="planning.noTeams" />
+						</h2>
+						<p>
+							<Localized str="planning.noTeamsDescription" />
+						</p>
 					</div>
 				)}
 			</section>

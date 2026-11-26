@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Localized, LocalizationScope, useLocalizedString } from "@/localization"
+import { ComputedText, Localized, LocalizationScope, useLocalizedString } from "@/localization"
 import type { AppShellProps } from "./types"
 
 const AppShellContent = ({ children, onSignOut, viewer }: AppShellProps) => {
@@ -17,7 +17,7 @@ const AppShellContent = ({ children, onSignOut, viewer }: AppShellProps) => {
 					to="/app"
 				>
 					<img alt="" className="size-7 object-contain" src="/favicon.png" />
-					Porphyra
+					<Localized str="common.porphyra" />
 				</Link>
 				<nav aria-label={applicationAreas} className="flex min-w-0 gap-1 overflow-x-auto">
 					<Link
@@ -52,7 +52,9 @@ const AppShellContent = ({ children, onSignOut, viewer }: AppShellProps) => {
 				<Button className="shrink-0 rounded-full" onClick={onSignOut} variant="secondary">
 					<Avatar size="sm">
 						<AvatarImage alt={`${viewerName} profile`} src={viewer.avatarUrl} />
-						<AvatarFallback>{viewerName.slice(0, 1)}</AvatarFallback>
+						<AvatarFallback>
+							<ComputedText value={viewerName.slice(0, 1)} />
+						</AvatarFallback>
 					</Avatar>
 					<span className="hidden sm:inline">
 						<Localized str="common.signOut" />

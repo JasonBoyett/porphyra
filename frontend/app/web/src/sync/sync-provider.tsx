@@ -7,18 +7,23 @@ import { SyncManager } from "./sync-manager"
 const syncManagerContext = createContext<SyncManager | null>(null)
 
 export const SyncProvider = (
-	props: PropsWithChildren<{ accessToken: string | null; queryClient: QueryClient }>,
+	props: PropsWithChildren<{
+		accessToken: string | null
+		enabled?: boolean
+		queryClient: QueryClient
+	}>,
 ) => {
-	const [manager] = useState(
-		() =>
-			new SyncManager(props.queryClient, {
-				accessToken: props.accessToken,
-				apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
-			}),
+	const [manager] = useState(() =>
+		props.enabled === false
+			? null
+			: new SyncManager(props.queryClient, {
+					accessToken: props.accessToken,
+					apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+				}),
 	)
 
-	useEffect(() => manager.updateAccessToken(props.accessToken), [manager, props.accessToken])
-	useEffect(() => () => manager.dispose(), [manager])
+	useEffect(() => manager?.updateAccessToken(props.accessToken), [manager, props.accessToken])
+	useEffect(() => () => manager?.dispose(), [manager])
 
 	return <syncManagerContext.Provider value={manager}>{props.children}</syncManagerContext.Provider>
 }

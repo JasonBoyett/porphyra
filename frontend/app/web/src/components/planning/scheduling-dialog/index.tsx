@@ -14,7 +14,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog"
-import { Localized, LocalizationScope } from "@/localization"
+import { ComputedText, Localized, LocalizationScope } from "@/localization"
 import type { SchedulingDialogProps } from "./types"
 
 const formatTime = (value: string) =>
@@ -78,10 +78,14 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 		<Dialog onOpenChange={(isOpen) => !isOpen && props.onClose()} open>
 			<DialogContent className="porphyra-card max-w-md">
 				<DialogHeader>
-					<p className="porphyra-eyebrow">Schedule volunteer</p>
-					<DialogTitle className="font-serif text-3xl">{props.team.name}</DialogTitle>
+					<p className="porphyra-eyebrow">
+						<Localized str="planning.scheduleVolunteer" />
+					</p>
+					<DialogTitle className="font-serif text-3xl">
+						<ComputedText value={props.team.name} />
+					</DialogTitle>
 					<DialogDescription>
-						{props.ministry} ·{" "}
+						<ComputedText value={props.ministry ?? ""} /> ·{" "}
 						{props.team.callTime === null ? (
 							<LocalizationScope name="planning.scheduling-dialog-event-start-time">
 								<Localized
@@ -90,31 +94,42 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 								/>
 							</LocalizationScope>
 						) : (
-							formatTime(props.team.callTime)
+							<ComputedText value={formatTime(props.team.callTime)} />
 						)}
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="secondary">
-						Role: {role.emoji ?? "✨"} {props.roleName} ({role.scheduledUsers.length}/{role.count})
+						<Localized str="planning.role" />:{" "}
+						<ComputedText
+							value={`${role.emoji ?? "✨"} ${props.roleName} (${role.scheduledUsers.length}/${role.count})`}
+						/>
 					</Badge>
 				</div>
 				<p className="text-sm text-muted-foreground">
-					Choose a volunteer for <strong className="text-foreground">{props.roleName}</strong>.
+					<Localized str="planning.chooseVolunteer" values={{ role: roleName }} />
 				</p>
 
 				{error !== null && (
 					<Alert variant="destructive">
-						<AlertTitle>Unable to send request</AlertTitle>
-						<AlertDescription>{error}</AlertDescription>
+						<AlertTitle>
+							<Localized str="planning.unableToSendRequest" />
+						</AlertTitle>
+						<AlertDescription>
+							<ComputedText value={error} />
+						</AlertDescription>
 					</Alert>
 				)}
 
 				{isFull ? (
 					<Alert>
-						<AlertTitle>Role is filled</AlertTitle>
-						<AlertDescription>This role was filled while this window was open.</AlertDescription>
+						<AlertTitle>
+							<Localized str="planning.roleFilled" />
+						</AlertTitle>
+						<AlertDescription>
+							<Localized str="planning.roleFilledDescription" />
+						</AlertDescription>
 					</Alert>
 				) : props.team.eligibleVolunteers.length > 0 ? (
 					<div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
@@ -129,10 +144,14 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 					</div>
 				) : (
 					<Alert>
-						<AlertTitle>No available volunteers</AlertTitle>
+						<AlertTitle>
+							<Localized str="planning.noAvailableVolunteers" />
+						</AlertTitle>
 						<AlertDescription>
-							No available volunteers for {props.roleName} on this date. Adjust team membership or
-							availability to schedule someone.
+							<Localized
+								str="planning.noAvailableVolunteersDescription"
+								values={{ role: roleName }}
+							/>
 						</AlertDescription>
 					</Alert>
 				)}
@@ -143,7 +162,7 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 						onClick={props.onClose}
 						variant="ghost"
 					>
-						Exit
+						<Localized str="common.close" />
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -165,12 +184,20 @@ const VolunteerChoice = (props: {
 	>
 		<Avatar size="lg">
 			<AvatarImage alt="" src={props.volunteer.avatarUrl} />
-			<AvatarFallback>{initials(props.volunteer.name)}</AvatarFallback>
+			<AvatarFallback>
+				<ComputedText value={initials(props.volunteer.name)} />
+			</AvatarFallback>
 		</Avatar>
 		<span className="grid min-w-0 gap-0.5">
-			<strong>{props.isSending ? "Sending request…" : props.volunteer.name}</strong>
+			<strong>
+				{props.isSending ? (
+					<Localized str="planning.sendingRequest" />
+				) : (
+					<ComputedText value={props.volunteer.name} />
+				)}
+			</strong>
 			<span className="truncate text-xs font-normal text-muted-foreground">
-				{props.volunteer.email}
+				<ComputedText value={props.volunteer.email} />
 			</span>
 		</span>
 	</Button>

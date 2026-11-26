@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const repositoryRoot = resolve(import.meta.dir, "..");
@@ -15,7 +15,33 @@ const generatedDirectory = resolve(
 const openApiTypesPath = resolve(generatedDirectory, "openapi.d.ts");
 const namedTypesPath = resolve(generatedDirectory, "types.ts");
 const operationsPath = resolve(generatedDirectory, "operations.ts");
+const webMockOperationsDirectory = resolve(
+	repositoryRoot,
+	"frontend/app/web/src/test/mocks/api/operations",
+);
+const webMockTransportPath = resolve(
+	repositoryRoot,
+	"frontend/app/web/src/test/mocks/api/transport.ts",
+);
 const httpMethods = ["delete", "get", "patch", "post", "put"] as const;
+
+const mockOperationFileName = (operationId: string) =>
+	`${operationId.replace(/[^a-zA-Z0-9_-]/g, "_")}.ts`;
+
+const mockOperationStub = (operationId: string) =>
+	`/**
+ * This file was auto-generated from Porphyra OpenAPI operation IDs.
+ * Edit this stub to provide mock behavior. Future API generation preserves edits.
+ */
+
+import type { ApiClientTransport } from "@/api/client-types"
+
+export const mockOperation: ApiClientTransport[${JSON.stringify(operationId)}] = async () => {
+	throw new Error(${JSON.stringify(
+		`Mock implementation for ${operationId} is not implemented.`,
+	)})
+}
+`;
 
 const syncTagsForOperation = (
 	operation: Record<string, unknown>,
@@ -290,7 +316,66 @@ export const apiSyncResources = ${JSON.stringify(syncResources, null, 2)} as con
 `,
 );
 
-execFileSync("bunx", ["prettier", "--write", namedTypesPath, operationsPath], {
+mkdirSync(webMockOperationsDirectory, { recursive: true });
+const mockOperationFiles = new Map<string, string>();
+for (const [operationId] of operationEntries) {
+	const fileName = mockOperationFileName(operationId);
+	const existingOperationId = mockOperationFiles.get(fileName);
+	if (existingOperationId !== undefined) {
+		throw new Error(
+			`Mock operation file name collision: ${existingOperationId} and ${operationId}`,
+		);
+	}
+	mockOperationFiles.set(fileName, operationId);
+
+	const stubPath = resolve(webMockOperationsDirectory, fileName);
+	const generatedStub = mockOperationStub(operationId);
+	if (!existsSync(stubPath) || readFileSync(stubPath, "utf8") === generatedStub) {
+		writeFileSync(stubPath, generatedStub);
+	}
+}
+
+const mockOperationImports = operationEntries
+	.map(
+		([operationId], index) =>
+			`import { mockOperation as mockOperation${index} } from "./operations/${mockOperationFileName(operationId).replace(/\.ts$/, "")}"`,
+	)
+	.join("\n");
+const mockTransportMembers = operationEntries
+	.map(
+		([operationId], index) => `\t${JSON.stringify(operationId)}: mockOperation${index},`,
+	)
+	.join("\n");
+writeFileSync(
+	webMockTransportPath,
+	`/**
+ * This file was auto-generated from Porphyra OpenAPI operation IDs.
+ * Do not make direct changes to this file.
+ */
+
+import type { ApiClientTransport } from "@/api/client-types";
+${mockOperationImports}
+
+export const mockApiClientTransport: ApiClientTransport = {
+${mockTransportMembers}
+}
+`,
+);
+
+execFileSync(
+	"bunx",
+	[
+		"prettier",
+		"--write",
+		namedTypesPath,
+		operationsPath,
+		webMockTransportPath,
+		...Array.from(mockOperationFiles.keys()).map((fileName) =>
+			resolve(webMockOperationsDirectory, fileName),
+		),
+	],
+	{
 	cwd: repositoryRoot,
 	stdio: "inherit",
-});
+	},
+);
