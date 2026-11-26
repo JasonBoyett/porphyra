@@ -20,12 +20,13 @@ describe("ComputedText", () => {
 	})
 
 	it("marks computed and localized text distinctly during inspection", () => {
+		const computedValue = "Calculated"
 		const markup = renderToStaticMarkup(
 			<TranslationProvider catalog={catalog} initialLocalizationInspectionEnabled>
 				<LocalizationScope name="test">
 					<Localized str="common.hello" />
 				</LocalizationScope>
-				<ComputedText value="Calculated" />
+				<ComputedText value={computedValue} />
 			</TranslationProvider>,
 		)
 
@@ -36,12 +37,13 @@ describe("ComputedText", () => {
 	})
 
 	it("uses a sentinel color for raw text and explicit markers for approved text", () => {
+		const computedValue = "Calculated"
 		const markup = renderToStaticMarkup(
 			<TranslationProvider localizationTest={{ sentinelColor: "rebeccapurple" }} catalog={catalog}>
 				<LocalizationScope name="test">
 					<Localized str="common.hello" />
 				</LocalizationScope>
-				<ComputedText value="Calculated" />
+				<ComputedText value={computedValue} />
 				raw text
 			</TranslationProvider>,
 		)

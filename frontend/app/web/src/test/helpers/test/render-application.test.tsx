@@ -44,13 +44,14 @@ describe("application render helpers", () => {
 	})
 
 	it("detects intentional raw localization leaks while allowing marked text", () => {
+		const approvedValue = "Approved value"
 		container = document.createElement("div")
 		document.body.append(container)
 		root = createRoot(container)
 		act(() => {
 			root?.render(
 				<TranslationProvider catalog={{ sourceLocale: "en", locales: { en: {} } }} localizationTest>
-					<ComputedText value="Approved value" />
+					<ComputedText value={approvedValue} />
 					raw leak
 				</TranslationProvider>,
 			)

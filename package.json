@@ -1,28 +1,28 @@
 {
-  "name": "porphyra",
-  "private": true,
-  "packageManager": "bun@1.3.11",
-  "workspaces": [
-    "server/auth",
-    "server/api",
-    "frontend/lib",
-    "frontend/app/web",
-    "frontend/app/mobile/lib",
-    "frontend/app/mobile/planning",
-    "frontend/app/mobile/volunteer",
-    "frontend/app/mobile/kiosk"
-  ],
-  "scripts": {
-    "dev": "turbo dev",
-    "dev:stream": "turbo dev --ui=stream",
-    "db:migrate": "bun run --filter @porphyra/api db:migrate",
-    "db:reset": "bun run --filter @porphyra/api db:reset",
-    "generate:api": "bun scripts/generate-openapi-clients.ts",
-    "check": "bun run --filter '*' typecheck",
-    "typecheck": "bun run --filter @porphyra/auth typecheck && bun run --filter @porphyra/frontend typecheck && bun run --filter @porphyra/web typecheck"
-  },
-  "devDependencies": {
-    "turbo": "^2.8.13",
-    "typescript": "^5.9.3"
-  }
+	"name": "porphyra",
+	"private": true,
+	"packageManager": "bun@1.3.11",
+	"workspaces": [
+		"server/auth",
+		"server/api",
+		"frontend/lib",
+		"frontend/app/web",
+		"frontend/app/mobile/lib",
+		"frontend/app/mobile/planning",
+		"frontend/app/mobile/volunteer",
+		"frontend/app/mobile/kiosk"
+	],
+	"scripts": {
+		"dev": "turbo dev",
+		"dev:stream": "turbo dev --ui=stream",
+		"db:migrate": "bun run --filter @porphyra/api db:migrate",
+		"db:reset": "bun run --filter @porphyra/api db:reset",
+		"generate:api": "bun scripts/generate-openapi-clients.ts",
+		"check": "bun run --filter '*' typecheck && bun run --filter @porphyra/web lint",
+		"typecheck": "bun run --filter @porphyra/auth typecheck && bun run --filter @porphyra/frontend typecheck && bun run --filter @porphyra/web typecheck"
+	},
+	"devDependencies": {
+		"turbo": "^2.8.13",
+		"typescript": "^5.9.3"
+	}
 }
