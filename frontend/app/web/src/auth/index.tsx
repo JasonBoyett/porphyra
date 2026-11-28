@@ -1,10 +1,10 @@
 import type { AuthSession } from "@porphyra/frontend/auth"
 import {
 	createContext,
-	useCallback,
 	useContext,
 	useMemo,
 	useState,
+	useSyncExternalStore,
 	type PropsWithChildren,
 } from "react"
 
@@ -35,15 +35,18 @@ export const getStoredSession = (): AuthSession | null => {
 	return { accessToken: legacyAccessToken, email: "" }
 }
 
-export type AuthProviderProps = PropsWithChildren<{
-	/** Supplies an isolated auth state, primarily for application tests. */
-	auth?: AuthState
-}>
+class BrowserAuthStore {
+	#listeners = new Set<() => void>()
+	#session = getStoredSession()
 
-export const AuthProvider = ({ auth: providedAuth, children }: AuthProviderProps) => {
-	const [session, setSession] = useState<AuthSession | null>(getStoredSession)
+	public getSnapshot = () => this.#session
 
-	const signIn = useCallback(async ({ email }: SignInInput) => {
+	public subscribe = (listener: () => void) => {
+		this.#listeners.add(listener)
+		return () => this.#listeners.delete(listener)
+	}
+
+	public signIn = async ({ email }: SignInInput) => {
 		const response = await fetch(`${authUrl}/api/v1/auth/sign-in`, {
 			body: JSON.stringify({ email }),
 			headers: { "Content-Type": "application/json" },
@@ -52,26 +55,41 @@ export const AuthProvider = ({ auth: providedAuth, children }: AuthProviderProps
 
 		if (!response.ok) throw new Error("Unable to sign in.")
 
-		const nextSession = (await response.json()) as AuthSession
-		sessionStorage.setItem(authStorageKey, JSON.stringify(nextSession))
+		const session = (await response.json()) as AuthSession
+		sessionStorage.setItem(authStorageKey, JSON.stringify(session))
 		sessionStorage.removeItem(legacyAccessTokenStorageKey)
-		setSession(nextSession)
-	}, [])
+		this.#setSession(session)
+	}
 
-	const signOut = useCallback(() => {
+	public signOut = () => {
 		sessionStorage.removeItem(authStorageKey)
 		sessionStorage.removeItem(legacyAccessTokenStorageKey)
-		setSession(null)
-	}, [])
+		this.#setSession(null)
+	}
+
+	#setSession(session: AuthSession | null) {
+		this.#session = session
+		for (const listener of this.#listeners) listener()
+	}
+}
+
+export type AuthProviderProps = PropsWithChildren<{
+	/** Supplies an isolated auth state, primarily for application tests. */
+	auth?: AuthState
+}>
+
+export const AuthProvider = ({ auth: providedAuth, children }: AuthProviderProps) => {
+	const [authStore] = useState(() => new BrowserAuthStore())
+	const session = useSyncExternalStore(authStore.subscribe, authStore.getSnapshot)
 
 	const auth = useMemo<AuthState>(
 		() => ({
 			isAuthenticated: session !== null,
 			session,
-			signIn,
-			signOut,
+			signIn: authStore.signIn,
+			signOut: authStore.signOut,
 		}),
-		[session, signIn, signOut],
+		[authStore, session],
 	)
 
 	return <authContext.Provider value={providedAuth ?? auth}>{children}</authContext.Provider>

@@ -18,7 +18,15 @@
             "postalCode": "37201",
             "countryCode": "US",
             "timeZone": "America/Chicago"
-          }
+          },
+          "type": "PHYSICAL",
+          "recurringServices": [
+            {
+              "name": "Sunday Worship Service",
+              "weekday": "SUNDAY",
+              "localStartTime": "10:00"
+            }
+          ]
         },
         {
           "name": "Eastside",
@@ -29,7 +37,55 @@
             "postalCode": "37206",
             "countryCode": "US",
             "timeZone": "America/Chicago"
-          }
+          },
+          "type": "PHYSICAL",
+          "recurringServices": [
+            {
+              "name": "Sunday Worship Service",
+              "weekday": "SUNDAY",
+              "localStartTime": "10:00"
+            }
+          ]
+        },
+        {
+          "name": "Grace Harbor Online",
+          "type": "ONLINE",
+          "location": {
+            "timeZone": "America/Chicago"
+          },
+          "recurringServices": [
+            {
+              "name": "Online Worship Gathering",
+              "weekday": "SUNDAY",
+              "localStartTime": "10:00"
+            }
+          ]
+        },
+        {
+          "name": "Church Office",
+          "type": "ADMINISTRATIVE",
+          "location": {
+            "addressLine1": "414 Union Street",
+            "city": "Nashville",
+            "region": "TN",
+            "postalCode": "37219",
+            "countryCode": "US",
+            "timeZone": "America/Chicago"
+          },
+          "recurringServices": []
+        },
+        {
+          "name": "Harbor Ministry Centre",
+          "type": "MINISTRY_CENTER",
+          "location": {
+            "addressLine1": "240 Queen Street West",
+            "city": "Toronto",
+            "region": "ON",
+            "postalCode": "M5V 1Z7",
+            "countryCode": "CA",
+            "timeZone": "America/Toronto"
+          },
+          "recurringServices": []
         }
       ],
       "ministries": [
@@ -77,30 +133,49 @@
       "roles": [
         {
           "name": "Downtown Planner",
-          "permissions": ["schedule.manage"],
+          "permissions": [
+            "schedule.manage"
+          ],
           "assignments": [
-            { "member": "Amelia Brooks", "campus": "Downtown" }
+            {
+              "member": "Amelia Brooks",
+              "campus": "Downtown"
+            }
           ]
         },
         {
           "name": "Eastside Administrator",
           "isAdministrator": true,
           "assignments": [
-            { "member": "Benjamin Carter", "campus": "Eastside" }
+            {
+              "member": "Benjamin Carter",
+              "campus": "Eastside"
+            }
           ]
         },
         {
           "name": "Request Responder",
-          "permissions": ["volunteer.respond"],
+          "permissions": [
+            "volunteer.respond"
+          ],
           "assignments": [
-            { "member": "Chloe Davis", "campus": "Downtown" }
+            {
+              "member": "Chloe Davis",
+              "campus": "Downtown"
+            }
           ]
         },
         {
           "name": "Band Coordinator",
-          "permissions": ["schedule.manage"],
+          "permissions": [
+            "schedule.manage"
+          ],
           "assignments": [
-            { "member": "Daniel Ellis", "campus": "Downtown", "team": "Band" }
+            {
+              "member": "Daniel Ellis",
+              "campus": "Downtown",
+              "team": "Band"
+            }
           ]
         }
       ],
@@ -233,7 +308,8 @@
             }
           ]
         }
-      ]
+      ],
+      "primaryCampus": "Downtown"
     },
     {
       "name": "Riverstone Community Church",
@@ -248,7 +324,15 @@
             "postalCode": "37064",
             "countryCode": "US",
             "timeZone": "America/Chicago"
-          }
+          },
+          "type": "PHYSICAL",
+          "recurringServices": [
+            {
+              "name": "Sunday Gathering",
+              "weekday": "SUNDAY",
+              "localStartTime": "09:30"
+            }
+          ]
         }
       ],
       "ministries": [
@@ -285,22 +369,26 @@
         "Ximena West",
         "Yvette York",
         "Zoe Zimmerman"
-      ]
+      ],
+      "primaryCampus": "Main Campus"
     },
     {
       "name": "New Mercies Fellowship",
-      "description": "A growing church community rooted in worship, service, and hospitality.",
+      "description": "An online-only church community rooted in worship, service, and hospitality.",
       "campuses": [
         {
-          "name": "Gathering House",
+          "name": "New Mercies Online",
+          "type": "ONLINE",
           "location": {
-            "addressLine1": "200 West Main Street",
-            "city": "Murfreesboro",
-            "region": "TN",
-            "postalCode": "37130",
-            "countryCode": "US",
             "timeZone": "America/Chicago"
-          }
+          },
+          "recurringServices": [
+            {
+              "name": "Sunday Online Gathering",
+              "weekday": "SUNDAY",
+              "localStartTime": "18:00"
+            }
+          ]
         }
       ],
       "ministries": [
@@ -337,7 +425,8 @@
         "Wyatt Myers",
         "Zara Newton",
         "Aaron Oliver"
-      ]
+      ],
+      "primaryCampus": "New Mercies Online"
     }
   ]
 }

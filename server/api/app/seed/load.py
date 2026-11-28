@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, time
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -12,6 +12,7 @@ from app.db.models import (
     CampusEventMinistry,
     CampusEventTeam,
     CampusEventTeamVolunteer,
+    CampusType,
     Church,
     ChurchMembership,
     ChurchRole,
@@ -19,6 +20,7 @@ from app.db.models import (
     ChurchRolePermission,
     Ministry,
     MinistryLeadership,
+    RecurringService,
     Team,
     TeamMembership,
     User,
@@ -29,6 +31,16 @@ from app.db.schemas import RoleTemplateData
 from app.permissions import ALL_PERMISSIONS
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 
+_WEEKDAY_INDEX = {
+    "MONDAY": 0,
+    "TUESDAY": 1,
+    "WEDNESDAY": 2,
+    "THURSDAY": 3,
+    "FRIDAY": 4,
+    "SATURDAY": 5,
+    "SUNDAY": 6,
+}
+
 
 def load_seed_data() -> dict[str, Any]:
     path = Path(__file__).with_name("data.json")
@@ -36,24 +48,24 @@ def load_seed_data() -> dict[str, Any]:
 
 
 class _CampusLocationFields(TypedDict):
-    address_line_1: str
+    address_line_1: str | None
     address_line_2: str | None
-    city: str
-    region: str
-    postal_code: str
-    country_code: str
+    city: str | None
+    region: str | None
+    postal_code: str | None
+    country_code: str | None
     time_zone: str
 
 
 def _campus_location_fields(campus_data: dict[str, Any]) -> _CampusLocationFields:
     location = campus_data["location"]
     return {
-        "address_line_1": location["addressLine1"],
+        "address_line_1": location.get("addressLine1"),
         "address_line_2": location.get("addressLine2"),
-        "city": location["city"],
-        "region": location["region"],
-        "postal_code": location["postalCode"],
-        "country_code": location["countryCode"],
+        "city": location.get("city"),
+        "region": location.get("region"),
+        "postal_code": location.get("postalCode"),
+        "country_code": location.get("countryCode"),
         "time_zone": location["timeZone"],
     }
 
@@ -93,6 +105,7 @@ def seed_database(db: Session) -> None:
                 campuses=[
                     Campus(
                         name=campus_data["name"],
+                        campus_type=CampusType[campus_data["type"]],
                         **_campus_location_fields(campus_data),
                     )
                     for campus_data in church_data["campuses"]
@@ -156,16 +169,52 @@ def seed_database(db: Session) -> None:
                 )
             ).one_or_none()
             if campus is None:
-                db.add(
-                    Campus(
-                        church_id=church.id,
-                        name=campus_data["name"],
-                        **_campus_location_fields(campus_data),
-                    )
+                campus = Campus(
+                    church_id=church.id,
+                    name=campus_data["name"],
+                    campus_type=CampusType[campus_data["type"]],
+                    **_campus_location_fields(campus_data),
                 )
+                db.add(campus)
             else:
+                campus.campus_type = CampusType[campus_data["type"]]
                 for field_name, value in _campus_location_fields(campus_data).items():
                     setattr(campus, field_name, value)
+
+            db.flush()
+            for service_data in campus_data.get("recurringServices", []):
+                weekday = _WEEKDAY_INDEX[service_data["weekday"]]
+                starts_at = time.fromisoformat(service_data["localStartTime"])
+                recurring_service = db.exec(
+                    select(RecurringService).where(
+                        RecurringService.campus_id == campus.id,
+                        RecurringService.name == service_data["name"],
+                        RecurringService.weekday == weekday,
+                        RecurringService.starts_at == starts_at,
+                    )
+                ).one_or_none()
+                if recurring_service is None:
+                    recurring_service = RecurringService(
+                        campus_id=campus.id,
+                        name=service_data["name"],
+                        weekday=weekday,
+                        starts_at=starts_at,
+                    )
+                    db.add(recurring_service)
+                recurring_service.duration_minutes = service_data.get("durationMinutes")
+
+        db.flush()
+        primary_campus_name = church_data.get("primaryCampus")
+        church.primary_campus_id = (
+            db.exec(
+                select(Campus.id).where(
+                    Campus.church_id == church.id,
+                    Campus.name == primary_campus_name,
+                )
+            ).one()
+            if primary_campus_name is not None
+            else None
+        )
 
         for ministry_data in church_data["ministries"]:
             ministry = db.exec(

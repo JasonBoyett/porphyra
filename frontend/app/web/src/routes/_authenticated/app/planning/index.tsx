@@ -8,8 +8,8 @@ export const Route = createFileRoute("/_authenticated/app/planning/")({
 
 function ChurchPickerRoute() {
 	const { apiClient } = Route.useRouteContext()
-	const dashboard = apiClient.getDashboard.useSyncQuery()
-	const events = apiClient.getCampusEvents.useSyncQuery()
+	const dashboard = apiClient.getDashboard.useQuery()
+	const events = apiClient.getCampusEvents.useQuery()
 
 	return (
 		<LocalizationScope name="planning">
@@ -18,7 +18,9 @@ function ChurchPickerRoute() {
 					<Localized str="navigation.planning" />
 				</h1>
 				{events.data?.length === 0 ? (
-					<p className="mt-6"><Localized str="planning.noEvents" /></p>
+					<p className="mt-6">
+						<Localized str="planning.noEvents" />
+					</p>
 				) : null}
 				<div className="mt-6 grid gap-3 sm:grid-cols-2">
 					{dashboard.data?.churches.map((church) => (

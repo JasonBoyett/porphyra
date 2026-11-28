@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_authenticated/app/")({
 })
 
 function DashboardRoute() {
-	const { accessToken, apiClient } = Route.useRouteContext()
-	const dashboard = apiClient.getDashboard.useSyncQuery()
+	const { apiClient } = Route.useRouteContext()
+	const dashboard = apiClient.getDashboard.useQuery()
 	const churches = dashboard.data?.churches ?? []
 
 	return (

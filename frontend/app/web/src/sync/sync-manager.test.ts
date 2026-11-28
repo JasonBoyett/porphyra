@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { QueryClient } from "@tanstack/react-query"
+import { QueryClient, QueryObserver } from "@tanstack/react-query"
 
 import { apiTag, type ApiTag } from "../api/tags"
 import { SyncManager } from "./sync-manager"
@@ -33,6 +33,16 @@ const addQuery = async (queryClient: QueryClient, key: string, tags: readonly Ap
 	})
 }
 
+const observeQuery = (queryClient: QueryClient, key: string, tags: readonly ApiTag[]) => {
+	const observer = new QueryObserver(queryClient, {
+		queryKey: [key],
+		queryFn: () => key,
+		meta: { syncTags: tags },
+		staleTime: Infinity,
+	})
+	return observer.subscribe(() => undefined)
+}
+
 const invalidated = (queryClient: QueryClient, key: string) =>
 	queryClient.getQueryCache().find({ queryKey: [key] })?.state.isInvalidated
 
@@ -42,7 +52,6 @@ const setup = (apiUrl = "http://localhost:8000") => {
 	const connections: Array<{ protocols: string[]; url: string }> = []
 	const scheduled: Array<() => void> = []
 	const manager = new SyncManager(queryClient, {
-		accessToken: "header.payload.signature",
 		apiUrl,
 		createSocket: (url, protocols) => {
 			const socket = new FakeSocket()
@@ -50,6 +59,7 @@ const setup = (apiUrl = "http://localhost:8000") => {
 			connections.push({ protocols, url })
 			return socket as unknown as WebSocket
 		},
+		getAccessToken: () => "header.payload.signature",
 		schedule: (callback) => {
 			scheduled.push(callback)
 			return scheduled.length as unknown as ReturnType<typeof setTimeout>
@@ -60,32 +70,34 @@ const setup = (apiUrl = "http://localhost:8000") => {
 }
 
 describe("SyncManager", () => {
-	test("is lazy, reference-counts tags, and keeps one authenticated socket", async () => {
-		const { connections, manager, queryClient, sockets } = setup()
+	test("derives active concerns from query observers and keeps one authenticated socket", async () => {
+		const { connections, queryClient, sockets } = setup()
 		await addQuery(queryClient, "planning", [apiTag.campusEvents])
 		expect(sockets).toHaveLength(0)
 
-		manager.addTags([apiTag.campusEvents])
-		manager.addTags([apiTag.campusEvents])
+		const stopFirstObserver = observeQuery(queryClient, "planning", [apiTag.campusEvents])
+		const stopSecondObserver = observeQuery(queryClient, "planning", [apiTag.campusEvents])
 		expect(sockets).toHaveLength(1)
 		expect(connections[0]).toEqual({
 			url: "ws://localhost:8000/api/v1/sync",
 			protocols: ["porphyra.sync.v1", "porphyra.jwt.header.payload.signature"],
 		})
 
-		manager.removeTags([apiTag.campusEvents])
+		stopFirstObserver()
 		sockets[0].emit("message", JSON.stringify({ type: "changed", tags: ["campus-events"] }))
 		expect(invalidated(queryClient, "planning")).toBe(true)
-		manager.removeTags([apiTag.campusEvents])
+		stopSecondObserver()
 		expect(sockets[0].closed).toBe(true)
 	})
 
 	test("invalidates matching and shared concerns but not unrelated queries", async () => {
-		const { manager, queryClient, sockets } = setup()
+		const { queryClient, sockets } = setup()
 		await addQuery(queryClient, "list", [apiTag.campusEvents])
 		await addQuery(queryClient, "detail", [apiTag.campusEvents, apiTag.campusEventPlanning])
 		await addQuery(queryClient, "dashboard", [apiTag.dashboard])
-		manager.addTags([apiTag.campusEvents, apiTag.campusEventPlanning])
+		observeQuery(queryClient, "list", [apiTag.campusEvents])
+		observeQuery(queryClient, "detail", [apiTag.campusEvents, apiTag.campusEventPlanning])
+		observeQuery(queryClient, "dashboard", [apiTag.dashboard])
 
 		sockets[0].emit("message", JSON.stringify({ type: "changed", tags: ["campus-events"] }))
 
@@ -99,8 +111,8 @@ describe("SyncManager", () => {
 		const secondTab = setup()
 		await addQuery(firstTab.queryClient, "dashboard", [apiTag.dashboard])
 		await addQuery(secondTab.queryClient, "planning", [apiTag.campusEvents])
-		firstTab.manager.addTags([apiTag.dashboard])
-		secondTab.manager.addTags([apiTag.campusEvents])
+		observeQuery(firstTab.queryClient, "dashboard", [apiTag.dashboard])
+		observeQuery(secondTab.queryClient, "planning", [apiTag.campusEvents])
 
 		firstTab.sockets[0].emit(
 			"message",
@@ -116,9 +128,9 @@ describe("SyncManager", () => {
 	})
 
 	test("ignores malformed, unknown, and non-JSON events", async () => {
-		const { manager, queryClient, sockets } = setup()
+		const { queryClient, sockets } = setup()
 		await addQuery(queryClient, "dashboard", [apiTag.dashboard])
-		manager.addTags([apiTag.dashboard])
+		observeQuery(queryClient, "dashboard", [apiTag.dashboard])
 
 		for (const event of [
 			"not-json",
@@ -133,11 +145,11 @@ describe("SyncManager", () => {
 	})
 
 	test("uses wss for HTTPS and reconnects with active invalidation", async () => {
-		const { connections, manager, queryClient, scheduled, sockets } = setup(
+		const { connections, queryClient, scheduled, sockets } = setup(
 			"https://api.example.test/base?debug=true",
 		)
 		await addQuery(queryClient, "dashboard", [apiTag.dashboard])
-		manager.addTags([apiTag.dashboard])
+		observeQuery(queryClient, "dashboard", [apiTag.dashboard])
 		expect(connections[0].url).toBe("wss://api.example.test/api/v1/sync")
 
 		sockets[0].emit("open")
@@ -158,12 +170,12 @@ describe("SyncManager", () => {
 		let attempts = 0
 		const connectionError = new DOMException("Invalid WebSocket protocol")
 		const manager = new SyncManager(queryClient, {
-			accessToken: "browser-rejected-token",
 			apiUrl: "http://localhost:8000",
 			createSocket: () => {
 				attempts += 1
 				throw connectionError
 			},
+			getAccessToken: () => "browser-rejected-token",
 			onConnectionError: (error) => connectionErrors.push(error),
 			schedule: (callback) => {
 				scheduled.push(callback)
@@ -172,7 +184,7 @@ describe("SyncManager", () => {
 			cancelSchedule: () => undefined,
 		})
 
-		expect(() => manager.addTags([apiTag.dashboard])).not.toThrow()
+		expect(() => observeQuery(queryClient, "dashboard", [apiTag.dashboard])).not.toThrow()
 		expect(attempts).toBe(1)
 		expect(connectionErrors).toEqual([connectionError])
 		expect(scheduled).toHaveLength(1)
@@ -184,13 +196,13 @@ describe("SyncManager", () => {
 	})
 
 	test("dispose closes the socket and prevents reconnect", () => {
-		const { manager, scheduled, sockets } = setup()
-		manager.addTags([apiTag.dashboard])
+		const { manager, queryClient, scheduled, sockets } = setup()
+		observeQuery(queryClient, "dashboard", [apiTag.dashboard])
 		manager.dispose()
 		expect(sockets[0].closed).toBe(true)
 		sockets[0].emit("close")
 		expect(scheduled).toHaveLength(0)
-		manager.addTags([apiTag.dashboard])
+		observeQuery(queryClient, "second-dashboard", [apiTag.dashboard])
 		expect(sockets).toHaveLength(1)
 	})
 })

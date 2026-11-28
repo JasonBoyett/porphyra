@@ -1,4 +1,4 @@
-from app.db.models.campus import Campus
+from app.db.models.campus import Campus, CampusType
 from app.db.models.campus_event import CampusEvent
 from app.db.models.campus_event_ministry import CampusEventMinistry
 from app.db.models.campus_event_team import CampusEventTeam
@@ -14,8 +14,10 @@ from app.db.models.church_role import (
     ChurchRoleAssignment,
     ChurchRolePermission,
 )
+from app.db.models.invitation import Invitation, InvitationRole, InvitationTeam
 from app.db.models.ministry import Ministry
 from app.db.models.ministry_leadership import MinistryLeadership
+from app.db.models.recurring_service import RecurringService
 from app.db.models.role_template import (
     CampusRoleTemplate,
     ChurchRoleTemplate,
@@ -28,6 +30,7 @@ from app.db.models.volunteer_request import VolunteerRequest, VolunteerRequestSt
 
 __all__ = [
     "Campus",
+    "CampusType",
     "CampusEvent",
     "CampusEventMinistry",
     "CampusEventTeam",
@@ -43,6 +46,10 @@ __all__ = [
     "ChurchRolePermission",
     "Ministry",
     "MinistryLeadership",
+    "Invitation",
+    "InvitationRole",
+    "InvitationTeam",
+    "RecurringService",
     "CampusRoleTemplate",
     "ChurchRoleTemplate",
     "PublicRoleTemplate",

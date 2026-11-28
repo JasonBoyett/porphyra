@@ -10,6 +10,17 @@ export const Route = createFileRoute(
 
 function EventPlanningRoute() {
 	const { eventId } = Route.useParams()
-	const { accessToken } = Route.useRouteContext()
-	return <PlanningScheduleBoard accessToken={accessToken} eventId={eventId} />
+	const navigate = Route.useNavigate()
+
+	return (
+		<PlanningScheduleBoard
+			eventId={eventId}
+			onEventChange={(churchId, nextEventId) =>
+				void navigate({
+					params: { churchId, eventId: nextEventId },
+					to: "/app/planning/churches/$churchId/events/$eventId",
+				})
+			}
+		/>
+	)
 }

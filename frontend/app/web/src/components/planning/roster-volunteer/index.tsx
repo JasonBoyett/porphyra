@@ -2,7 +2,6 @@ import { useState } from "react"
 import { Ellipsis, Pencil, UserMinus } from "lucide-react"
 import { toast } from "sonner"
 
-import { apiClient } from "@/api/client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -40,47 +39,34 @@ const initials = (name: string) =>
 
 export const RosterVolunteer = (props: RosterVolunteerProps) => {
 	const [isDropDialogOpen, setIsDropDialogOpen] = useState(false)
-	const changeRole = apiClient.changeCampusEventVolunteerRole.useMutation()
-	const dropVolunteer = apiClient.dropCampusEventVolunteer.useMutation()
+	const [isChangingRole, setIsChangingRole] = useState(false)
+	const [isDropping, setIsDropping] = useState(false)
 	const canManageAssignment =
-		props.status === "accepted" &&
-		props.eventTeamId !== undefined &&
-		props.volunteerId !== undefined
+		props.status === "accepted" && props.onChangeRole !== undefined && props.onDrop !== undefined
 	const roles = Object.entries(props.roles ?? {})
 
 	const changeRoleTo = (roleName: string) => {
 		const role = props.roles?.[roleName]
-		if (role === undefined || props.eventTeamId === undefined || props.volunteerId === undefined)
-			return
-		changeRole.mutate(
-			{
-				event_team_id: props.eventTeamId,
-				roleEmoji: role.emoji,
-				roleName,
-				volunteer_id: props.volunteerId,
-			},
-			{
-				onError: () => toast.error(`Unable to update ${props.name}'s role.`),
-				onSuccess: () => toast.success(`${props.name}'s role was updated.`),
-			},
-		)
+		if (role === undefined || props.onChangeRole === undefined) return
+		setIsChangingRole(true)
+		void props
+			.onChangeRole(roleName, role.emoji)
+			.then(() => toast.success(`${props.name}'s role was updated.`))
+			.catch(() => toast.error(`Unable to update ${props.name}'s role.`))
+			.finally(() => setIsChangingRole(false))
 	}
 
 	const drop = () => {
-		if (props.eventTeamId === undefined || props.volunteerId === undefined) return
-		dropVolunteer.mutate(
-			{
-				event_team_id: props.eventTeamId,
-				volunteer_id: props.volunteerId,
-			},
-			{
-				onError: () => toast.error(`Unable to remove ${props.name} from the roster.`),
-				onSuccess: () => {
-					setIsDropDialogOpen(false)
-					toast.success(`${props.name} was removed from the roster.`)
-				},
-			},
-		)
+		if (props.onDrop === undefined) return
+		setIsDropping(true)
+		void props
+			.onDrop()
+			.then(() => {
+				setIsDropDialogOpen(false)
+				toast.success(`${props.name} was removed from the roster.`)
+			})
+			.catch(() => toast.error(`Unable to remove ${props.name} from the roster.`))
+			.finally(() => setIsDropping(false))
 	}
 
 	return (
@@ -155,7 +141,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 												{roles.map(([roleName, role]) => (
 													<DropdownMenuRadioItem
 														disabled={
-															changeRole.isPending ||
+															isChangingRole ||
 															(roleName !== props.roleName &&
 																role.scheduledUsers.length >= role.count)
 														}
@@ -174,7 +160,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 							<DropdownMenuSeparator />
 							<DropdownMenuGroup>
 								<DropdownMenuItem
-									disabled={dropVolunteer.isPending}
+									disabled={isDropping}
 									onSelect={() => setIsDropDialogOpen(true)}
 									variant="destructive"
 								>
@@ -201,7 +187,7 @@ export const RosterVolunteer = (props: RosterVolunteerProps) => {
 								<Button onClick={() => setIsDropDialogOpen(false)} variant="outline">
 									<Localized str="planning.cancel" />
 								</Button>
-								<Button disabled={dropVolunteer.isPending} onClick={drop} variant="destructive">
+								<Button disabled={isDropping} onClick={drop} variant="destructive">
 									<UserMinus data-icon="inline-start" />
 									<Localized str="planning.dropVolunteer" />
 								</Button>

@@ -1,4 +1,5 @@
 import tseslint from "typescript-eslint"
+import reactHooks from "eslint-plugin-react-hooks"
 
 import { noStaticComputedText } from "./eslint-rules/no-static-computed-text.mjs"
 
@@ -12,6 +13,7 @@ export default tseslint.config(
 			parser: tseslint.parser,
 		},
 		plugins: {
+			"react-hooks": reactHooks,
 			porphyra: {
 				rules: {
 					"no-static-computed-text": noStaticComputedText,
@@ -20,6 +22,10 @@ export default tseslint.config(
 		},
 		rules: {
 			"porphyra/no-static-computed-text": "error",
+			"react-hooks/exhaustive-deps": "error",
+			"react-hooks/no-deriving-state-in-effects": "error",
+			"react-hooks/rules-of-hooks": "error",
+			"react-hooks/set-state-in-effect": "error",
 		},
 	},
 )

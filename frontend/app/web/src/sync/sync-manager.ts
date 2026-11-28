@@ -26,9 +26,9 @@ type SocketFactory = (url: string, protocols: string[]) => WebSocket
 type TimerHandle = ReturnType<typeof setTimeout>
 
 export type SyncManagerOptions = {
-	accessToken: string | null
 	apiUrl: string
 	createSocket?: SocketFactory
+	getAccessToken: () => string | null
 	onConnectionError?: (error: unknown) => void
 	onAuthorizationChanged?: (churchId: string, campusId?: string) => void
 	reconnectDelayMs?: number
@@ -52,10 +52,11 @@ const syncUrl = (apiUrl: string) => {
 }
 
 export class SyncManager {
-	readonly #activeTags = new Map<ApiTag, number>()
+	readonly #activeTags = new Set<ApiTag>()
 	readonly #queryClient: QueryClient
 	readonly #apiUrl: string
 	readonly #createSocket: SocketFactory
+	readonly #getAccessToken: () => string | null
 	readonly #onConnectionError: (error: unknown) => void
 	readonly #onAuthorizationChanged: (churchId: string, campusId?: string) => void
 	readonly #reconnectDelayMs: number
@@ -63,7 +64,6 @@ export class SyncManager {
 	readonly #cancelSchedule: (handle: TimerHandle) => void
 	readonly #identityIndex = new Map<string, Set<Query>>()
 	readonly #unsubscribeCache: () => void
-	#accessToken: string | null
 	#socket: WebSocket | undefined
 	#reconnectTimer: TimerHandle | undefined
 	#disposed = false
@@ -72,7 +72,7 @@ export class SyncManager {
 	public constructor(queryClient: QueryClient, options: SyncManagerOptions) {
 		this.#queryClient = queryClient
 		this.#apiUrl = options.apiUrl
-		this.#accessToken = options.accessToken
+		this.#getAccessToken = options.getAccessToken
 		this.#createSocket = options.createSocket ?? ((url, protocols) => new WebSocket(url, protocols))
 		this.#onConnectionError =
 			options.onConnectionError ??
@@ -81,35 +81,8 @@ export class SyncManager {
 		this.#reconnectDelayMs = options.reconnectDelayMs ?? 1_000
 		this.#schedule = options.schedule ?? ((callback, delay) => setTimeout(callback, delay))
 		this.#cancelSchedule = options.cancelSchedule ?? ((handle) => clearTimeout(handle))
-		this.#unsubscribeCache = queryClient.getQueryCache().subscribe((event) => {
-			if (event.query !== undefined) this.#indexQuery(event.query)
-		})
-		for (const query of queryClient.getQueryCache().getAll()) this.#indexQuery(query)
-	}
-
-	public addTags(tags: readonly ApiTag[]) {
-		if (this.#disposed) return
-		for (const tag of new Set(tags)) {
-			this.#activeTags.set(tag, (this.#activeTags.get(tag) ?? 0) + 1)
-		}
-		this.#connect()
-	}
-
-	public removeTags(tags: readonly ApiTag[]) {
-		for (const tag of new Set(tags)) {
-			const count = this.#activeTags.get(tag) ?? 0
-			if (count <= 1) this.#activeTags.delete(tag)
-			else this.#activeTags.set(tag, count - 1)
-		}
-		if (this.#activeTags.size === 0) this.#disconnect()
-	}
-
-	public updateAccessToken(accessToken: string | null) {
-		if (this.#accessToken === accessToken || this.#disposed) return
-		this.#accessToken = accessToken
-		this.#reportedConnectionError = false
-		this.#disconnect()
-		this.#connect()
+		this.#unsubscribeCache = queryClient.getQueryCache().subscribe(() => this.#reconcileQueries())
+		this.#reconcileQueries()
 	}
 
 	public dispose() {
@@ -121,12 +94,13 @@ export class SyncManager {
 	}
 
 	#connect() {
+		const accessToken = this.#getAccessToken()
 		if (
 			this.#disposed ||
 			this.#socket !== undefined ||
 			this.#reconnectTimer !== undefined ||
 			this.#activeTags.size === 0 ||
-			this.#accessToken === null
+			accessToken === null
 		) {
 			return
 		}
@@ -135,7 +109,7 @@ export class SyncManager {
 		try {
 			socket = this.#createSocket(syncUrl(this.#apiUrl), [
 				SYNC_PROTOCOL,
-				`${TOKEN_PROTOCOL_PREFIX}${this.#accessToken}`,
+				`${TOKEN_PROTOCOL_PREFIX}${accessToken}`,
 			])
 		} catch (error) {
 			if (!this.#reportedConnectionError) {
@@ -147,7 +121,7 @@ export class SyncManager {
 		}
 		this.#socket = socket
 		socket.addEventListener("open", () => {
-			if (this.#socket === socket) this.#invalidateTags([...this.#activeTags.keys()])
+			if (this.#socket === socket) this.#invalidateTags([...this.#activeTags])
 		})
 		socket.addEventListener("message", (event) => this.#handleMessage(event))
 		socket.addEventListener("close", () => {
@@ -162,7 +136,7 @@ export class SyncManager {
 			this.#disposed ||
 			this.#reconnectTimer !== undefined ||
 			this.#activeTags.size === 0 ||
-			this.#accessToken === null
+			this.#getAccessToken() === null
 		) {
 			return
 		}
@@ -210,7 +184,8 @@ export class SyncManager {
 			candidate.type === "sync.invalidate" &&
 			Array.isArray(candidate.targets) &&
 			candidate.targets.every(isSyncIdentity) &&
-			(candidate.tags === undefined || (Array.isArray(candidate.tags) && candidate.tags.every(isApiTag))) &&
+			(candidate.tags === undefined ||
+				(Array.isArray(candidate.tags) && candidate.tags.every(isApiTag))) &&
 			(candidate.callKey === undefined || typeof candidate.callKey === "string")
 		)
 	}
@@ -264,8 +239,21 @@ export class SyncManager {
 		})
 	}
 
+	#reconcileQueries() {
+		if (this.#disposed) return
+		this.#activeTags.clear()
+		this.#identityIndex.clear()
+		for (const query of this.#queryClient.getQueryCache().getAll()) {
+			this.#indexQuery(query)
+			if (query.isActive()) {
+				for (const tag of tagsForQuery(query)) this.#activeTags.add(tag)
+			}
+		}
+		if (this.#activeTags.size === 0) this.#disconnect()
+		else this.#connect()
+	}
+
 	#indexQuery(query: Query) {
-		for (const queries of this.#identityIndex.values()) queries.delete(query)
 		const meta = query.meta as TaggedQueryMeta | undefined
 		const identities = [
 			...(meta?.syncTargets ?? []),

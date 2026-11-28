@@ -8,8 +8,12 @@ from app.api.v1.dependencies.church_membership import get_church_membership_or_4
 from app.api.v1.dependencies.database import DatabaseSession
 from app.api.v1.events.campus.sync import (
     accept_volunteer_request_action,
+    assign_team_volunteer_action,
     cancel_volunteer_assignment_action,
+    change_team_volunteer_role_action,
+    create_team_volunteer_replacement_action,
     decline_volunteer_request_action,
+    drop_team_volunteer_action,
 )
 from app.api.v1.events.schemas import (
     AssignVolunteerRequest,
@@ -282,6 +286,7 @@ def _publish_volunteer_schedule_change(
     operation_id="assignCampusEventVolunteer",
     status_code=status.HTTP_201_CREATED,
 )
+@assign_team_volunteer_action.bind
 def assign_volunteer(
     event_team_id: UUID,
     payload: AssignVolunteerRequest,
@@ -310,6 +315,7 @@ def assign_volunteer(
     operation_id="createVolunteerReplacement",
     status_code=status.HTTP_201_CREATED,
 )
+@create_team_volunteer_replacement_action.bind
 def create_replacement(
     event_team_id: UUID,
     request_id: UUID,
@@ -493,6 +499,7 @@ def decline_volunteer_request(
     operation_id="changeCampusEventVolunteerRole",
     openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
+@change_team_volunteer_role_action.bind
 def update_volunteer_role(
     event_team_id: UUID,
     volunteer_id: UUID,
@@ -618,6 +625,7 @@ def _drop_volunteer_assignment(
     operation_id="dropCampusEventVolunteer",
     openapi_extra={"x-sync-tags": ["campus-events", "campus-event-planning"]},
 )
+@drop_team_volunteer_action.bind
 def drop_volunteer(
     event_team_id: UUID,
     volunteer_id: UUID,

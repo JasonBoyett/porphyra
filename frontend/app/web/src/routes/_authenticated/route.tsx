@@ -9,8 +9,6 @@ export const Route = createFileRoute("/_authenticated")({
 				to: "/sign-in",
 			})
 		}
-
-		return { accessToken: context.auth.session.accessToken }
 	},
 	component: Outlet,
 })

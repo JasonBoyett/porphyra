@@ -1,69 +1,21 @@
-import { createContext, useContext, useEffect, useState, type PropsWithChildren } from "react"
-
-type ThemePreference = "dark" | "light" | "system"
-type ResolvedTheme = Exclude<ThemePreference, "system">
-
-type ThemeContextValue = {
-	preference: ThemePreference
-	resolvedTheme: ResolvedTheme
-	setPreference: (preference: ThemePreference) => void
-}
+import { ThemeProvider as NextThemeProvider, useTheme, type ThemeProviderProps } from "next-themes"
 
 const storageKey = "porphyra-theme-preference"
-const themeContext = createContext<ThemeContextValue | null>(null)
 
-const getSystemTheme = (): ResolvedTheme =>
-	window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-
-const resolveTheme = (preference: ThemePreference): ResolvedTheme =>
-	preference === "system" ? getSystemTheme() : preference
-
-const applyTheme = (theme: ResolvedTheme) => {
-	document.documentElement.classList.toggle("dark", theme === "dark")
-	document.documentElement.style.colorScheme = theme
-}
-
-const getStoredPreference = (): ThemePreference => {
-	const preference = localStorage.getItem(storageKey)
-	return preference === "dark" || preference === "light" || preference === "system"
-		? preference
-		: "system"
-}
-
-export const ThemeProvider = (props: PropsWithChildren) => {
-	const [preference, setPreference] = useState<ThemePreference>(getStoredPreference)
-	const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(preference))
-
-	useEffect(() => {
-		const updateTheme = () => {
-			const nextTheme = resolveTheme(preference)
-			setResolvedTheme(nextTheme)
-			applyTheme(nextTheme)
-		}
-		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-
-		updateTheme()
-		mediaQuery.addEventListener("change", updateTheme)
-		localStorage.setItem(storageKey, preference)
-
-		return () => mediaQuery.removeEventListener("change", updateTheme)
-	}, [preference])
-
-	return (
-		<themeContext.Provider value={{ preference, resolvedTheme, setPreference }}>
-			{props.children}
-		</themeContext.Provider>
-	)
-}
-
-export const useTheme = () => {
-	const theme = useContext(themeContext)
-	if (theme === null) throw new Error("Theme context is unavailable")
-	return theme
-}
+export const ThemeProvider = (props: ThemeProviderProps) => (
+	<NextThemeProvider
+		attribute="class"
+		defaultTheme="system"
+		disableTransitionOnChange
+		enableColorScheme
+		enableSystem
+		storageKey={storageKey}
+		{...props}
+	/>
+)
 
 export const DevelopmentThemeSwitcher = () => {
-	const { preference, resolvedTheme, setPreference } = useTheme()
+	const { resolvedTheme, setTheme, theme = "system" } = useTheme()
 
 	if (!import.meta.env.DEV) return null
 
@@ -73,17 +25,17 @@ export const DevelopmentThemeSwitcher = () => {
 			className="fixed bottom-4 left-4 z-20 flex items-center gap-1 rounded-full border border-[color:var(--porphyra-surface-border)] bg-card/92 p-1 text-xs shadow-md backdrop-blur-md"
 		>
 			<span className="px-2 text-muted-foreground">
-				Theme: {preference === "system" ? `System (${resolvedTheme})` : preference}
+				Theme: {theme === "system" ? `System (${resolvedTheme ?? "light"})` : theme}
 			</span>
-			{(["light", "system", "dark"] as const).map((theme) => (
+			{(["light", "system", "dark"] as const).map((nextTheme) => (
 				<button
-					aria-pressed={preference === theme}
-					className={`rounded-full px-2 py-1 font-bold capitalize ${preference === theme ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"}`}
-					key={theme}
-					onClick={() => setPreference(theme)}
+					aria-pressed={theme === nextTheme}
+					className={`rounded-full px-2 py-1 font-bold capitalize ${theme === nextTheme ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"}`}
+					key={nextTheme}
+					onClick={() => setTheme(nextTheme)}
 					type="button"
 				>
-					{theme}
+					{nextTheme}
 				</button>
 			))}
 		</div>

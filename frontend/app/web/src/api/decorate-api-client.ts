@@ -3,8 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AxiosRequestConfig } from "axios"
 import { apiOperations, apiSyncResources } from "@porphyra/frontend/api/operations"
 
-import { useSyncTags } from "@/sync/sync-provider"
-import { createSyncCallKey, forgetSyncCallKey } from "@/sync/call-keys"
+import { createSyncCallKey, forgetSyncCallKey, markSyncCallReconciled } from "@/sync/call-keys"
 import type { SyncIdentity } from "@/sync/identity"
 import type { ApiClient, ApiClientOperationId, ApiClientTransport } from "./client-types"
 import type { ApiTag } from "./tags"
@@ -73,7 +72,7 @@ const resourceActionsForView = (tag: string): ResourceAction[] => {
 	return resource?.kind === "resource" ? [...resource.actions] : []
 }
 
-const decorateResourceViews = (
+export const decorateResourceViews = (
 	data: unknown,
 	operationId: ApiClientOperationId,
 	runAction: (
@@ -86,40 +85,58 @@ const decorateResourceViews = (
 	)
 	if (view === undefined) return data
 	const actions = resourceActionsForView(view.tag)
-	const decorateResources = (resources: unknown[]) =>
-		resources.map((resource) => {
-			if (typeof resource !== "object" || resource === null) return resource
-			const value = { ...(resource as Record<string, unknown>) }
-			Object.defineProperties(
-				value,
-				Object.fromEntries(
-					actions.map((action) => [
-						action.name,
-						{
-							enumerable: false,
-							value: () =>
-								runAction(
-									action.operationId,
-									Object.fromEntries(
-										Object.entries(action.parameterBindings).map(([parameter, field]) => [
-											parameter,
-											value[field],
-										]),
-									),
+	const decorateResource = (resource: unknown) => {
+		if (typeof resource !== "object" || resource === null) return resource
+		const value = { ...(resource as Record<string, unknown>) }
+		Object.defineProperties(
+			value,
+			Object.fromEntries(
+				actions.map((action) => [
+					action.name,
+					{
+						enumerable: false,
+						value: (input: Record<string, unknown> = {}) =>
+							runAction(action.operationId, {
+								...input,
+								...Object.fromEntries(
+									Object.entries(action.parameterBindings).map(([parameter, field]) => [
+										parameter,
+										value[field],
+									]),
 								),
-						},
-					]),
-				),
-			)
-			return value
-		})
-	if (view.path === "$[]") return Array.isArray(data) ? decorateResources(data) : data
-	const nestedArray = /^\$\.([A-Za-z][A-Za-z0-9_]*)\[\]$/.exec(view.path)
-	if (nestedArray === null || typeof data !== "object" || data === null) return data
-	const [key] = nestedArray.slice(1)
-	const resources = (data as Record<string, unknown>)[key]
-	if (!Array.isArray(resources)) return data
-	return { ...(data as Record<string, unknown>), [key]: decorateResources(resources) }
+							}),
+					},
+				]),
+			),
+		)
+		return value
+	}
+	const parts =
+		view.path === "$[]"
+			? ["[]"]
+			: view.path
+					.replace(/^\$\.?/, "")
+					.split(".")
+					.filter(Boolean)
+	const decorateAtPath = (value: unknown, partIndex: number): unknown => {
+		if (partIndex === parts.length) return decorateResource(value)
+		const part = parts[partIndex]
+		if (part === "[]") {
+			return Array.isArray(value) ? value.map((item) => decorateAtPath(item, partIndex + 1)) : value
+		}
+		if (typeof value !== "object" || value === null) return value
+		const isArray = part.endsWith("[]")
+		const key = isArray ? part.slice(0, -2) : part
+		const source = value as Record<string, unknown>
+		const child = source[key]
+		const decoratedChild = isArray
+			? Array.isArray(child)
+				? child.map((item) => decorateAtPath(item, partIndex + 1))
+				: child
+			: decorateAtPath(child, partIndex + 1)
+		return { ...source, [key]: decoratedChild }
+	}
+	return decorateAtPath(data, 0)
 }
 
 const decorateQuery = (
@@ -154,28 +171,20 @@ const decorateQuery = (
 	}
 	const useQueryMethod = (...args: [unknown?, Record<string, unknown>?]) =>
 		useQuery(queryOptions(...args))
-	const useSyncQuery = (...args: [unknown?, Record<string, unknown>?]) => {
-		useSyncTags(apiOperations[operationId].syncTags)
-		return useQuery(queryOptions(...args))
-	}
 	const useResourceQuery = (...args: [unknown?, Record<string, unknown>?]) => {
-		useSyncTags(apiOperations[operationId].syncTags)
 		const queryClient = useQueryClient()
 		const result = useQuery(queryOptions(...args))
+		const queryContext = JSON.stringify(queryKey(hasInput ? args[0] : undefined))
 		const data = useMemo(
 			() =>
 				decorateResourceViews(result.data, operationId, async (actionOperationId, actionInput) => {
-					const response = await runAction(
-						actionOperationId,
-						actionInput,
-						JSON.stringify(queryKey(hasInput ? args[0] : undefined)),
-					)
+					const response = await runAction(actionOperationId, actionInput, queryContext)
 					void queryClient.invalidateQueries({
-						queryKey: queryKey(hasInput ? args[0] : undefined),
+						queryKey: JSON.parse(queryContext) as unknown[],
 					})
 					return response
 				}),
-			[result.data],
+			[queryClient, queryContext, result.data],
 		)
 		return { ...result, data }
 	}
@@ -183,7 +192,6 @@ const decorateQuery = (
 		queryKey,
 		queryOptions,
 		useQuery: useQueryMethod,
-		useSyncQuery,
 		useResourceQuery,
 	})
 }
@@ -230,7 +238,11 @@ export const decorateApiClient = (transport: ApiClientTransport): ApiClient => {
 		const callKey = createSyncCallKey(queryContext)
 		const request = transport[operationId] as RequestMethod
 		try {
-			return await request(input, { headers: { "X-Porphyra-Sync-Call-Key": callKey } })
+			const response = await request(input, {
+				headers: { "X-Porphyra-Sync-Call-Key": callKey },
+			})
+			if (queryContext !== undefined) markSyncCallReconciled(callKey, queryContext)
+			return response
 		} catch (error) {
 			forgetSyncCallKey(callKey)
 			throw error

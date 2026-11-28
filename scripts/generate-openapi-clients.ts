@@ -167,7 +167,11 @@ const resourceActionTypes = syncResources
 		(resource): resource is {
 			kind: "resource";
 			tag: string;
-			actions: Array<{ name: string; operationId: string }>;
+			actions: Array<{
+				name: string;
+				operationId: string;
+				parameterBindings: Record<string, string>;
+			}>;
 		} =>
 			typeof resource === "object" &&
 			resource !== null &&
@@ -180,7 +184,13 @@ const resourceActionTypes = syncResources
 			`TTag extends ${JSON.stringify(resource.tag)} ? {\n${resource.actions
 				.map(
 					(action) =>
-						`\t${action.name}: () => Promise<ApiOperationResponse<${JSON.stringify(action.operationId)}>>`,
+						`\t${action.name}: ApiSyncResourceActionMethod<${JSON.stringify(action.operationId)}, ${
+							Object.keys(action.parameterBindings).length === 0
+								? "never"
+								: Object.keys(action.parameterBindings)
+										.map((parameter) => JSON.stringify(parameter))
+										.join(" | ")
+						}>`,
 				)
 				.join("\n")}\n} :`,
 	)
@@ -287,6 +297,15 @@ export type ApiOperationInput<TOperationId extends ApiOperationId> =
 	ApiOperationDataPart<ApiOperationPath<TOperationId>> &
 	ApiOperationDataPart<ApiOperationQuery<TOperationId>> &
 	ApiOperationDataPart<ApiOperationRequest<TOperationId>>
+
+type ApiSyncResourceActionMethod<
+	TOperationId extends ApiOperationId,
+	TBoundParameter extends PropertyKey,
+> = keyof Omit<ApiOperationInput<TOperationId>, TBoundParameter> extends never
+	? () => Promise<ApiOperationResponse<TOperationId>>
+	: (
+		input: Omit<ApiOperationInput<TOperationId>, TBoundParameter>,
+	) => Promise<ApiOperationResponse<TOperationId>>
 
 ${schemaNames
 	.map(

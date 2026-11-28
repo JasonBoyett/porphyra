@@ -6,16 +6,16 @@ from sqlmodel import select
 from app.api.v1.campuses._responses import campus_location_response
 from app.api.v1.dependencies.database import DatabaseSession
 from app.api.v1.events.campus.sync import (
-	my_volunteer_assignments_refresh,
-	volunteer_request_refresh,
+    my_volunteer_assignments_refresh,
+    volunteer_request_refresh,
 )
 from app.api.v1.events.schemas import (
-	CampusEventListItem,
-	CampusEventMinistryScheduleResponse,
-	CampusEventPlanningResponse,
-	CampusEventTeamScheduleResponse,
-	MyVolunteerAssignmentResponse,
-	MyVolunteerAssignmentsResponse,
+    CampusEventListItem,
+    CampusEventMinistryScheduleResponse,
+    CampusEventPlanningResponse,
+    CampusEventTeamScheduleResponse,
+    MyVolunteerAssignmentResponse,
+    MyVolunteerAssignmentsResponse,
     ScheduledVolunteerResponse,
     TeamRoleResponseData,
     VolunteerRequestRosterResponse,
@@ -88,33 +88,33 @@ def _request_roster_item(
         name=user.name,
         email=user.email,
         avatar_url=user.avatar_url,
-	)
+    )
 
 
 def _my_volunteer_assignment(
-	assignment: CampusEventTeamVolunteer,
+    assignment: CampusEventTeamVolunteer,
 ) -> MyVolunteerAssignmentResponse:
-	event_team = assignment.event_team
-	event_ministry = event_team.event_ministry
-	event = event_ministry.event
-	return MyVolunteerAssignmentResponse(
-		id=assignment.id,
-		campus_event_team_id=event_team.id,
-		campus_id=event.campus_id,
-		campus_name=event.campus.name,
-		campus_location=campus_location_response(event.campus),
-		event_id=event.id,
-		event_title=event.title,
-		event_starts_at=event.starts_at,
-		ministry_id=event_ministry.ministry_id,
-		ministry_name=event_ministry.ministry.name,
-		team_id=event_team.id,
-		team_name=event_team.team.name,
-		role_name=assignment.role_name,
-		role_emoji=assignment.role_emoji,
-		call_time=event_team.call_time,
-		notes=event_team.notes,
-	)
+    event_team = assignment.event_team
+    event_ministry = event_team.event_ministry
+    event = event_ministry.event
+    return MyVolunteerAssignmentResponse(
+        id=assignment.id,
+        campus_event_team_id=event_team.id,
+        campus_id=event.campus_id,
+        campus_name=event.campus.name,
+        campus_location=campus_location_response(event.campus),
+        event_id=event.id,
+        event_title=event.title,
+        event_starts_at=event.starts_at,
+        ministry_id=event_ministry.ministry_id,
+        ministry_name=event_ministry.ministry.name,
+        team_id=event_team.id,
+        team_name=event_team.team.name,
+        role_name=assignment.role_name,
+        role_emoji=assignment.role_emoji,
+        call_time=event_team.call_time,
+        notes=event_team.notes,
+    )
 
 
 def _terminal_requests(
@@ -164,9 +164,9 @@ def _planning_response(
         id=event.id,
         church_id=event.church_id,
         church_name=event.church.name,
-		campus_id=event.campus_id,
-		campus_name=event.campus.name,
-		campus_location=campus_location_response(event.campus),
+        campus_id=event.campus_id,
+        campus_name=event.campus.name,
+        campus_location=campus_location_response(event.campus),
         title=event.title,
         description=event.description,
         starts_at=event.starts_at,
@@ -250,9 +250,9 @@ def get_campus_events(
                 id=event.id,
                 church_id=event.church_id,
                 church_name=event.church.name,
-				campus_id=event.campus_id,
-				campus_name=event.campus.name,
-				campus_location=campus_location_response(event.campus),
+                campus_id=event.campus_id,
+                campus_name=event.campus.name,
+                campus_location=campus_location_response(event.campus),
                 title=event.title,
                 starts_at=event.starts_at,
                 ends_at=event.ends_at,
@@ -288,7 +288,7 @@ def get_campus_event_planning(
 @router.get(
     "/teams/{event_team_id}/volunteer-requests",
     operation_id="getCampusEventTeamVolunteerRequests",
-	openapi_extra={
+    openapi_extra={
         "x-sync-resource-views": [
             {
                 "tag": "volunteer-requests",
@@ -342,47 +342,47 @@ def get_team_volunteer_requests(
 
 
 @router.get(
-	"/volunteer-assignments",
-	operation_id="getMyVolunteerAssignments",
-	openapi_extra=sync_tags("campus-events", "campus-event-planning")
-	| {
-		"x-sync-resource-views": [
-			{
-				"tag": "my-volunteer-assignments",
-				"path": "$",
-				"identity": ["userId"],
-			},
-			{
-				"tag": "volunteer-assignments",
-				"path": "$.assignments[]",
-				"identity": ["id", "campusEventTeamId"],
-			},
-		],
-	},
+    "/volunteer-assignments",
+    operation_id="getMyVolunteerAssignments",
+    openapi_extra=sync_tags("campus-events", "campus-event-planning")
+    | {
+        "x-sync-resource-views": [
+            {
+                "tag": "my-volunteer-assignments",
+                "path": "$",
+                "identity": ["userId"],
+            },
+            {
+                "tag": "volunteer-assignments",
+                "path": "$.assignments[]",
+                "identity": ["id", "campusEventTeamId"],
+            },
+        ],
+    },
 )
 @my_volunteer_assignments_refresh.bind
 def get_my_volunteer_assignments(
-	db: DatabaseSession,
-	user: CurrentUser,
+    db: DatabaseSession,
+    user: CurrentUser,
 ) -> MyVolunteerAssignmentsResponse:
-	"""Accepted campus-event assignments for the signed-in volunteer."""
-	assignments = db.exec(select(CampusEventTeamVolunteer)).all()
-	my_assignments = [
-		assignment
-		for assignment in assignments
-		if assignment.team_membership.church_membership.user_id == user.id
-	]
-	return MyVolunteerAssignmentsResponse(
-		user_id=user.id,
-		assignments=sorted(
-			[_my_volunteer_assignment(assignment) for assignment in my_assignments],
-			key=lambda assignment: assignment.event_starts_at,
-		),
-	)
+    """Accepted campus-event assignments for the signed-in volunteer."""
+    assignments = db.exec(select(CampusEventTeamVolunteer)).all()
+    my_assignments = [
+        assignment
+        for assignment in assignments
+        if assignment.team_membership.church_membership.user_id == user.id
+    ]
+    return MyVolunteerAssignmentsResponse(
+        user_id=user.id,
+        assignments=sorted(
+            [_my_volunteer_assignment(assignment) for assignment in my_assignments],
+            key=lambda assignment: assignment.event_starts_at,
+        ),
+    )
 
 
 @router.get(
-	"/volunteer-requests",
+    "/volunteer-requests",
     operation_id="getMyVolunteerRequests",
     openapi_extra=sync_tags("campus-events", "campus-event-planning")
     | {
@@ -400,14 +400,14 @@ def get_my_volunteer_requests(
     user: CurrentUser,
     include_resolved: bool = False,
 ) -> list[VolunteerRequestRosterResponse]:
-	"""Pending requests for the signed-in volunteer, unless history is requested."""
-	requests = db.exec(select(VolunteerRequest)).all()
-	return [
-		_request_roster_item(request)
-		for request in requests
-		if request.team_membership.church_membership.user_id == user.id
-		and (include_resolved or request.status == VolunteerRequestStatus.PENDING)
-	]
+    """Pending requests for the signed-in volunteer, unless history is requested."""
+    requests = db.exec(select(VolunteerRequest)).all()
+    return [
+        _request_roster_item(request)
+        for request in requests
+        if request.team_membership.church_membership.user_id == user.id
+        and (include_resolved or request.status == VolunteerRequestStatus.PENDING)
+    ]
 
 
 router.add_api_route(
@@ -416,5 +416,14 @@ router.add_api_route(
     methods=["GET"],
     operation_id="getCampusEventPlanning",
     response_model=CampusEventPlanningResponse,
-    openapi_extra=sync_tags("campus-events", "campus-event-planning"),
+    openapi_extra=sync_tags("campus-events", "campus-event-planning")
+    | {
+        "x-sync-resource-views": [
+            {
+                "tag": "campus-event-teams",
+                "path": "$.ministries[].teams[]",
+                "identity": ["id"],
+            }
+        ]
+    },
 )

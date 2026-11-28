@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { Auth } from "@/components/auth"
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/sign-in")({
 
 function SignInRoute() {
 	const { auth } = Route.useRouteContext()
+	const router = useRouter()
 	const [email, setEmail] = useState("dev@a244.tech")
 	const [error, setError] = useState(false)
 
@@ -32,6 +33,7 @@ function SignInRoute() {
 
 		try {
 			await auth.signIn({ email })
+			await router.invalidate()
 		} catch {
 			setError(true)
 		}

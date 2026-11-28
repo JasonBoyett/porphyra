@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.v1.dependencies.church_membership import get_church_membership_or_404
 from app.api.v1.dependencies.database import DatabaseSession
+from app.api.v1.events.campus.sync import update_team_role_requirements_action
 from app.api.v1.events.schemas import (
     ScheduledTeamResponse,
     ScheduleTeamRequest,
@@ -93,6 +94,7 @@ def schedule_team(
     operation_id="updateCampusEventTeamRoleRequirements",
     openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
+@update_team_role_requirements_action.bind
 def update_team_role_requirements(
     event_team_id: UUID,
     payload: UpdateTeamRoleRequirementsRequest,

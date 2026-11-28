@@ -39,15 +39,18 @@ const valuesAtPath = (data: unknown, path: string): unknown[] => {
 	if (path === "$") return [data]
 	if (path === "$[]") return Array.isArray(data) ? data : []
 	const parts = path.replace(/^\$\.?/, "").split(".")
-	return parts.reduce<unknown[]>((values, part) => {
-		const arrayPart = part.endsWith("[]")
-		const key = arrayPart ? part.slice(0, -2) : part
-		return values.flatMap((value) => {
-			if (typeof value !== "object" || value === null) return []
-			const child = (value as Record<string, unknown>)[key]
-			return arrayPart ? (Array.isArray(child) ? child : []) : [child]
-		})
-	}, [data])
+	return parts.reduce<unknown[]>(
+		(values, part) => {
+			const arrayPart = part.endsWith("[]")
+			const key = arrayPart ? part.slice(0, -2) : part
+			return values.flatMap((value) => {
+				if (typeof value !== "object" || value === null) return []
+				const child = (value as Record<string, unknown>)[key]
+				return arrayPart ? (Array.isArray(child) ? child : []) : [child]
+			})
+		},
+		[data],
+	)
 }
 
 export const syncIdentitiesIn = (

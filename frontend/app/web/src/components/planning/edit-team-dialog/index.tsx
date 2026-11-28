@@ -1,8 +1,7 @@
 import { Plus, Trash2 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import { apiClient } from "@/api/client"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -45,39 +44,39 @@ const createRoleDraft = (role: Omit<RoleDraft, "id">): RoleDraft => ({
 	id: crypto.randomUUID(),
 })
 
+const createInitialDraft = (props: EditTeamDialogProps) => {
+	const serviceDate = localDatePart(new Date(props.event.startsAt))
+	const callDate =
+		props.team.callTime === null ? serviceDate : localDatePart(new Date(props.team.callTime))
+
+	return {
+		callDate,
+		callTime: localTimePart(props.team.callTime),
+		roles: Object.entries(props.team.roles).map(([name, role]) =>
+			createRoleDraft({
+				count: role.count,
+				emoji: role.emoji ?? "",
+				name,
+				originalName: name,
+			}),
+		),
+		usesDifferentCallDate: callDate !== serviceDate,
+	}
+}
+
 export const EditTeamDialog = (props: EditTeamDialogProps) => {
-	const updateTeam = apiClient.updateCampusEventTeamRoleRequirements.useMutation()
-	const [callTime, setCallTime] = useState("")
-	const [callDate, setCallDate] = useState("")
-	const [usesDifferentCallDate, setUsesDifferentCallDate] = useState(false)
+	const [initialDraft] = useState(() => createInitialDraft(props))
+	const [callTime, setCallTime] = useState(initialDraft.callTime)
+	const [callDate, setCallDate] = useState(initialDraft.callDate)
+	const [usesDifferentCallDate, setUsesDifferentCallDate] = useState(
+		initialDraft.usesDifferentCallDate,
+	)
 	const [callTimeChanged, setCallTimeChanged] = useState(false)
-	const [roles, setRoles] = useState<RoleDraft[]>([])
+	const [roles, setRoles] = useState<RoleDraft[]>(initialDraft.roles)
 	const [isConfirming, setIsConfirming] = useState(false)
+	const [isSaving, setIsSaving] = useState(false)
 	const [actions, setActions] = useState<VolunteerAction[]>([])
 	const [emojiPickerRoleId, setEmojiPickerRoleId] = useState<string | null>(null)
-
-	useEffect(() => {
-		if (!props.open) return
-		const serviceDate = localDatePart(new Date(props.event.startsAt))
-		const teamCallDate =
-			props.team.callTime === null ? serviceDate : localDatePart(new Date(props.team.callTime))
-		setCallDate(teamCallDate)
-		setCallTime(localTimePart(props.team.callTime))
-		setUsesDifferentCallDate(teamCallDate !== serviceDate)
-		setCallTimeChanged(false)
-		setRoles(
-			Object.entries(props.team.roles).map(([name, role]) =>
-				createRoleDraft({
-					count: role.count,
-					emoji: role.emoji ?? "",
-					name,
-					originalName: name,
-				}),
-			),
-		)
-		setActions([])
-		setIsConfirming(false)
-	}, [props.event.startsAt, props.open, props.team])
 
 	const roleNames = useMemo(() => roles.map((role) => role.name.trim()).filter(Boolean), [roles])
 	const rolesAreValid =
@@ -109,9 +108,10 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 		setIsConfirming(true)
 	}
 
-	const save = (volunteerActions: VolunteerAction[]) => {
-		updateTeam.mutate(
-			{
+	const save = async (volunteerActions: VolunteerAction[]) => {
+		setIsSaving(true)
+		try {
+			await props.team.updateRoleRequirements({
 				affectedVolunteers: volunteerActions.map((item) => ({
 					action: item.action,
 					assignmentId: item.assignmentId,
@@ -122,19 +122,17 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 						? null
 						: new Date(`${callDate}T${callTime}`).toISOString()
 					: props.team.callTime,
-				event_team_id: props.team.id,
 				roles: Object.fromEntries(
 					roles.map((role) => [role.name.trim(), { count: role.count, emoji: role.emoji || null }]),
 				),
-			},
-			{
-				onError: () => toast.error("The team could not be updated. Refresh and try again."),
-				onSuccess: () => {
-					toast.success("Team requirements updated.")
-					props.onOpenChange(false)
-				},
-			},
-		)
+			})
+			toast.success("Team requirements updated.")
+			props.onOpenChange(false)
+		} catch {
+			toast.error("The team could not be updated. Refresh and try again.")
+		} finally {
+			setIsSaving(false)
+		}
 	}
 
 	const updateRole = (index: number, updates: Partial<RoleDraft>) =>
@@ -365,7 +363,7 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 				)}
 				<DialogFooter>
 					<Button
-						disabled={updateTeam.isPending}
+						disabled={isSaving}
 						onClick={() => (isConfirming ? setIsConfirming(false) : props.onOpenChange(false))}
 						type="button"
 						variant="ghost"
@@ -374,14 +372,14 @@ export const EditTeamDialog = (props: EditTeamDialogProps) => {
 					</Button>
 					<Button
 						disabled={
-							updateTeam.isPending ||
+							isSaving ||
 							!rolesAreValid ||
 							(isConfirming &&
 								actions.some(
 									(action) => action.action === "reassign" && !roleNames.includes(action.roleName),
 								))
 						}
-						onClick={() => (isConfirming ? save(actions) : beginConfirmation())}
+						onClick={() => (isConfirming ? void save(actions) : beginConfirmation())}
 						type="button"
 					>
 						{isConfirming ? (

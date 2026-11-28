@@ -38,6 +38,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/churches/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Church */
+        post: operations["createChurch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/churches/{church_id}/primary-campus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Primary Campus */
+        patch: operations["setPrimaryCampus"];
+        trace?: never;
+    };
+    "/api/v1/churches/{church_id}/campuses/{campus_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Campus */
+        delete: operations["deleteCampus"];
+        options?: never;
+        head?: never;
+        /** Update Campus */
+        patch: operations["updateCampus"];
+        trace?: never;
+    };
+    "/api/v1/invitations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Invitation */
+        post: operations["createInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/{invitation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Invitation */
+        get: operations["getInvitation"];
+        put?: never;
+        post?: never;
+        /** Revoke Invitation */
+        delete: operations["revokeInvitation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/redeem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Redeem Invitation */
+        post: operations["redeemInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboard/": {
         parameters: {
             query?: never;
@@ -447,6 +551,21 @@ export interface components {
             /** Roleemoji */
             roleEmoji?: string | null;
         };
+        /** CampusAddressRequest */
+        CampusAddressRequest: {
+            /** Addressline1 */
+            addressLine1?: string | null;
+            /** Addressline2 */
+            addressLine2?: string | null;
+            /** City */
+            city?: string | null;
+            /** Region */
+            region?: string | null;
+            /** Postalcode */
+            postalCode?: string | null;
+            /** Countrycode */
+            countryCode?: string | null;
+        };
         /** CampusEventListItem */
         CampusEventListItem: {
             /**
@@ -609,17 +728,17 @@ export interface components {
          */
         CampusLocationResponse: {
             /** Addressline1 */
-            addressLine1: string;
+            addressLine1: string | null;
             /** Addressline2 */
             addressLine2: string | null;
             /** City */
-            city: string;
+            city: string | null;
             /** Region */
-            region: string;
+            region: string | null;
             /** Postalcode */
-            postalCode: string;
+            postalCode: string | null;
             /** Countrycode */
-            countryCode: string;
+            countryCode: string | null;
             /** Timezone */
             timeZone: string;
         };
@@ -632,6 +751,25 @@ export interface components {
                 [key: string]: components["schemas"]["TeamPermissionSnapshot"];
             };
         };
+        /** CampusResponse */
+        CampusResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            campusType: components["schemas"]["CampusType"];
+            location: components["schemas"]["CampusLocationResponse"];
+            /** Recurringservices */
+            recurringServices: components["schemas"]["RecurringServiceResponse"][];
+        };
+        /**
+         * CampusType
+         * @enum {string}
+         */
+        CampusType: "physical" | "online" | "administrative" | "ministry_center";
         /** ChurchMembership */
         ChurchMembership: {
             /**
@@ -669,6 +807,20 @@ export interface components {
                 [key: string]: components["schemas"]["CampusPermissionSnapshot"];
             };
         };
+        /** ChurchResponse */
+        ChurchResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Primarycampusid */
+            primaryCampusId: string | null;
+            /** Campuses */
+            campuses: components["schemas"]["CampusResponse"][];
+        };
         /** ConfirmScheduleRequest */
         ConfirmScheduleRequest: {
             /**
@@ -704,6 +856,21 @@ export interface components {
             /** Endsat */
             endsAt?: string | null;
         };
+        /** CreateCampusRequest */
+        CreateCampusRequest: {
+            /** Name */
+            name: string;
+            /** @default physical */
+            campusType: components["schemas"]["CampusType"];
+            address?: components["schemas"]["CampusAddressRequest"] | null;
+            /**
+             * Timezone
+             * @default America/Chicago
+             */
+            timeZone: string;
+            /** Recurringservices */
+            recurringServices?: components["schemas"]["CreateRecurringServiceRequest"][];
+        };
         /** CreateChurchEventRequest */
         CreateChurchEventRequest: {
             /**
@@ -725,6 +892,102 @@ export interface components {
             startsAt: string;
             /** Endsat */
             endsAt?: string | null;
+        };
+        /** CreateChurchRequest */
+        CreateChurchRequest: {
+            /**
+             * Idempotencykey
+             * Format: uuid
+             */
+            idempotencyKey: string;
+            /** Name */
+            name: string;
+            /** Campuses */
+            campuses: components["schemas"]["CreateCampusRequest"][];
+            /**
+             * Primarycampusindex
+             * @default 0
+             */
+            primaryCampusIndex: number | null;
+        };
+        /** CreateInvitationRequest */
+        CreateInvitationRequest: {
+            /**
+             * Churchid
+             * Format: uuid
+             */
+            churchId: string;
+            /** Campusid */
+            campusId?: string | null;
+            /** Teamids */
+            teamIds?: string[];
+            /** Roleids */
+            roleIds?: string[];
+            /**
+             * Expiresin
+             * Format: duration
+             * @default P7D
+             */
+            expiresIn: string;
+        };
+        /** CreateRecurringServiceRequest */
+        CreateRecurringServiceRequest: {
+            /** Name */
+            name: string;
+            /**
+             * Weekday
+             * @description Monday is 0 and Sunday is 6.
+             */
+            weekday: number;
+            /**
+             * Startsat
+             * Format: time
+             */
+            startsAt: string;
+            /** Durationminutes */
+            durationMinutes?: number | null;
+        };
+        /** CreatedInvitationResponse */
+        CreatedInvitationResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Churchid
+             * Format: uuid
+             */
+            churchId: string;
+            /** Campusid */
+            campusId: string | null;
+            /**
+             * Creatoruserid
+             * Format: uuid
+             */
+            creatorUserId: string;
+            /** Teamids */
+            teamIds: string[];
+            /** Roleids */
+            roleIds: string[];
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Revokedat */
+            revokedAt: string | null;
+            /** Redeemedat */
+            redeemedAt: string | null;
+            /** Claimedbyuserid */
+            claimedByUserId: string | null;
+            /** Token */
+            token: string;
         };
         /** DashboardCampusResponse */
         DashboardCampusResponse: {
@@ -832,6 +1095,46 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** InvitationResponse */
+        InvitationResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Churchid
+             * Format: uuid
+             */
+            churchId: string;
+            /** Campusid */
+            campusId: string | null;
+            /**
+             * Creatoruserid
+             * Format: uuid
+             */
+            creatorUserId: string;
+            /** Teamids */
+            teamIds: string[];
+            /** Roleids */
+            roleIds: string[];
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Revokedat */
+            revokedAt: string | null;
+            /** Redeemedat */
+            redeemedAt: string | null;
+            /** Claimedbyuserid */
+            claimedByUserId: string | null;
+        };
         /** MyVolunteerAssignmentResponse */
         MyVolunteerAssignmentResponse: {
             /**
@@ -896,6 +1199,48 @@ export interface components {
             userId: string;
             /** Assignments */
             assignments: components["schemas"]["MyVolunteerAssignmentResponse"][];
+        };
+        /** RecurringServiceResponse */
+        RecurringServiceResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Weekday */
+            weekday: number;
+            /**
+             * Startsat
+             * Format: time
+             */
+            startsAt: string;
+            /** Durationminutes */
+            durationMinutes: number | null;
+        };
+        /** RedeemInvitationRequest */
+        RedeemInvitationRequest: {
+            /** Token */
+            token: string;
+        };
+        /** RedeemedInvitationResponse */
+        RedeemedInvitationResponse: {
+            /**
+             * Invitationid
+             * Format: uuid
+             */
+            invitationId: string;
+            /**
+             * Churchid
+             * Format: uuid
+             */
+            churchId: string;
+            /**
+             * Membershipid
+             * Format: uuid
+             */
+            membershipId: string;
         };
         /**
          * RoleTemplateData
@@ -989,6 +1334,11 @@ export interface components {
             /** Conflictconfirmedat */
             conflictConfirmedAt: string | null;
         };
+        /** SetPrimaryCampusRequest */
+        SetPrimaryCampusRequest: {
+            /** Primarycampusid */
+            primaryCampusId: string | null;
+        };
         /** TeamPermissionSnapshot */
         TeamPermissionSnapshot: {
             /** Permissions */
@@ -1019,6 +1369,26 @@ export interface components {
          */
         TeamRoleResponseData: {
             [key: string]: components["schemas"]["TeamRoleResponse"];
+        };
+        /** UpdateCampusRequest */
+        UpdateCampusRequest: {
+            /** Name */
+            name?: string | null;
+            campusType?: components["schemas"]["CampusType"] | null;
+            /** Addressline1 */
+            addressLine1?: string | null;
+            /** Addressline2 */
+            addressLine2?: string | null;
+            /** City */
+            city?: string | null;
+            /** Region */
+            region?: string | null;
+            /** Postalcode */
+            postalCode?: string | null;
+            /** Countrycode */
+            countryCode?: string | null;
+            /** Timezone */
+            timeZone?: string | null;
         };
         /** UpdateTeamRoleRequirementsRequest */
         UpdateTeamRoleRequirementsRequest: {
@@ -1208,6 +1578,266 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChurchMembership"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createChurch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateChurchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setPrimaryCampus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrimaryCampusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deleteCampus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: string;
+                campus_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateCampus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: string;
+                campus_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCampusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedInvitationResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revokeInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    redeemInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedeemInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedeemedInvitationResponse"];
                 };
             };
             /** @description Validation Error */
