@@ -97,8 +97,8 @@ export const porphyraCatalog = {
 				"Start with one location now. You can add more campus details as your church grows.",
 			"churchOnboarding.duration": "Duration in minutes (optional)",
 			"churchOnboarding.emptyDescription":
-				"Create your church workspace to begin organizing locations, services, and ministry work.",
-			"churchOnboarding.emptyTitle": "No church workspace yet",
+				"Create your church to begin organizing locations, services, and ministry work.",
+			"churchOnboarding.emptyTitle": "No church yet",
 			"churchOnboarding.friday": "Friday",
 			"churchOnboarding.monday": "Monday",
 			"churchOnboarding.multi.addCampus": "Add campus",
@@ -159,7 +159,7 @@ export const porphyraCatalog = {
 			"churchOnboarding.thursday": "Thursday",
 			"churchOnboarding.timeZone": "IANA time zone",
 			"churchOnboarding.timeZoneDetected": "Device time zone:",
-			"churchOnboarding.title": "Create your church workspace",
+			"churchOnboarding.title": "Create your church",
 			"churchOnboarding.tuesday": "Tuesday",
 			"churchOnboarding.wednesday": "Wednesday",
 			"churchOnboarding.weekday": "Weekday",
@@ -168,12 +168,12 @@ export const porphyraCatalog = {
 				"The congregations and facilities that make up this church.",
 			"churchWorkspace.campuses": "Campuses",
 			"churchWorkspace.campusTitle": "Your campuses",
-			"churchWorkspace.loading": "Preparing your church workspace…",
+			"churchWorkspace.loading": "Preparing your church…",
 			"churchWorkspace.locations": "Location",
 			"churchWorkspace.ministries": "Ministries",
 			"churchWorkspace.multiEyebrow": "Multi-campus church",
 			"churchWorkspace.multiWelcome":
-				"Welcome to your new church workspace. Start with the campuses you just created, then build out your ministries and teams.",
+				"Your church is ready. Start with the campuses you just created, then build out your ministries and teams.",
 			"churchWorkspace.nextCampus":
 				"Review each campus name, address, and time zone.",
 			"churchWorkspace.nextDescription":
@@ -184,18 +184,18 @@ export const porphyraCatalog = {
 				"Review your location, address, and time zone.",
 			"churchWorkspace.nextTeam":
 				"Create ministries and teams for the people who serve.",
-			"churchWorkspace.nextTitle": "Build your workspace",
+			"churchWorkspace.nextTitle": "Continue setting up your church",
 			"churchWorkspace.openPlanning": "Open planning",
 			"churchWorkspace.singleEyebrow": "Single-location church",
 			"churchWorkspace.singleLocationDescription":
 				"The home location for this church and its local schedule.",
 			"churchWorkspace.singleLocationTitle": "Your location",
 			"churchWorkspace.singleWelcome":
-				"Welcome to your new church workspace. Start with your location, then build out your ministries and teams.",
+				"Your church is ready. Start with your location, then build out your ministries and teams.",
 			"churchWorkspace.teams": "Teams",
 			"churchWorkspace.unavailableDescription":
-				"Return to your dashboard and choose a church you can access.",
-			"churchWorkspace.unavailableTitle": "Church workspace unavailable",
+				"Return to your churches and choose one you can access.",
+			"churchWorkspace.unavailableTitle": "Church unavailable",
 			"dashboard.apiUnavailable": "The API is not running yet. Start it with",
 			"dashboard.church": "Church",
 			"dashboard.churches": "{count} churches",

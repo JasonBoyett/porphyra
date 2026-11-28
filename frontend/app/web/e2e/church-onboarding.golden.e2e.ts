@@ -91,11 +91,11 @@ test("creates a single-location church", async ({ golden, page }) => {
 	const submittedInput = await mockChurchCreation(page)
 
 	await golden.open("/church", async () => {
-		await expect(page.getByText("No church workspace yet", { exact: true })).toBeVisible()
+		await expect(page.getByText("No church yet", { exact: true })).toBeVisible()
 	})
 
 	await page.getByRole("button", { name: "Create church" }).click()
-	await expect(page.getByText("Create your church workspace", { exact: true })).toBeVisible()
+	await expect(page.getByText("Create your church", { exact: true })).toBeVisible()
 	await golden.capture("church-onboarding-structure")
 
 	await page.getByLabel("Church name").fill("Grace Fellowship")
