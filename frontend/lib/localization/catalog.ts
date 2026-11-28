@@ -100,9 +100,6 @@ export const porphyraCatalog = {
 				"Create your church workspace to begin organizing locations, services, and ministry work.",
 			"churchOnboarding.emptyTitle": "No church workspace yet",
 			"churchOnboarding.friday": "Friday",
-			"churchOnboarding.managementDescription":
-				"Church management is ready for workspace",
-			"churchOnboarding.managementTitle": "Church created",
 			"churchOnboarding.monday": "Monday",
 			"churchOnboarding.multi.addCampus": "Add campus",
 			"churchOnboarding.multi.administrative": "Administrative",
@@ -167,6 +164,38 @@ export const porphyraCatalog = {
 			"churchOnboarding.wednesday": "Wednesday",
 			"churchOnboarding.weekday": "Weekday",
 			"churchOnboarding.weeklyService": "Weekly recurring service (optional)",
+			"churchWorkspace.campusDescription":
+				"The congregations and facilities that make up this church.",
+			"churchWorkspace.campuses": "Campuses",
+			"churchWorkspace.campusTitle": "Your campuses",
+			"churchWorkspace.loading": "Preparing your church workspace…",
+			"churchWorkspace.locations": "Location",
+			"churchWorkspace.ministries": "Ministries",
+			"churchWorkspace.multiEyebrow": "Multi-campus church",
+			"churchWorkspace.multiWelcome":
+				"Welcome to your new church workspace. Start with the campuses you just created, then build out your ministries and teams.",
+			"churchWorkspace.nextCampus":
+				"Review each campus name, address, and time zone.",
+			"churchWorkspace.nextDescription":
+				"Your church is ready. These are good places to continue.",
+			"churchWorkspace.nextEvent":
+				"Plan your first event or recurring worship service.",
+			"churchWorkspace.nextLocation":
+				"Review your location, address, and time zone.",
+			"churchWorkspace.nextTeam":
+				"Create ministries and teams for the people who serve.",
+			"churchWorkspace.nextTitle": "Build your workspace",
+			"churchWorkspace.openPlanning": "Open planning",
+			"churchWorkspace.singleEyebrow": "Single-location church",
+			"churchWorkspace.singleLocationDescription":
+				"The home location for this church and its local schedule.",
+			"churchWorkspace.singleLocationTitle": "Your location",
+			"churchWorkspace.singleWelcome":
+				"Welcome to your new church workspace. Start with your location, then build out your ministries and teams.",
+			"churchWorkspace.teams": "Teams",
+			"churchWorkspace.unavailableDescription":
+				"Return to your dashboard and choose a church you can access.",
+			"churchWorkspace.unavailableTitle": "Church workspace unavailable",
 			"dashboard.apiUnavailable": "The API is not running yet. Start it with",
 			"dashboard.church": "Church",
 			"dashboard.churches": "{count} churches",

@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2 } from "lucide-react"
 
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { ComputedText, Localized, LocalizationScope } from "@/localization"
+import { ChurchWorkspace } from "@/components/church-workspace"
 
 export const Route = createFileRoute("/_authenticated/church/$churchId/")({
 	component: ChurchManagementRoute,
@@ -10,25 +8,11 @@ export const Route = createFileRoute("/_authenticated/church/$churchId/")({
 
 function ChurchManagementRoute() {
 	const { churchId } = Route.useParams()
+	const { apiClient } = Route.useRouteContext()
+	const dashboard = apiClient.getDashboard.useQuery()
+	const church = dashboard.data?.churches.find((candidate) => candidate.id === churchId)
 
 	return (
-		<LocalizationScope name="church-management">
-			<main className="mx-auto max-w-4xl px-6 py-12">
-				<Empty className="min-h-80 border bg-card">
-					<EmptyHeader>
-						<EmptyMedia variant="icon">
-							<Building2 />
-						</EmptyMedia>
-						<EmptyTitle>
-							<Localized str="churchOnboarding.managementTitle" />
-						</EmptyTitle>
-						<EmptyDescription>
-							<Localized str="churchOnboarding.managementDescription" />{" "}
-							<ComputedText value={churchId} />
-						</EmptyDescription>
-					</EmptyHeader>
-				</Empty>
-			</main>
-		</LocalizationScope>
+		<ChurchWorkspace church={church} isError={dashboard.isError} isLoading={dashboard.isLoading} />
 	)
 }

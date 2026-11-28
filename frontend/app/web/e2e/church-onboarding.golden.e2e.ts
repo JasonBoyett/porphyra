@@ -5,6 +5,7 @@ import { expect, test } from "./golden-helper"
 
 type CreateChurchInput = ApiOperationInput<"createChurch">
 type ChurchResponse = ApiOperationResponse<"createChurch">
+type DashboardResponse = ApiOperationResponse<"getDashboard">
 
 const churchId = "019b2680-2a8d-7000-8000-000000000001"
 
@@ -12,6 +13,37 @@ test.use({ timezoneId: "America/Chicago" })
 
 const mockChurchCreation = async (page: Page) => {
 	let submittedInput: CreateChurchInput | undefined
+	let createdChurch: ChurchResponse | undefined
+
+	await page.route("**/api/v1/dashboard/", async (route) => {
+		const response: DashboardResponse = {
+			viewer: {
+				avatarUrl: "",
+				email: "dev@a244.tech",
+				id: "019b2680-2a8d-7000-9000-000000000001",
+				name: "Development User",
+			},
+			churches:
+				createdChurch === undefined
+					? []
+					: [
+							{
+								avatarUrl: "",
+								campuses: createdChurch.campuses.map((campus) => ({
+									id: campus.id,
+									location: campus.location,
+									name: campus.name,
+								})),
+								description: "",
+								id: createdChurch.id,
+								ministries: [],
+								name: createdChurch.name,
+							},
+						],
+		}
+
+		await route.fulfill({ json: response })
+	})
 
 	await page.route("**/api/v1/churches/", async (route) => {
 		submittedInput = route.request().postDataJSON() as CreateChurchInput
@@ -47,6 +79,7 @@ const mockChurchCreation = async (page: Page) => {
 				})),
 			})),
 		}
+		createdChurch = response
 
 		await route.fulfill({ json: response, status: 201 })
 	})
@@ -78,7 +111,8 @@ test("creates a single-location church", async ({ golden, page }) => {
 
 	await page.getByRole("button", { name: "Create church" }).click()
 	await expect(page).toHaveURL(`/church/${churchId}`)
-	await expect(page.getByText("Church created", { exact: true })).toBeVisible()
+	await expect(page.getByRole("heading", { name: "Grace Fellowship" })).toBeVisible()
+	await expect(page.getByText("Single-location church", { exact: true })).toBeVisible()
 	await golden.capture("church-onboarding-created")
 
 	expect(submittedInput()).toMatchObject({
@@ -121,7 +155,9 @@ test("creates a multi-campus church", async ({ golden, page }) => {
 	await createChurch.click()
 	await expect.poll(submittedInput).toBeDefined()
 	await expect(page).toHaveURL(`/church/${churchId}`)
-	await expect(page.getByText("Church created", { exact: true })).toBeVisible()
+	await expect(page.getByRole("heading", { name: "City Hope Church" })).toBeVisible()
+	await expect(page.getByText("Multi-campus church", { exact: true })).toBeVisible()
+	await golden.capture("church-onboarding-created")
 
 	expect(submittedInput()).toMatchObject({
 		name: "City Hope Church",
