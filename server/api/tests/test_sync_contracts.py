@@ -9,7 +9,7 @@ def test_openapi_exports_bound_sync_resource_contract() -> None:
             "kind": "resource",
             "tag": "volunteer-requests",
             "identity": ["id", "campusEventTeamId"],
-			"refreshOperationId": None,
+            "refreshOperationId": None,
             "mutateOperationId": None,
             "actions": [
                 {
@@ -61,6 +61,53 @@ def test_openapi_exports_bound_sync_resource_contract() -> None:
             "memberTag": "volunteer-assignments",
             "refreshOperationId": "getMyVolunteerAssignments",
         },
+        {
+            "kind": "resource",
+            "tag": "campus-event-teams",
+            "identity": ["id"],
+            "refreshOperationId": None,
+            "mutateOperationId": None,
+            "actions": [
+                {
+                    "name": "updateRoleRequirements",
+                    "operationId": "updateCampusEventTeamRoleRequirements",
+                    "parameterBindings": {"event_team_id": "id"},
+                },
+                {
+                    "name": "assignVolunteer",
+                    "operationId": "assignCampusEventVolunteer",
+                    "parameterBindings": {"event_team_id": "id"},
+                },
+                {
+                    "name": "createVolunteerReplacement",
+                    "operationId": "createVolunteerReplacement",
+                    "parameterBindings": {"event_team_id": "id"},
+                },
+                {
+                    "name": "changeVolunteerRole",
+                    "operationId": "changeCampusEventVolunteerRole",
+                    "parameterBindings": {"event_team_id": "id"},
+                },
+                {
+                    "name": "dropVolunteer",
+                    "operationId": "dropCampusEventVolunteer",
+                    "parameterBindings": {"event_team_id": "id"},
+                },
+            ],
+        },
+    ]
+
+
+def test_openapi_marks_nested_planning_team_resources() -> None:
+    schema = create_app().openapi()
+    operation = schema["paths"]["/api/v1/events/campus/{event_id}"]["get"]
+
+    assert operation["x-sync-resource-views"] == [
+        {
+            "tag": "campus-event-teams",
+            "path": "$.ministries[].teams[]",
+            "identity": ["id"],
+        }
     ]
 
 
@@ -81,9 +128,7 @@ def test_openapi_marks_roster_identity_locations() -> None:
 
 def test_openapi_marks_my_volunteer_assignment_collection_and_members() -> None:
     schema = create_app().openapi()
-    operation = schema["paths"]["/api/v1/events/campus/volunteer-assignments"][
-        "get"
-    ]
+    operation = schema["paths"]["/api/v1/events/campus/volunteer-assignments"]["get"]
 
     assert operation["x-sync-resource-views"] == [
         {

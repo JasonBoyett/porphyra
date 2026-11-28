@@ -236,17 +236,24 @@ export const TeamCard = (props: TeamCardProps) => {
 									))}
 									{props.team.volunteers.map((volunteer) => (
 										<RosterVolunteer
-											accessToken={props.accessToken}
 											avatarUrl={volunteer.avatarUrl}
 											email={volunteer.email}
-											eventTeamId={props.team.id}
 											key={volunteer.assignmentId}
 											name={volunteer.name}
+											onChangeRole={(roleName, roleEmoji) =>
+												props.team.changeVolunteerRole({
+													roleEmoji,
+													roleName,
+													volunteer_id: volunteer.assignmentId,
+												})
+											}
+											onDrop={() =>
+												props.team.dropVolunteer({ volunteer_id: volunteer.assignmentId })
+											}
 											roleEmoji={volunteer.roleEmoji}
 											roleName={volunteer.roleName}
 											roles={props.team.roles}
 											status="accepted"
-											volunteerId={volunteer.assignmentId}
 										/>
 									))}
 									{pendingRequests.map((request) => (

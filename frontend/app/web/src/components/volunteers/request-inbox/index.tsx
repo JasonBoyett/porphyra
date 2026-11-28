@@ -14,7 +14,7 @@ import {
 } from "@/localization"
 import type { RequestInboxProps } from "./types"
 
-export const RequestInbox = ({ accessToken, requests }: RequestInboxProps) => {
+export const RequestInbox = ({ requests }: RequestInboxProps) => {
 	const [respondedRequestIds, setRespondedRequestIds] = useState<string[]>([])
 	const requestResponseFailed = useSimpleLocalizedString("volunteers.requestResponseFailed")
 	const pendingRequests = requests.filter((request) => !respondedRequestIds.includes(request.id))

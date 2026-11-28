@@ -10,20 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated.app'
-import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated.app.index'
-import { Route as AuthenticatedAppKioskRouteImport } from './routes/_authenticated.app.kiosk'
-import { Route as AuthenticatedAppPlanningRouteImport } from './routes/_authenticated.app.planning'
-import { Route as AuthenticatedAppVolunteersRouteImport } from './routes/_authenticated.app.volunteers'
+import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
+import { Route as AuthenticatedAppKioskRouteImport } from './routes/_authenticated/app/kiosk'
+import { Route as AuthenticatedAppPlanningRouteRouteImport } from './routes/_authenticated/app/planning/route'
+import { Route as AuthenticatedAppVolunteersRouteImport } from './routes/_authenticated/app/volunteers'
+import { Route as AuthenticatedChurchIndexRouteImport } from './routes/_authenticated/church/index'
+import { Route as AuthenticatedAppPlanningIndexRouteImport } from './routes/_authenticated/app/planning/index'
+import { Route as AuthenticatedChurchChurchIdIndexRouteImport } from './routes/_authenticated/church/$churchId/index'
+import { Route as AuthenticatedAppPlanningChurchesChurchIdRouteRouteImport } from './routes/_authenticated/app/planning/churches/$churchId/route'
+import { Route as AuthenticatedAppPlanningChurchesChurchIdIndexRouteImport } from './routes/_authenticated/app/planning/churches/$churchId/index'
+import { Route as AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRouteImport } from './routes/_authenticated/app/planning/churches/$churchId/events/$eventId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -32,61 +38,113 @@ const SignInRoute = SignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   id: '/app',
   path: '/app',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedAppRoute,
+  getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
 const AuthenticatedAppKioskRoute = AuthenticatedAppKioskRouteImport.update({
   id: '/kiosk',
   path: '/kiosk',
-  getParentRoute: () => AuthenticatedAppRoute,
+  getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
-const AuthenticatedAppPlanningRoute =
-  AuthenticatedAppPlanningRouteImport.update({
+const AuthenticatedAppPlanningRouteRoute =
+  AuthenticatedAppPlanningRouteRouteImport.update({
     id: '/planning',
     path: '/planning',
-    getParentRoute: () => AuthenticatedAppRoute,
+    getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppVolunteersRoute =
   AuthenticatedAppVolunteersRouteImport.update({
     id: '/volunteers',
     path: '/volunteers',
-    getParentRoute: () => AuthenticatedAppRoute,
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedChurchIndexRoute =
+  AuthenticatedChurchIndexRouteImport.update({
+    id: '/church/',
+    path: '/church/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppPlanningIndexRoute =
+  AuthenticatedAppPlanningIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppPlanningRouteRoute,
+  } as any)
+const AuthenticatedChurchChurchIdIndexRoute =
+  AuthenticatedChurchChurchIdIndexRouteImport.update({
+    id: '/church/$churchId/',
+    path: '/church/$churchId/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppPlanningChurchesChurchIdRouteRoute =
+  AuthenticatedAppPlanningChurchesChurchIdRouteRouteImport.update({
+    id: '/churches/$churchId',
+    path: '/churches/$churchId',
+    getParentRoute: () => AuthenticatedAppPlanningRouteRoute,
+  } as any)
+const AuthenticatedAppPlanningChurchesChurchIdIndexRoute =
+  AuthenticatedAppPlanningChurchesChurchIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppPlanningChurchesChurchIdRouteRoute,
+  } as any)
+const AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute =
+  AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRouteImport.update({
+    id: '/events/$eventId',
+    path: '/events/$eventId',
+    getParentRoute: () => AuthenticatedAppPlanningChurchesChurchIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
-  '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/app/planning': typeof AuthenticatedAppPlanningRouteRouteWithChildren
   '/app/kiosk': typeof AuthenticatedAppKioskRoute
-  '/app/planning': typeof AuthenticatedAppPlanningRoute
   '/app/volunteers': typeof AuthenticatedAppVolunteersRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/church/': typeof AuthenticatedChurchIndexRoute
+  '/app/planning/': typeof AuthenticatedAppPlanningIndexRoute
+  '/church/$churchId/': typeof AuthenticatedChurchChurchIdIndexRoute
+  '/app/planning/churches/$churchId': typeof AuthenticatedAppPlanningChurchesChurchIdRouteRouteWithChildren
+  '/app/planning/churches/$churchId/': typeof AuthenticatedAppPlanningChurchesChurchIdIndexRoute
+  '/app/planning/churches/$churchId/events/$eventId': typeof AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/app/kiosk': typeof AuthenticatedAppKioskRoute
-  '/app/planning': typeof AuthenticatedAppPlanningRoute
   '/app/volunteers': typeof AuthenticatedAppVolunteersRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/church': typeof AuthenticatedChurchIndexRoute
+  '/app/planning': typeof AuthenticatedAppPlanningIndexRoute
+  '/church/$churchId': typeof AuthenticatedChurchChurchIdIndexRoute
+  '/app/planning/churches/$churchId': typeof AuthenticatedAppPlanningChurchesChurchIdIndexRoute
+  '/app/planning/churches/$churchId/events/$eventId': typeof AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/app/planning': typeof AuthenticatedAppPlanningRouteRouteWithChildren
   '/_authenticated/app/kiosk': typeof AuthenticatedAppKioskRoute
-  '/_authenticated/app/planning': typeof AuthenticatedAppPlanningRoute
   '/_authenticated/app/volunteers': typeof AuthenticatedAppVolunteersRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/church/': typeof AuthenticatedChurchIndexRoute
+  '/_authenticated/app/planning/': typeof AuthenticatedAppPlanningIndexRoute
+  '/_authenticated/church/$churchId/': typeof AuthenticatedChurchChurchIdIndexRoute
+  '/_authenticated/app/planning/churches/$churchId': typeof AuthenticatedAppPlanningChurchesChurchIdRouteRouteWithChildren
+  '/_authenticated/app/planning/churches/$churchId/': typeof AuthenticatedAppPlanningChurchesChurchIdIndexRoute
+  '/_authenticated/app/planning/churches/$churchId/events/$eventId': typeof AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,33 +152,49 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/app'
-    | '/app/kiosk'
     | '/app/planning'
+    | '/app/kiosk'
     | '/app/volunteers'
     | '/app/'
+    | '/church/'
+    | '/app/planning/'
+    | '/church/$churchId/'
+    | '/app/planning/churches/$churchId'
+    | '/app/planning/churches/$churchId/'
+    | '/app/planning/churches/$churchId/events/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/sign-in'
     | '/app/kiosk'
-    | '/app/planning'
     | '/app/volunteers'
     | '/app'
+    | '/church'
+    | '/app/planning'
+    | '/church/$churchId'
+    | '/app/planning/churches/$churchId'
+    | '/app/planning/churches/$churchId/events/$eventId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/sign-in'
     | '/_authenticated/app'
-    | '/_authenticated/app/kiosk'
     | '/_authenticated/app/planning'
+    | '/_authenticated/app/kiosk'
     | '/_authenticated/app/volunteers'
     | '/_authenticated/app/'
+    | '/_authenticated/church/'
+    | '/_authenticated/app/planning/'
+    | '/_authenticated/church/$churchId/'
+    | '/_authenticated/app/planning/churches/$churchId'
+    | '/_authenticated/app/planning/churches/$churchId/'
+    | '/_authenticated/app/planning/churches/$churchId/events/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
 }
 
@@ -137,7 +211,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -151,72 +225,155 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
-      preLoaderRoute: typeof AuthenticatedAppRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/app/kiosk': {
       id: '/_authenticated/app/kiosk'
       path: '/kiosk'
       fullPath: '/app/kiosk'
       preLoaderRoute: typeof AuthenticatedAppKioskRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/app/planning': {
       id: '/_authenticated/app/planning'
       path: '/planning'
       fullPath: '/app/planning'
-      preLoaderRoute: typeof AuthenticatedAppPlanningRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      preLoaderRoute: typeof AuthenticatedAppPlanningRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/app/volunteers': {
       id: '/_authenticated/app/volunteers'
       path: '/volunteers'
       fullPath: '/app/volunteers'
       preLoaderRoute: typeof AuthenticatedAppVolunteersRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/church/': {
+      id: '/_authenticated/church/'
+      path: '/church'
+      fullPath: '/church/'
+      preLoaderRoute: typeof AuthenticatedChurchIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/planning/': {
+      id: '/_authenticated/app/planning/'
+      path: '/'
+      fullPath: '/app/planning/'
+      preLoaderRoute: typeof AuthenticatedAppPlanningIndexRouteImport
+      parentRoute: typeof AuthenticatedAppPlanningRouteRoute
+    }
+    '/_authenticated/church/$churchId/': {
+      id: '/_authenticated/church/$churchId/'
+      path: '/church/$churchId'
+      fullPath: '/church/$churchId/'
+      preLoaderRoute: typeof AuthenticatedChurchChurchIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/planning/churches/$churchId': {
+      id: '/_authenticated/app/planning/churches/$churchId'
+      path: '/churches/$churchId'
+      fullPath: '/app/planning/churches/$churchId'
+      preLoaderRoute: typeof AuthenticatedAppPlanningChurchesChurchIdRouteRouteImport
+      parentRoute: typeof AuthenticatedAppPlanningRouteRoute
+    }
+    '/_authenticated/app/planning/churches/$churchId/': {
+      id: '/_authenticated/app/planning/churches/$churchId/'
+      path: '/'
+      fullPath: '/app/planning/churches/$churchId/'
+      preLoaderRoute: typeof AuthenticatedAppPlanningChurchesChurchIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAppPlanningChurchesChurchIdRouteRoute
+    }
+    '/_authenticated/app/planning/churches/$churchId/events/$eventId': {
+      id: '/_authenticated/app/planning/churches/$churchId/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/app/planning/churches/$churchId/events/$eventId'
+      preLoaderRoute: typeof AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRouteImport
+      parentRoute: typeof AuthenticatedAppPlanningChurchesChurchIdRouteRoute
     }
   }
 }
 
-interface AuthenticatedAppRouteChildren {
+interface AuthenticatedAppPlanningChurchesChurchIdRouteRouteChildren {
+  AuthenticatedAppPlanningChurchesChurchIdIndexRoute: typeof AuthenticatedAppPlanningChurchesChurchIdIndexRoute
+  AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute: typeof AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute
+}
+
+const AuthenticatedAppPlanningChurchesChurchIdRouteRouteChildren: AuthenticatedAppPlanningChurchesChurchIdRouteRouteChildren =
+  {
+    AuthenticatedAppPlanningChurchesChurchIdIndexRoute:
+      AuthenticatedAppPlanningChurchesChurchIdIndexRoute,
+    AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute:
+      AuthenticatedAppPlanningChurchesChurchIdEventsEventIdRoute,
+  }
+
+const AuthenticatedAppPlanningChurchesChurchIdRouteRouteWithChildren =
+  AuthenticatedAppPlanningChurchesChurchIdRouteRoute._addFileChildren(
+    AuthenticatedAppPlanningChurchesChurchIdRouteRouteChildren,
+  )
+
+interface AuthenticatedAppPlanningRouteRouteChildren {
+  AuthenticatedAppPlanningIndexRoute: typeof AuthenticatedAppPlanningIndexRoute
+  AuthenticatedAppPlanningChurchesChurchIdRouteRoute: typeof AuthenticatedAppPlanningChurchesChurchIdRouteRouteWithChildren
+}
+
+const AuthenticatedAppPlanningRouteRouteChildren: AuthenticatedAppPlanningRouteRouteChildren =
+  {
+    AuthenticatedAppPlanningIndexRoute: AuthenticatedAppPlanningIndexRoute,
+    AuthenticatedAppPlanningChurchesChurchIdRouteRoute:
+      AuthenticatedAppPlanningChurchesChurchIdRouteRouteWithChildren,
+  }
+
+const AuthenticatedAppPlanningRouteRouteWithChildren =
+  AuthenticatedAppPlanningRouteRoute._addFileChildren(
+    AuthenticatedAppPlanningRouteRouteChildren,
+  )
+
+interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppPlanningRouteRoute: typeof AuthenticatedAppPlanningRouteRouteWithChildren
   AuthenticatedAppKioskRoute: typeof AuthenticatedAppKioskRoute
-  AuthenticatedAppPlanningRoute: typeof AuthenticatedAppPlanningRoute
   AuthenticatedAppVolunteersRoute: typeof AuthenticatedAppVolunteersRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
-const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppPlanningRouteRoute:
+    AuthenticatedAppPlanningRouteRouteWithChildren,
   AuthenticatedAppKioskRoute: AuthenticatedAppKioskRoute,
-  AuthenticatedAppPlanningRoute: AuthenticatedAppPlanningRoute,
   AuthenticatedAppVolunteersRoute: AuthenticatedAppVolunteersRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
-const AuthenticatedAppRouteWithChildren =
-  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+const AuthenticatedAppRouteRouteWithChildren =
+  AuthenticatedAppRouteRoute._addFileChildren(
+    AuthenticatedAppRouteRouteChildren,
+  )
 
-interface AuthenticatedRouteChildren {
-  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
+  AuthenticatedChurchIndexRoute: typeof AuthenticatedChurchIndexRoute
+  AuthenticatedChurchChurchIdIndexRoute: typeof AuthenticatedChurchChurchIdIndexRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
+  AuthenticatedChurchIndexRoute: AuthenticatedChurchIndexRoute,
+  AuthenticatedChurchChurchIdIndexRoute: AuthenticatedChurchChurchIdIndexRoute,
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport

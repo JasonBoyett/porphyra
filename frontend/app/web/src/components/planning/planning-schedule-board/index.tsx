@@ -151,7 +151,6 @@ export const PlanningScheduleBoard = (props: PlanningScheduleBoardProps) => (
 						<div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
 							{group.teams.map(({ team }) => (
 								<TeamCard
-									accessToken={props.accessToken}
 									event={props.event}
 									key={team.id}
 									onSchedule={(roleName, replacementRequestId) =>

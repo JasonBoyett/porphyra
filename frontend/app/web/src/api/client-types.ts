@@ -83,22 +83,6 @@ type ApiQueryMembers<TOperationId extends ApiClientOperationId> =
 				) => UseQueryResult<TSelected, Error>
 			}
 
-type ApiSyncQueryMember<TOperationId extends ApiClientOperationId> =
-	(typeof apiOperations)[TOperationId]["syncTags"] extends readonly []
-		? {}
-		: HasInput<TOperationId> extends true
-			? {
-					useSyncQuery: <TSelected = ApiOperationResponse<TOperationId>>(
-						input: ApiOperationInput<TOperationId>,
-						options?: ApiQueryOptions<TOperationId, TSelected>,
-					) => UseQueryResult<TSelected, Error>
-				}
-			: {
-					useSyncQuery: <TSelected = ApiOperationResponse<TOperationId>>(
-						options?: ApiQueryOptions<TOperationId, TSelected>,
-					) => UseQueryResult<TSelected, Error>
-				}
-
 type ApiMutationMembers<TOperationId extends ApiClientOperationId> = {
 	mutationKey: readonly [ApiOperationKey<TOperationId>]
 	mutationOptions: (
@@ -135,8 +119,6 @@ export type ApiClient = {
 	[
 		TOperationId in ApiClientOperationId
 	]: (typeof apiOperations)[TOperationId]["method"] extends "get"
-		? ApiRequestMethod<TOperationId> &
-				ApiQueryMembers<TOperationId> &
-				ApiSyncQueryMember<TOperationId>
+		? ApiRequestMethod<TOperationId> & ApiQueryMembers<TOperationId>
 		: ApiRequestMethod<TOperationId> & ApiMutationMembers<TOperationId>
 }

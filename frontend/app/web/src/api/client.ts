@@ -3,6 +3,7 @@ import type { AxiosRequestConfig } from "axios"
 import { apiOperations } from "@porphyra/frontend/api/operations"
 import type {
 	CampusEventPlanningResponse,
+	CampusEventTeamScheduleResponse,
 	DashboardResponse,
 	MyVolunteerAssignmentResponse,
 	ScheduledVolunteerResponse,
@@ -27,6 +28,14 @@ export type VolunteerAssignment = VolunteerAssignmentResponse
 export type VolunteerAssignmentWithActions = MyVolunteerAssignmentResponse &
 	ApiSyncResourceActionMethods<"volunteer-assignments">
 export type CampusEventPlanning = CampusEventPlanningResponse
+export type CampusEventPlanningTeam = CampusEventTeamScheduleResponse &
+	ApiSyncResourceActionMethods<"campus-event-teams">
+type CampusEventPlanningMinistry = CampusEventPlanningResponse["ministries"][number]
+export type CampusEventPlanningWithActions = Omit<CampusEventPlanningResponse, "ministries"> & {
+	ministries: Array<
+		Omit<CampusEventPlanningMinistry, "teams"> & { teams: CampusEventPlanningTeam[] }
+	>
+}
 
 const http = axios.create({
 	baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8000",

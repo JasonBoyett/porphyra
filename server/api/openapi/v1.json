@@ -76,6 +76,397 @@
         }
       }
     },
+    "/api/v1/churches/": {
+      "post": {
+        "summary": "Create Church",
+        "operationId": "createChurch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChurchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/churches/{church_id}/primary-campus": {
+      "patch": {
+        "summary": "Set Primary Campus",
+        "operationId": "setPrimaryCampus",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Church Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryCampusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/churches/{church_id}/campuses/{campus_id}": {
+      "patch": {
+        "summary": "Update Campus",
+        "operationId": "updateCampus",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Church Id"
+            }
+          },
+          {
+            "name": "campus_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campus Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCampusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      },
+      "delete": {
+        "summary": "Delete Campus",
+        "operationId": "deleteCampus",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Church Id"
+            }
+          },
+          {
+            "name": "campus_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campus Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/invitations/": {
+      "post": {
+        "summary": "Create Invitation",
+        "operationId": "createInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedInvitationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/invitations/{invitation_id}": {
+      "get": {
+        "summary": "Get Invitation",
+        "operationId": "getInvitation",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invitation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Invitation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Revoke Invitation",
+        "operationId": "revokeInvitation",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invitation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Invitation Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invitations/redeem": {
+      "post": {
+        "summary": "Redeem Invitation",
+        "operationId": "redeemInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedeemInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedeemedInvitationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "x-sync-tags": [
+          "dashboard"
+        ]
+      }
+    },
     "/api/v1/dashboard/": {
       "get": {
         "summary": "Get Dashboard",
@@ -414,6 +805,15 @@
         "x-sync-tags": [
           "campus-events",
           "campus-event-planning"
+        ],
+        "x-sync-resource-views": [
+          {
+            "tag": "campus-event-teams",
+            "path": "$.ministries[].teams[]",
+            "identity": [
+              "id"
+            ]
+          }
         ]
       }
     },
@@ -633,7 +1033,8 @@
         },
         "x-sync-tags": [
           "campus-events",
-          "campus-event-planning"
+          "campus-event-planning",
+          "campus-event-teams"
         ]
       }
     },
@@ -690,7 +1091,10 @@
               }
             }
           }
-        }
+        },
+        "x-sync-tags": [
+          "campus-event-teams"
+        ]
       }
     },
     "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/replacement": {
@@ -755,7 +1159,10 @@
               }
             }
           }
-        }
+        },
+        "x-sync-tags": [
+          "campus-event-teams"
+        ]
       }
     },
     "/api/v1/events/campus/{event_team_id}/volunteer-requests/{request_id}/accept": {
@@ -939,7 +1346,8 @@
         },
         "x-sync-tags": [
           "campus-events",
-          "campus-event-planning"
+          "campus-event-planning",
+          "campus-event-teams"
         ]
       }
     },
@@ -999,7 +1407,8 @@
         },
         "x-sync-tags": [
           "campus-events",
-          "campus-event-planning"
+          "campus-event-planning",
+          "campus-event-teams"
         ]
       }
     },
@@ -1144,6 +1553,51 @@
         ]
       }
     },
+    "/api/v1/permissions/{church_id}": {
+      "get": {
+        "summary": "Get Church Permissions",
+        "operationId": "getChurchPermissions",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "church_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Church Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurchPermissionSnapshot"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -1242,6 +1696,85 @@
           "teamMembershipId"
         ],
         "title": "AssignVolunteerRequest"
+      },
+      "CampusAddressRequest": {
+        "properties": {
+          "addressLine1": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addressline1"
+          },
+          "addressLine2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addressline2"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "postalCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postalcode"
+          },
+          "countryCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Countrycode"
+          }
+        },
+        "type": "object",
+        "title": "CampusAddressRequest"
       },
       "CampusEventListItem": {
         "properties": {
@@ -1612,7 +2145,14 @@
       "CampusLocationResponse": {
         "properties": {
           "addressLine1": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Addressline1"
           },
           "addressLine2": {
@@ -1627,21 +2167,49 @@
             "title": "Addressline2"
           },
           "city": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "City"
           },
           "region": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Region"
           },
           "postalCode": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Postalcode"
           },
           "countryCode": {
-            "type": "string",
-            "maxLength": 2,
-            "minLength": 2,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Countrycode"
           },
           "timeZone": {
@@ -1661,6 +2229,78 @@
         ],
         "title": "CampusLocationResponse",
         "description": "A campus's physical address and authoritative local scheduling timezone."
+      },
+      "CampusPermissionSnapshot": {
+        "properties": {
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "teams": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TeamPermissionSnapshot"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "permissions",
+          "teams"
+        ],
+        "title": "CampusPermissionSnapshot"
+      },
+      "CampusResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "campusType": {
+            "$ref": "#/components/schemas/CampusType"
+          },
+          "location": {
+            "$ref": "#/components/schemas/CampusLocationResponse"
+          },
+          "recurringServices": {
+            "items": {
+              "$ref": "#/components/schemas/RecurringServiceResponse"
+            },
+            "type": "array",
+            "title": "Recurringservices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "campusType",
+          "location",
+          "recurringServices"
+        ],
+        "title": "CampusResponse"
+      },
+      "CampusType": {
+        "type": "string",
+        "enum": [
+          "physical",
+          "online",
+          "administrative",
+          "ministry_center"
+        ],
+        "title": "CampusType"
       },
       "ChurchMembership": {
         "properties": {
@@ -1691,6 +2331,79 @@
           "church_id"
         ],
         "title": "ChurchMembership"
+      },
+      "ChurchPermissionSnapshot": {
+        "properties": {
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "campuses": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CampusPermissionSnapshot"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Campuses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "churchId",
+          "permissions",
+          "campuses"
+        ],
+        "title": "ChurchPermissionSnapshot"
+      },
+      "ChurchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "primaryCampusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primarycampusid"
+          },
+          "campuses": {
+            "items": {
+              "$ref": "#/components/schemas/CampusResponse"
+            },
+            "type": "array",
+            "title": "Campuses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "primaryCampusId",
+          "campuses"
+        ],
+        "title": "ChurchResponse"
       },
       "ConfirmScheduleRequest": {
         "properties": {
@@ -1754,6 +2467,47 @@
         ],
         "title": "CreateCampusEventRequest"
       },
+      "CreateCampusRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "campusType": {
+            "$ref": "#/components/schemas/CampusType",
+            "default": "physical"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CampusAddressRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "America/Chicago"
+          },
+          "recurringServices": {
+            "items": {
+              "$ref": "#/components/schemas/CreateRecurringServiceRequest"
+            },
+            "type": "array",
+            "title": "Recurringservices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateCampusRequest"
+      },
       "CreateChurchEventRequest": {
         "properties": {
           "churchId": {
@@ -1795,6 +2549,252 @@
           "startsAt"
         ],
         "title": "CreateChurchEventRequest"
+      },
+      "CreateChurchRequest": {
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idempotencykey"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "campuses": {
+            "items": {
+              "$ref": "#/components/schemas/CreateCampusRequest"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Campuses"
+          },
+          "primaryCampusIndex": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primarycampusindex",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "idempotencyKey",
+          "name",
+          "campuses"
+        ],
+        "title": "CreateChurchRequest"
+      },
+      "CreateInvitationRequest": {
+        "properties": {
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "campusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campusid"
+          },
+          "teamIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamids"
+          },
+          "roleIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Roleids"
+          },
+          "expiresIn": {
+            "type": "string",
+            "format": "duration",
+            "title": "Expiresin",
+            "default": "P7D"
+          }
+        },
+        "type": "object",
+        "required": [
+          "churchId"
+        ],
+        "title": "CreateInvitationRequest"
+      },
+      "CreateRecurringServiceRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday",
+            "description": "Monday is 0 and Sunday is 6."
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "time",
+            "title": "Startsat"
+          },
+          "durationMinutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationminutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weekday",
+          "startsAt"
+        ],
+        "title": "CreateRecurringServiceRequest"
+      },
+      "CreatedInvitationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "campusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campusid"
+          },
+          "creatorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Creatoruserid"
+          },
+          "teamIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamids"
+          },
+          "roleIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Roleids"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "revokedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revokedat"
+          },
+          "redeemedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redeemedat"
+          },
+          "claimedByUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimedbyuserid"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "campusId",
+          "creatorUserId",
+          "teamIds",
+          "roleIds",
+          "createdAt",
+          "expiresAt",
+          "revokedAt",
+          "redeemedAt",
+          "claimedByUserId",
+          "token"
+        ],
+        "title": "CreatedInvitationResponse"
       },
       "DashboardCampusResponse": {
         "properties": {
@@ -2040,6 +3040,114 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "InvitationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "campusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campusid"
+          },
+          "creatorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Creatoruserid"
+          },
+          "teamIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Teamids"
+          },
+          "roleIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Roleids"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "revokedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revokedat"
+          },
+          "redeemedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redeemedat"
+          },
+          "claimedByUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimedbyuserid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "churchId",
+          "campusId",
+          "creatorUserId",
+          "teamIds",
+          "roleIds",
+          "createdAt",
+          "expiresAt",
+          "revokedAt",
+          "redeemedAt",
+          "claimedByUserId"
+        ],
+        "title": "InvitationResponse"
+      },
       "MyVolunteerAssignmentResponse": {
         "properties": {
           "id": {
@@ -2180,6 +3288,89 @@
           "assignments"
         ],
         "title": "MyVolunteerAssignmentsResponse"
+      },
+      "RecurringServiceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weekday": {
+            "type": "integer",
+            "title": "Weekday"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "time",
+            "title": "Startsat"
+          },
+          "durationMinutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationminutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "weekday",
+          "startsAt",
+          "durationMinutes"
+        ],
+        "title": "RecurringServiceResponse"
+      },
+      "RedeemInvitationRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 32,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "RedeemInvitationRequest"
+      },
+      "RedeemedInvitationResponse": {
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Invitationid"
+          },
+          "churchId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Churchid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Membershipid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "invitationId",
+          "churchId",
+          "membershipId"
+        ],
+        "title": "RedeemedInvitationResponse"
       },
       "RoleTemplateData": {
         "additionalProperties": {
@@ -2397,6 +3588,43 @@
         ],
         "title": "ScheduledVolunteerResponse"
       },
+      "SetPrimaryCampusRequest": {
+        "properties": {
+          "primaryCampusId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primarycampusid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "primaryCampusId"
+        ],
+        "title": "SetPrimaryCampusRequest"
+      },
+      "TeamPermissionSnapshot": {
+        "properties": {
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "permissions"
+        ],
+        "title": "TeamPermissionSnapshot"
+      },
       "TeamRoleResponse": {
         "properties": {
           "emoji": {
@@ -2448,6 +3676,119 @@
         "type": "object",
         "title": "TeamRoleResponseData",
         "description": "Expose database role snapshots through the API's camel-case response model."
+      },
+      "UpdateCampusRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "campusType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CampusType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "addressLine1": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addressline1"
+          },
+          "addressLine2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addressline2"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "postalCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postalcode"
+          },
+          "countryCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Countrycode"
+          },
+          "timeZone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          }
+        },
+        "type": "object",
+        "title": "UpdateCampusRequest"
       },
       "UpdateTeamRoleRequirementsRequest": {
         "properties": {
@@ -2909,6 +4250,52 @@
       ],
       "memberTag": "volunteer-assignments",
       "refreshOperationId": "getMyVolunteerAssignments"
+    },
+    {
+      "kind": "resource",
+      "tag": "campus-event-teams",
+      "identity": [
+        "id"
+      ],
+      "refreshOperationId": null,
+      "mutateOperationId": null,
+      "actions": [
+        {
+          "name": "updateRoleRequirements",
+          "operationId": "updateCampusEventTeamRoleRequirements",
+          "parameterBindings": {
+            "event_team_id": "id"
+          }
+        },
+        {
+          "name": "assignVolunteer",
+          "operationId": "assignCampusEventVolunteer",
+          "parameterBindings": {
+            "event_team_id": "id"
+          }
+        },
+        {
+          "name": "createVolunteerReplacement",
+          "operationId": "createVolunteerReplacement",
+          "parameterBindings": {
+            "event_team_id": "id"
+          }
+        },
+        {
+          "name": "changeVolunteerRole",
+          "operationId": "changeCampusEventVolunteerRole",
+          "parameterBindings": {
+            "event_team_id": "id"
+          }
+        },
+        {
+          "name": "dropVolunteer",
+          "operationId": "dropCampusEventVolunteer",
+          "parameterBindings": {
+            "event_team_id": "id"
+          }
+        }
+      ]
     }
   ]
 }

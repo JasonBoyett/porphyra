@@ -7,9 +7,9 @@ export const Route = createFileRoute("/_authenticated/app")({
 })
 
 function AppLayout() {
-	const { accessToken, apiClient, auth, queryClient } = Route.useRouteContext()
+	const { apiClient, auth, queryClient } = Route.useRouteContext()
 	const navigate = useNavigate()
-	const dashboard = apiClient.getDashboard.useSyncQuery()
+	const dashboard = apiClient.getDashboard.useQuery()
 
 	const handleSignOut = () => {
 		auth.signOut()

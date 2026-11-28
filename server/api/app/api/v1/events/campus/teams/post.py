@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.v1.dependencies.church_membership import get_church_membership_or_404
 from app.api.v1.dependencies.database import DatabaseSession
+from app.api.v1.events.campus.sync import update_team_role_requirements_action
 from app.api.v1.events.schemas import (
     ScheduledTeamResponse,
     ScheduleTeamRequest,
@@ -18,6 +19,7 @@ from app.db.models import (
     VolunteerRequest,
     VolunteerRequestStatus,
 )
+from app.permissions import require_action
 from app.scheduling.roles import RoleAssignment, build_team_role_data
 from app.sync.audience import church_member_user_ids
 from app.sync.contracts import SyncTarget
@@ -42,7 +44,17 @@ def schedule_team(
     event_ministry = db.get(CampusEventMinistry, event_ministry_id)
     if event_ministry is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    get_church_membership_or_404(event_ministry.event.church_id, user=user, db=db)
+    membership = get_church_membership_or_404(
+        event_ministry.event.church_id, user=user, db=db
+    )
+    require_action(
+        membership,
+        db,
+        action="schedule.manage",
+        church_id=event_ministry.event.church_id,
+        campus_id=event_ministry.event.campus_id,
+        team_id=payload.team_id,
+    )
     team = db.get(Team, payload.team_id)
     if team is None or team.ministry_id != event_ministry.ministry_id:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)
@@ -82,6 +94,7 @@ def schedule_team(
     operation_id="updateCampusEventTeamRoleRequirements",
     openapi_extra=sync_tags("campus-events", "campus-event-planning"),
 )
+@update_team_role_requirements_action.bind
 def update_team_role_requirements(
     event_team_id: UUID,
     payload: UpdateTeamRoleRequirementsRequest,
@@ -91,8 +104,16 @@ def update_team_role_requirements(
     event_team = db.get(CampusEventTeam, event_team_id)
     if event_team is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    get_church_membership_or_404(
+    membership = get_church_membership_or_404(
         event_team.event_ministry.event.church_id, user=user, db=db
+    )
+    require_action(
+        membership,
+        db,
+        action="schedule.manage",
+        church_id=event_team.event_ministry.event.church_id,
+        campus_id=event_team.event_ministry.event.campus_id,
+        team_id=event_team.team_id,
     )
 
     call_time = (
@@ -151,9 +172,7 @@ def update_team_role_requirements(
             for assignment in retained_assignments
         ],
     )
-    if any(
-        len(role.scheduled_users) > role.count for role in role_data.root.values()
-    ):
+    if any(len(role.scheduled_users) > role.count for role in role_data.root.values()):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(

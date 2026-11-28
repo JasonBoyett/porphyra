@@ -21,7 +21,6 @@ export const markSyncCallReconciled = (callKey: string, queryContext: string) =>
 
 export const consumeSyncCallKey = (callKey: string) => {
 	const pending = pendingCallKeys.get(callKey)
-	if (pending?.locallyReconciled !== true) return false
 	pendingCallKeys.delete(callKey)
-	return true
+	return pending?.locallyReconciled === true
 }

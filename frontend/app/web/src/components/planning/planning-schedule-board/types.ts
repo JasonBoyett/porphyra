@@ -1,8 +1,8 @@
-import type { CampusEventPlanning } from "../../../api/client"
+import type { CampusEventPlanning, CampusEventPlanningTeam } from "../../../api/client"
 
 export type ScheduleFilter = "all" | "attention" | "confirmed" | "my-teams"
 
-export type PlanningTeam = CampusEventPlanning["ministries"][number]["teams"][number]
+export type PlanningTeam = CampusEventPlanningTeam
 
 export type TeamGroup = {
 	name: string
@@ -13,7 +13,6 @@ export type TeamGroup = {
 }
 
 export type PlanningScheduleBoardProps = {
-	accessToken: string
 	event: CampusEventPlanning
 	events: readonly { id: string; title: string }[]
 	filter: ScheduleFilter

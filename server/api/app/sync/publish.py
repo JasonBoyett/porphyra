@@ -60,6 +60,26 @@ def publish(
     return data
 
 
+def publish_authorization_change(
+    *,
+    recipients: Iterable[UUID],
+    church_id: UUID,
+    campus_id: UUID | None = None,
+    session: Session | None = None,
+) -> None:
+    """Queue a recipient-specific effective-permissions refresh after commit."""
+    notification = SyncNotification(
+        recipients=tuple(sorted(set(recipients), key=str)),
+        tags=(),
+        authorization_church_id=church_id,
+        authorization_campus_id=campus_id,
+    )
+    if session is None:
+        socket_registry.notify(notification)
+        return
+    session.info.setdefault(_PENDING_NOTIFICATIONS_KEY, []).append(notification)
+
+
 def dispatch_session_notifications(session: Session) -> None:
     pending = session.info.pop(_PENDING_NOTIFICATIONS_KEY, [])
     unique_notifications = {
@@ -72,6 +92,8 @@ def dispatch_session_notifications(session: Session) -> None:
                 separators=(",", ":"),
             ),
             notification.call_key,
+            notification.authorization_church_id,
+            notification.authorization_campus_id,
         ): notification
         for notification in pending
     }

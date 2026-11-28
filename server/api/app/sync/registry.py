@@ -21,6 +21,8 @@ class SyncNotification:
     tags: tuple[SyncTag, ...]
     targets: tuple[SyncTarget, ...] = ()
     call_key: UUID | None = None
+    authorization_church_id: UUID | None = None
+    authorization_campus_id: UUID | None = None
 
 
 @dataclass(frozen=True)
@@ -57,7 +59,14 @@ class SocketRegistry:
 
     def notify(self, notification: SyncNotification) -> None:
         payload: dict[str, Any]
-        if notification.targets:
+        if notification.authorization_church_id is not None:
+            payload = {
+                "type": "authorization.changed",
+                "churchId": str(notification.authorization_church_id),
+            }
+            if notification.authorization_campus_id is not None:
+                payload["campusId"] = str(notification.authorization_campus_id)
+        elif notification.targets:
             payload = {
                 "type": "sync.invalidate",
                 "targets": [target.wire_value() for target in notification.targets],

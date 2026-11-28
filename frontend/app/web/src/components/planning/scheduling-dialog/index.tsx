@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
-import { apiClient, type PlannedVolunteer } from "@/api/client"
+import type { PlannedVolunteer } from "@/api/client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -34,44 +34,35 @@ const initials = (name: string) =>
 export const SchedulingDialog = (props: SchedulingDialogProps) => {
 	const [error, setError] = useState<string | null>(null)
 	const [sendingVolunteerId, setSendingVolunteerId] = useState<string | null>(null)
-	const assignment = apiClient.assignCampusEventVolunteer.useMutation()
-	const replacement = apiClient.createVolunteerReplacement.useMutation()
-
-	useEffect(() => {
-		setError(null)
-		setSendingVolunteerId(null)
-	}, [props.roleName, props.team?.id])
-
-	if (props.team === undefined || props.roleName === null) return null
-
 	const team = props.team
 	const roleName = props.roleName
 	const role = team.roles[roleName]
 	if (role === undefined) return null
 
 	const isFull = role.scheduledUsers.length >= role.count
-	const sendRequest = (volunteer: PlannedVolunteer) => {
+	const sendRequest = async (volunteer: PlannedVolunteer) => {
 		setError(null)
 		setSendingVolunteerId(volunteer.teamMembershipId)
-		const options = {
-			onError: () => {
-				setSendingVolunteerId(null)
-				setError("This role is no longer available. The schedule has been refreshed.")
-			},
-			onSuccess: () => {
-				toast.success(`Request sent to ${volunteer.name} for ${roleName}.`)
-				props.onClose()
-			},
-		}
 		const request = {
 			confirmConflict: false,
-			event_team_id: team.id,
 			roleEmoji: role.emoji,
 			roleName,
 			teamMembershipId: volunteer.teamMembershipId,
 		}
-		if (props.replacementRequestId === undefined) assignment.mutate(request, options)
-		else replacement.mutate({ ...request, request_id: props.replacementRequestId }, options)
+		try {
+			if (props.replacementRequestId === undefined) await team.assignVolunteer(request)
+			else {
+				await team.createVolunteerReplacement({
+					...request,
+					request_id: props.replacementRequestId,
+				})
+			}
+			toast.success(`Request sent to ${volunteer.name} for ${roleName}.`)
+			props.onClose()
+		} catch {
+			setSendingVolunteerId(null)
+			setError("This role is no longer available. The schedule has been refreshed.")
+		}
 	}
 
 	return (
@@ -157,11 +148,7 @@ export const SchedulingDialog = (props: SchedulingDialogProps) => {
 				)}
 
 				<DialogFooter>
-					<Button
-						disabled={assignment.isPending || replacement.isPending}
-						onClick={props.onClose}
-						variant="ghost"
-					>
+					<Button disabled={sendingVolunteerId !== null} onClick={props.onClose} variant="ghost">
 						<Localized str="common.close" />
 					</Button>
 				</DialogFooter>

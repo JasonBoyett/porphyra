@@ -7,6 +7,7 @@ from app.api.v1.dependencies.database import DatabaseSession
 from app.api.v1.events.schemas import ScheduledMinistryResponse, ScheduleMinistryRequest
 from app.auth import CurrentUser
 from app.db.models import CampusEvent, CampusEventMinistry, Ministry
+from app.permissions import require_action
 from app.sync.audience import church_member_user_ids
 from app.sync.openapi import sync_tags
 from app.sync.publish import publish
@@ -29,7 +30,14 @@ def schedule_ministry(
     event = db.get(CampusEvent, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    get_church_membership_or_404(event.church_id, user=user, db=db)
+    membership = get_church_membership_or_404(event.church_id, user=user, db=db)
+    require_action(
+        membership,
+        db,
+        action="schedule.manage",
+        church_id=event.church_id,
+        campus_id=event.campus_id,
+    )
     ministry = db.get(Ministry, payload.ministry_id)
     if ministry is None or ministry.church_id != event.church_id:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import type { CampusEventPlanning } from "@/api/client"
+import type { CampusEventPlanning, CampusEventPlanningTeam } from "@/api/client"
 import { LocalizationScope, TranslationProvider } from "@/localization"
 import { porphyraCatalog } from "@porphyra/frontend/localization"
 import { TeamCard } from ".."
@@ -16,9 +16,21 @@ const campusLocation = {
 	timeZone: "America/Chicago",
 }
 
+type TeamData = CampusEventPlanning["ministries"][number]["teams"][number]
+const withActions = (team: TeamData): CampusEventPlanningTeam => {
+	const unavailable = () => Promise.reject(new Error("Action unavailable in static rendering"))
+	return Object.assign(team, {
+		assignVolunteer: unavailable,
+		changeVolunteerRole: unavailable,
+		createVolunteerReplacement: unavailable,
+		dropVolunteer: unavailable,
+		updateRoleRequirements: unavailable,
+	})
+}
+
 describe("planning team roles", () => {
 	it("renders assignment counts from the API's nested role fields", () => {
-		const team: CampusEventPlanning["ministries"][number]["teams"][number] = {
+		const team = withActions({
 			id: "scheduled-team",
 			teamId: "team",
 			name: "Band",
@@ -37,7 +49,7 @@ describe("planning team roles", () => {
 			},
 			volunteers: [],
 			eligibleVolunteers: [],
-		}
+		})
 		const event: CampusEventPlanning = {
 			id: "event",
 			churchId: "church",
@@ -58,7 +70,7 @@ describe("planning team roles", () => {
 		const markup = renderToStaticMarkup(
 			<TranslationProvider catalog={porphyraCatalog}>
 				<LocalizationScope name="planning.team-rosters">
-					<TeamCard accessToken="fixture" event={event} onSchedule={() => {}} team={team} />
+					<TeamCard event={event} onSchedule={() => {}} team={team} />
 				</LocalizationScope>
 			</TranslationProvider>,
 		)
@@ -67,7 +79,7 @@ describe("planning team roles", () => {
 	})
 
 	it("uses an open role as the scheduling control", () => {
-		const team: CampusEventPlanning["ministries"][number]["teams"][number] = {
+		const team = withActions({
 			id: "scheduled-team",
 			teamId: "team",
 			name: "Band",
@@ -93,7 +105,7 @@ describe("planning team roles", () => {
 			},
 			volunteers: [],
 			eligibleVolunteers: [],
-		}
+		})
 		const event = {
 			id: "event",
 			churchId: "church",
@@ -114,7 +126,7 @@ describe("planning team roles", () => {
 		const markup = renderToStaticMarkup(
 			<TranslationProvider catalog={porphyraCatalog}>
 				<LocalizationScope name="planning.team-rosters">
-					<TeamCard accessToken="fixture" event={event} onSchedule={() => {}} team={team} />
+					<TeamCard event={event} onSchedule={() => {}} team={team} />
 				</LocalizationScope>
 			</TranslationProvider>,
 		)

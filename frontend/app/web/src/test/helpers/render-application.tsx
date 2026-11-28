@@ -119,18 +119,16 @@ const renderMockApplication = async (
 	const root = createRoot(container)
 	const queryClient = createTestQueryClient()
 	const apiClient = decorateApiClient(mockApiClientTransport)
+	const dependencies = createApplicationDependencies({
+		apiClient,
+		auth: options.auth ?? createMockAuthState(viewer),
+		queryClient,
+		syncEnabled: false,
+	})
 
 	await act(async () => {
 		root.render(
-			<App
-				dependencies={createApplicationDependencies({
-					apiClient,
-					auth: options.auth ?? createMockAuthState(viewer),
-					queryClient,
-					syncEnabled: false,
-				})}
-				localizationTest={!options.skipLocalizationCheck}
-			/>,
+			<App dependencies={dependencies} localizationTest={!options.skipLocalizationCheck} />,
 		)
 	})
 
@@ -144,6 +142,7 @@ const renderMockApplication = async (
 				if (!options.skipLocalizationCheck) assertNoLocalizationLeaks(container)
 			} finally {
 				await act(async () => root.unmount())
+				dependencies.dispose()
 				queryClient.clear()
 				resetMockDatabase()
 				container.remove()
