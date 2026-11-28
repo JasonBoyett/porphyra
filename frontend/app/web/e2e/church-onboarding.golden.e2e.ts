@@ -15,6 +15,20 @@ const mockChurchCreation = async (page: Page) => {
 	let submittedInput: CreateChurchInput | undefined
 	let createdChurch: ChurchResponse | undefined
 
+	await page.route("https://api.dicebear.com/**", async (route) => {
+		await route.fulfill({
+			body: `
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+					<rect width="100" height="100" rx="18" fill="#f0dff5" />
+					<circle cx="50" cy="38" r="20" fill="#8a3399" />
+					<path d="M18 94c3-23 15-34 32-34s29 11 32 34" fill="#54215d" />
+					<path d="M33 32c5-16 29-16 34 0-11-6-23-6-34 0" fill="#35143b" />
+				</svg>
+			`,
+			contentType: "image/svg+xml",
+		})
+	})
+
 	await page.route("**/api/v1/dashboard/", async (route) => {
 		const response: DashboardResponse = {
 			viewer: {
@@ -28,7 +42,7 @@ const mockChurchCreation = async (page: Page) => {
 					? []
 					: [
 							{
-								avatarUrl: "",
+								avatarUrl: `https://api.dicebear.com/10.x/stack/svg?seed=${encodeURIComponent(createdChurch.name)}`,
 								campuses: createdChurch.campuses.map((campus) => ({
 									id: campus.id,
 									location: campus.location,
@@ -113,6 +127,7 @@ test("creates a single-location church", async ({ golden, page }) => {
 	await expect(page).toHaveURL(`/church/${churchId}`)
 	await expect(page.getByRole("heading", { name: "Grace Fellowship" })).toBeVisible()
 	await expect(page.getByText("Single-location church", { exact: true })).toBeVisible()
+	await expect(page.getByAltText("Grace Fellowship profile")).toBeVisible()
 	await golden.capture("church-onboarding-created")
 
 	expect(submittedInput()).toMatchObject({
@@ -157,6 +172,7 @@ test("creates a multi-campus church", async ({ golden, page }) => {
 	await expect(page).toHaveURL(`/church/${churchId}`)
 	await expect(page.getByRole("heading", { name: "City Hope Church" })).toBeVisible()
 	await expect(page.getByText("Multi-campus church", { exact: true })).toBeVisible()
+	await expect(page.getByAltText("City Hope Church profile")).toBeVisible()
 	await golden.capture("church-onboarding-created")
 
 	expect(submittedInput()).toMatchObject({

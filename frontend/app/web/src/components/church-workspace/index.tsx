@@ -52,7 +52,7 @@ export const ChurchWorkspace = ({ church, isError, isLoading }: ChurchWorkspaceP
 					<div className="h-3 bg-primary" />
 					<div className="flex flex-col gap-6 p-6 md:flex-row md:items-end md:justify-between md:p-10">
 						<div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-							<Avatar className="rounded-2xl" size="lg">
+							<Avatar className="size-20 rounded-2xl sm:size-24">
 								<AvatarImage alt={`${church.name} profile`} src={church.avatarUrl} />
 								<AvatarFallback className="rounded-2xl font-serif text-2xl">
 									<ComputedText value={church.name.slice(0, 1)} />
