@@ -60,6 +60,39 @@ The web application uses shadcn/ui as its styling and component primitive. The c
 
 ## Web UI Architecture and Conventions
 
+### Reactive State and Effects
+
+Web UI code must be a pure projection of state delivered by the generated API
+client, the sync client, router state, and explicit local user interaction.
+Components must not build a second synchronization layer around those sources.
+
+- Treat every proposed `useEffect` as a code smell. Its apparent necessity is
+  likely evidence of duplicated state, an incorrect ownership boundary, or a
+  misunderstanding of the API, sync, router, or component lifecycle.
+- Do not use effects to copy props, API results, sync values, URL parameters, or
+  derived values into component state. Read the source value directly or derive
+  the required value during rendering.
+- The API and sync clients own remote-data freshness, subscriptions,
+  invalidation, and reconciliation. UI hooks consume their stateful values; UI
+  components must not manually register sync tags, maintain WebSocket state, or
+  mirror remote records in component-owned stores.
+- Use TanStack Router state as the source of truth for navigable state. Perform
+  navigation and invalidation explicitly in the user action that requires it,
+  not in an effect reacting to copied state.
+- Reset transient component state through component identity and lifecycle,
+  such as conditional rendering or a meaningful `key`, rather than an effect.
+- Derive computed values during rendering. Use `useMemo` only for meaningful
+  computational or referential stability, never as a substitute for correct
+  state ownership.
+- Use event handlers for user-driven side effects. Use `useSyncExternalStore`
+  when React must read an existing external store.
+- A `useEffect` may be introduced only when synchronizing with an external
+  system that cannot be owned by the API client, sync client, router, or another
+  application service. The change must include a narrow written justification
+  explaining the ownership boundary and why an effect-free design is not
+  viable. Reviewers must treat an unjustified effect as an architectural defect,
+  not a routine implementation detail.
+
 ### Styling and UI Primitives
 
 - Tailwind CSS is the default web styling system. Use utility classes for layout,
